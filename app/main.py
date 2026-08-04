@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.database.database import test_database_connection
+from app.routers.users import router as user_router
 
 
 app = FastAPI(
@@ -19,3 +20,6 @@ def root():
     return {
         "message": "ContractIQ Backend is running successfully."
     }
+
+
+app.include_router(user_router)
