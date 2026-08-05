@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.user import User as UserModel
 from app.schemas.user import UserCreate, UserResponse
+from app.utils.security import hash_password
 
 router = APIRouter()
 
@@ -19,9 +20,10 @@ def create_user_db(
     db: Session = Depends(get_db)
 ):
     user = UserModel(
-        full_name=user_data.full_name,
-        email=user_data.email,
-        role=user_data.role
+    full_name=user_data.full_name,
+    email=user_data.email,
+    password=hash_password(user_data.password),
+    role=user_data.role
     )
 
     db.add(user)
@@ -83,6 +85,7 @@ def update_user(
 
     user.full_name = user_data.full_name
     user.email = user_data.email
+    user.password = hash_password(user_data.password)
     user.role = user_data.role
 
     db.commit()
