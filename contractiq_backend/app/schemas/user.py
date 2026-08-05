@@ -1,29 +1,3 @@
-# from pydantic import BaseModel
-
-# class User(BaseModel):
-#     id: int
-#     name: str
-#     email: str
-#     role: str
-
-# from pydantic import BaseModel, EmailStr
-
-
-# class UserCreate(BaseModel):
-#     full_name: str
-#     email: EmailStr
-#     role: str
-
-
-# class UserResponse(BaseModel):
-#     id: int
-#     full_name: str
-#     email: EmailStr
-#     role: str
-
-#     class Config:
-#         from_attributes = True
-
 # from pydantic import BaseModel, EmailStr
 
 
