@@ -5,11 +5,13 @@ from starlette import status
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
+from app.core.security import hash_password
 
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
+
 
 # 1. POST - Create User
 @router.post(
@@ -21,14 +23,27 @@ def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
+
+    # Check if email already exists
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+
     user = User(
         full_name=user_data.full_name,
         email=user_data.email,
+        password=hash_password(user_data.password),
         role=user_data.role
     )
+
     db.add(user)
     db.commit()
     db.refresh(user)
+
     return user
 
 
@@ -49,12 +64,15 @@ def get_users(db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK
 )
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+
     user = db.query(User).filter(User.id == user_id).first()
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with ID {user_id} not found"
         )
+
     return user
 
 
@@ -69,6 +87,7 @@ def update_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
+
     user_query = db.query(User).filter(User.id == user_id)
     existing_user = user_query.first()
 
@@ -78,9 +97,18 @@ def update_user(
             detail=f"User with ID {user_id} not found"
         )
 
-    user_query.update(user_data.model_dump(), synchronize_session=False)
+    update_data = {
+        "full_name": user_data.full_name,
+        "email": user_data.email,
+        "password": hash_password(user_data.password),
+        "role": user_data.role
+    }
+
+    user_query.update(update_data, synchronize_session=False)
+
     db.commit()
     db.refresh(existing_user)
+
     return existing_user
 
 
@@ -90,6 +118,7 @@ def update_user(
     status_code=status.HTTP_204_NO_CONTENT
 )
 def delete_user(user_id: int, db: Session = Depends(get_db)):
+
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -100,4 +129,5 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
     db.delete(user)
     db.commit()
+
     return None

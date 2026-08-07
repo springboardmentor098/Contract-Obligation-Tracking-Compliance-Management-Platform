@@ -1,15 +1,29 @@
 from pydantic import BaseModel
-from typing import Optional
 
-# Used for creating a new user (All fields required)
-class User(BaseModel):
-    id: int
-    name: str
+
+# Request schema - Used while creating a new user
+class UserCreate(BaseModel):
+    full_name: str
     email: str
+    password: str
     role: str
 
-# Used for updating an existing user (All fields optional)
+
+# Response schema - Returned to the client
+class UserResponse(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    role: str
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+# Request schema - Used while updating a user
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-    role: Optional[str] = None
+    full_name: str | None = None
+    email: str | None = None
+    password: str | None = None
+    role: str | None = None
