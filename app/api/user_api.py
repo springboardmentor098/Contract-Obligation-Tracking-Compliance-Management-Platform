@@ -1,91 +1,150 @@
-from fastapi import APIRouter, HTTPException
-from app.schemas.user_schema import User
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
-router = APIRouter()
+from app.database.database import get_db
+from app.models.user import User
+from app.schemas.user_schema import UserCreate, UserResponse
 
-# Temporary Storage
-users = []
 
-# -------------------------
+router = APIRouter(
+    prefix="/users",
+    tags=["Users"]
+)
+
+
 # CREATE USER
-# -------------------------
-@router.post("/users")
-def create_user(user: User):
+@router.post(
+    "",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED
+)
+def create_user(
+    user_data: UserCreate,
+    db: Session = Depends(get_db)
+):
+    existing_user = db.query(User).filter(
+        User.email == user_data.email
+    ).first()
 
-    # Duplicate ID Check
-    for existing_user in users:
-        if existing_user.id == user.id:
-            raise HTTPException(
-                status_code=400,
-                detail="User ID already exists"
-            )
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already exists"
+        )
 
-    users.append(user)
+    user = User(
+        full_name=user_data.full_name,
+        email=user_data.email,
+        role=user_data.role
+    )
 
-    return {
-        "message": "User created successfully",
-        "user": user
-    }
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
 
 
-# -------------------------
 # GET ALL USERS
-# -------------------------
-@router.get("/users")
-def get_users():
+@router.get(
+    "",
+    response_model=list[UserResponse],
+    status_code=status.HTTP_200_OK
+)
+def get_users(
+    db: Session = Depends(get_db)
+):
+    users = db.query(User).all()
     return users
 
 
-# -------------------------
 # GET USER BY ID
-# -------------------------
-@router.get("/users/{user_id}")
-def get_user(user_id: int):
+@router.get(
+    "/{user_id}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK
+)
+def get_user(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
-    for user in users:
-        if user.id == user_id:
-            return user
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
 
-    raise HTTPException(
-        status_code=404,
-        detail="User not found"
-    )
-# -------------------------
+    return user
+
+
 # UPDATE USER
-# -------------------------
-@router.put("/users/{user_id}")
-def update_user(user_id: int, updated_user: User):
+@router.put(
+    "/{user_id}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK
+)
+def update_user(
+    user_id: int,
+    user_data: UserCreate,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
-    for index, user in enumerate(users):
-        if user.id == user_id:
-            users[index] = updated_user
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
 
-            return {
-                "message": "User updated successfully",
-                "user": updated_user
-            }
+    existing_user = db.query(User).filter(
+        User.email == user_data.email,
+        User.id != user_id
+    ).first()
 
-    raise HTTPException(
-        status_code=404,
-        detail="User not found"
-    )
-# -------------------------
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already exists"
+        )
+
+    user.full_name = user_data.full_name
+    user.email = user_data.email
+    user.role = user_data.role
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
 # DELETE USER
-# -------------------------
-@router.delete("/users/{user_id}")
-def delete_user(user_id: int):
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_200_OK
+)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
-    for index, user in enumerate(users):
-        if user.id == user_id:
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
 
-            deleted_user = users.pop(index)
+    db.delete(user)
+    db.commit()
 
-            return {
-                "message": "User deleted successfully",
-                "user": deleted_user
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="User not found"
-    )
+    return {
+        "message": "User deleted successfully"
+    }

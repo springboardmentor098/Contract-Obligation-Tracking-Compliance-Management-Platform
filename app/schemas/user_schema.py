@@ -1,7 +1,17 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
-class User(BaseModel):
-    id: int
-    name: str
+
+class UserCreate(BaseModel):
+    full_name: str
     email: str
     role: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    role: str
+    is_active: bool
+
+    model_config = ConfigDict(from_attributes=True)

@@ -1,0 +1,123 @@
+Table users {
+  id integer [pk, increment]
+  full_name varchar(100) [not null]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255)
+  role varchar(50)
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table contracts {
+  id integer [pk, increment]
+  title varchar(255) [not null]
+  contract_number varchar(100) [unique]
+  description text
+  party_name varchar(255)
+  start_date date
+  end_date date
+  status varchar(50)
+  owner_id integer [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table contract_versions {
+  id integer [pk, increment]
+  contract_id integer [not null]
+  version_number integer [not null]
+  document_path varchar(500)
+  change_summary text
+  created_by integer [not null]
+  created_at timestamp
+}
+
+Table obligations {
+  id integer [pk, increment]
+  contract_id integer [not null]
+  title varchar(255) [not null]
+  description text
+  due_date date
+  status varchar(50)
+  priority varchar(50)
+  assigned_to integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table renewals {
+  id integer [pk, increment]
+  contract_id integer [not null]
+  renewal_date date
+  status varchar(50)
+  renewal_period integer
+  notes text
+  created_at timestamp
+}
+
+Table notifications {
+  id integer [pk, increment]
+  user_id integer [not null]
+  contract_id integer
+  title varchar(255)
+  message text
+  notification_type varchar(50)
+  is_read boolean [default: false]
+  created_at timestamp
+}
+
+Table reports {
+  id integer [pk, increment]
+  contract_id integer [not null]
+  generated_by integer [not null]
+  report_type varchar(100)
+  report_path varchar(500)
+  created_at timestamp
+}
+
+Table audit_logs {
+  id integer [pk, increment]
+  user_id integer [not null]
+  contract_id integer
+  action varchar(100)
+  entity_type varchar(100)
+  entity_id integer
+  old_value json
+  new_value json
+  created_at timestamp
+}
+
+Table activities {
+  id integer [pk, increment]
+  user_id integer [not null]
+  contract_id integer
+  activity_type varchar(100)
+  description text
+  created_at timestamp
+}
+
+
+// Relationships
+
+Ref: contracts.owner_id > users.id
+
+Ref: contract_versions.contract_id > contracts.id
+Ref: contract_versions.created_by > users.id
+
+Ref: obligations.contract_id > contracts.id
+Ref: obligations.assigned_to > users.id
+
+Ref: renewals.contract_id > contracts.id
+
+Ref: notifications.user_id > users.id
+Ref: notifications.contract_id > contracts.id
+
+Ref: reports.contract_id > contracts.id
+Ref: reports.generated_by > users.id
+
+Ref: audit_logs.user_id > users.id
+Ref: audit_logs.contract_id > contracts.id
+
+Ref: activities.user_id > users.id
+Ref: activities.contract_id > contracts.id
