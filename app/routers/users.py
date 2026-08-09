@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.user import User as UserModel
 from app.schemas.user import UserCreate, UserResponse
+from app.utils.security import hash_password
 
 router = APIRouter()
 
@@ -21,7 +22,8 @@ def create_user_db(
     user = UserModel(
         full_name=user_data.full_name,
         email=user_data.email,
-        role=user_data.role
+        role=user_data.role,
+        password=hash_password(user_data.password)
     )
 
     db.add(user)
@@ -52,7 +54,9 @@ def get_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    user = db.query(UserModel).filter(
+        UserModel.id == user_id
+    ).first()
 
     if not user:
         raise HTTPException(
@@ -73,7 +77,9 @@ def update_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    user = db.query(UserModel).filter(
+        UserModel.id == user_id
+    ).first()
 
     if not user:
         raise HTTPException(
@@ -84,6 +90,7 @@ def update_user(
     user.full_name = user_data.full_name
     user.email = user_data.email
     user.role = user_data.role
+    user.password = hash_password(user_data.password)
 
     db.commit()
     db.refresh(user)
@@ -97,7 +104,9 @@ def delete_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    user = db.query(UserModel).filter(
+        UserModel.id == user_id
+    ).first()
 
     if not user:
         raise HTTPException(
