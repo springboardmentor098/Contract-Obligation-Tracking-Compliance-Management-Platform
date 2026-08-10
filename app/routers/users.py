@@ -4,34 +4,33 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user_schema import UserCreate, UserResponse
+from app.core.security import get_password_hash
 
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
 
-@router.post(
-    "",
-    response_model=UserResponse,
-    status_code=201
-)
-def create_user(
-    user_data: UserCreate,
-    db: Session = Depends(get_db)
-):
-    user = User(
-        full_name=user_data.full_name,
-        email=user_data.email,
-        role=user_data.role
+
+@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def create_user(user: UserCreate, db: Session = Depends(get_db)): 
+    
+    # 1. Hash the password
+    hashed_pw = get_password_hash(user.password)
+
+    # 2. Save it to PostgreSQL
+    new_user = User(
+        full_name=user.full_name,
+        email=user.email,
+        role=user.role,
+        hashed_password=hashed_pw 
     )
-
-    db.add(user)
+    
+    db.add(new_user)
     db.commit()
-    db.refresh(user)
-
-    return user
-
+    db.refresh(new_user)
+    return new_user
 @router.get(
     "/",
     response_model=list[UserResponse],
