@@ -23,10 +23,18 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.database.database import Base
+
 from app.models.user import User
+from app.models.contract import Contract
+from app.models.contract_version import ContractVersion
+from app.models.obligation import Obligation
+from app.models.renewal import Renewal
+from app.models.notification import Notification
+from app.models.report import Report
+from app.models.audit_log import AuditLog
+from app.models.activity import Activity
 
 target_metadata = Base.metadata
-
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
