@@ -5,6 +5,13 @@ from app.database.database import get_db
 from app.models.user import User as UserModel
 from app.schemas.user import UserCreate, UserResponse
 from app.utils.security import hash_password
+from app.services.user import (
+    register_user,
+    get_all_users,
+    get_user_by_id,
+    update_user_service,
+    delete_user_service,
+)
 
 router = APIRouter()
 
@@ -19,18 +26,14 @@ def create_user_db(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
-    user = UserModel(
-    full_name=user_data.full_name,
-    email=user_data.email,
-    password=hash_password(user_data.password),
-    role=user_data.role
-    )
+    try:
+        return register_user(db, user_data)
 
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
 
 
 # GET ALL USERS
@@ -41,8 +44,7 @@ def create_user_db(
 def get_users_db(
     db: Session = Depends(get_db)
 ):
-    users = db.query(UserModel).all()
-    return users
+    return get_all_users(db)
 
 
 # GET USER BY ID
@@ -54,7 +56,7 @@ def get_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    user = get_user_by_id(db, user_id)
 
     if not user:
         raise HTTPException(
@@ -75,23 +77,14 @@ def update_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    try:
+        return update_user_service(db, user_id, user_data)
 
-    if not user:
+    except ValueError as error:
         raise HTTPException(
             status_code=404,
-            detail="User not found"
+            detail=str(error)
         )
-
-    user.full_name = user_data.full_name
-    user.email = user_data.email
-    user.password = hash_password(user_data.password)
-    user.role = user_data.role
-
-    db.commit()
-    db.refresh(user)
-
-    return user
 
 
 # DELETE USER
@@ -100,17 +93,11 @@ def delete_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    try:
+        return delete_user_service(db, user_id)
 
-    if not user:
+    except ValueError as error:
         raise HTTPException(
             status_code=404,
-            detail="User not found"
+            detail=str(error)
         )
-
-    db.delete(user)
-    db.commit()
-
-    return {
-        "message": "User deleted successfully"
-    }

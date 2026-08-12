@@ -6,7 +6,16 @@ from sqlalchemy import pool
 from alembic import context
 from app.core.config import settings
 from app.database.database import Base
+
 from app.models.user import User
+from app.models.contracts import Contract
+from app.models.activities import Activity
+from app.models.audit_logs import AuditLog
+from app.models.contract_versions import ContractVersion
+from app.models.notifications import Notification
+from app.models.obligations import Obligation
+from app.models.renewals import Renewal
+from app.models.reports import Report
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
