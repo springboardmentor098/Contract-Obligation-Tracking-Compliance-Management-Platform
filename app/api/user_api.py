@@ -1,137 +1,72 @@
-<<<<<<< HEAD
-# app/api/user_api.py
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from app.schemas.user_schema import UserCreate, UserResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-users = []
-
-from app.schemas.user_schema import User
-
-@router.get("/")
-def get_users():
-    return users
-
-@router.get("/{id}")
-def get_user(id: int):
-    for user in users:
-        if user.id == id:
-            return user
-    return {"error": f"User {id} not found"}
-
-@router.post("/")
-def create_user(user: User):
-    for existing_user in users:
-        if existing_user.id == user.id:
-            return {"error": f"User with ID {user.id} already exists"}
-    users.append(user)
-    return {"message": "User created successfully", "user": user}
-
-@router.put("/{id}")
-def update_user(id: int, updated_user: User):
-    for index, user in enumerate(users):
-        if user.id == id:
-            users[index] = updated_user
-            return {"message": f"User {id} updated successfully", "user": updated_user}
-    return {"error": f"User {id} not found"}
-
-@router.delete("/{id}")
-def delete_user(id: int):
-    for index, user in enumerate(users):
-        if user.id == id:
-            deleted_user = users.pop(index)
-            return {"message": f"User {id} deleted successfully", "user": deleted_user}
-    return {"error": f"User {id} not found"}
-=======
-from fastapi import APIRouter, HTTPException
-from app.schemas.user_schema import User
-
-router = APIRouter()
-
-# Temporary Storage
-users = []
+# Temporary in-memory storage
+users: list[UserResponse] = []
 
 # -------------------------
 # CREATE USER
 # -------------------------
-@router.post("/users")
-def create_user(user: User):
-
-    # Duplicate ID Check
+@router.post("/", response_model=UserResponse)
+def create_user(user: UserCreate):
+    # ✅ Check duplicate email instead of ID
     for existing_user in users:
-        if existing_user.id == user.id:
-            raise HTTPException(
-                status_code=400,
-                detail="User ID already exists"
-            )
+        if existing_user.email == user.email:
+            raise HTTPException(status_code=400, detail="Email already registered")
 
-    users.append(user)
-
-    return {
-        "message": "User created successfully",
-        "user": user
-    }
-
+    new_user = UserResponse(
+        id=len(users) + 1,  
+        full_name=user.full_name,
+        email=user.email,
+        role=user.role,
+        is_active=True
+    )
+    users.append(new_user)
+    return new_user
 
 # -------------------------
 # GET ALL USERS
 # -------------------------
-@router.get("/users")
+@router.get("/", response_model=list[UserResponse])
 def get_users():
     return users
-
 
 # -------------------------
 # GET USER BY ID
 # -------------------------
-@router.get("/users/{user_id}")
+@router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int):
-
     for user in users:
         if user.id == user_id:
             return user
+    raise HTTPException(status_code=404, detail="User not found")
 
-    raise HTTPException(
-        status_code=404,
-        detail="User not found"
-    )
 # -------------------------
 # UPDATE USER
 # -------------------------
-@router.put("/users/{user_id}")
-def update_user(user_id: int, updated_user: User):
-
+@router.put("/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, updated_user: UserCreate):
     for index, user in enumerate(users):
         if user.id == user_id:
-            users[index] = updated_user
+            users[index] = UserResponse(
+                id=user_id,
+                full_name=updated_user.full_name,
+                email=updated_user.email,
+                role=updated_user.role,
+                is_active=updated_user.is_active
+            )
+            return users[index]
+    raise HTTPException(status_code=404, detail="User not found")
 
-            return {
-                "message": "User updated successfully",
-                "user": updated_user
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="User not found"
-    )
 # -------------------------
 # DELETE USER
 # -------------------------
-@router.delete("/users/{user_id}")
+@router.delete("/{user_id}")
 def delete_user(user_id: int):
-
     for index, user in enumerate(users):
         if user.id == user_id:
-
             deleted_user = users.pop(index)
-
-            return {
-                "message": "User deleted successfully",
-                "user": deleted_user
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="User not found"
-    )
->>>>>>> cb87ace116b09ed98d5d64392b80a596edfa80ce
+            return {"message": "User deleted successfully", "user": deleted_user}
+    raise HTTPException(status_code=404, detail="User not found")

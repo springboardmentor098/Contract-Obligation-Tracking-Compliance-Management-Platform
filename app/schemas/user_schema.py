@@ -1,11 +1,17 @@
 from pydantic import BaseModel
 
-class User(BaseModel):
-    id: int
-    name: str
+class UserBase(BaseModel):
+    full_name: str
     email: str
-<<<<<<< HEAD
     role: str
-=======
-    role: str
->>>>>>> cb87ace116b09ed98d5d64392b80a596edfa80ce
+    is_active: bool = True
+
+class UserCreate(UserBase):
+    password: str   # plain password input
+
+class UserResponse(UserBase):
+    id: int
+    class Config:
+        from_attributes = True  # ✅ replaces orm_mode in Pydantic v2
+
+

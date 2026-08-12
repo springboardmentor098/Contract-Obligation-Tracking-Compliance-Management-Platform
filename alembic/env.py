@@ -1,20 +1,29 @@
+from alembic import context
+from sqlalchemy import engine_from_config, pool
+
 from app.core.config import settings
 from app.database.database import Base
-from app.models.user import User
 
-from alembic import context
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+# Import all models so Alembic can detect them
+from app.models import (
+    User,
+    Contract,
+    ContractVersion,
+    Obligation,
+    Renewal,
+    Notification,
+    Report,
+    AuditLog,
+    Activity,
+)
 
 
 config = context.config
-
 
 config.set_main_option(
     "sqlalchemy.url",
     settings.DATABASE_URL
 )
-
 
 target_metadata = Base.metadata
 
