@@ -5,6 +5,7 @@ from app.database.database import get_db
 from app.models.user import User
 from app.schemas.user_schema import UserCreate, UserResponse
 from app.utils.security import hash_password
+from app.core.dependencies import require_role
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
@@ -90,7 +91,8 @@ def update_user(
 )
 def delete_user(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("Administrator"))
 ):
     user = db.query(User).filter(User.id == user_id).first()
 
