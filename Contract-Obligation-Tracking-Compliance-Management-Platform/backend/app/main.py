@@ -1,7 +1,10 @@
 from fastapi import FastAPI
+from app import models
 
 from app.database.database import test_database_connection
 from app.api.users import router as user_router
+from app.api.auth import router as auth_router
+
 
 app = FastAPI(
     title="ContractIQ API",
@@ -9,10 +12,18 @@ app = FastAPI(
 )
 
 
+# ---------------------------------------
+# Database Startup Check
+# ---------------------------------------
+
 @app.on_event("startup")
 def startup_event():
     test_database_connection()
 
+
+# ---------------------------------------
+# Root Endpoint
+# ---------------------------------------
 
 @app.get("/")
 def root():
@@ -21,4 +32,9 @@ def root():
     }
 
 
+# ---------------------------------------
+# Include API Routers
+# ---------------------------------------
+
+app.include_router(auth_router)
 app.include_router(user_router)
