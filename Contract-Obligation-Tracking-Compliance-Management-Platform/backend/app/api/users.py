@@ -1,185 +1,76 @@
-from typing import List
+from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy.orm import relationship
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
-from app.database.database import get_db
-from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
-
-router = APIRouter(
-    prefix="/users",
-    tags=["Users"]
-)
+from app.database.database import Base
 
 
-# -----------------------------
-# Create Single User
-# -----------------------------
-@router.post(
-    "/",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED
-)
-def create_user(
-    user_data: UserCreate,
-    db: Session = Depends(get_db)
-):
-    existing_user = db.query(User).filter(
-        User.email == user_data.email
-    ).first()
+class User(Base):
+    __tablename__ = "users"
 
-    if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already exists"
-        )
+    # -----------------------------
+    # User Columns
+    # -----------------------------
+    id = Column(Integer, primary_key=True, index=True)
 
-    user = User(
-        full_name=user_data.full_name,
-        email=user_data.email,
-        role=user_data.role
+    full_name = Column(
+        String(100),
+        nullable=False
     )
 
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    email = Column(
+        String(255),
+        unique=True,
+        nullable=False,
+        index=True
+    )
 
-    return user
+    # Password is stored only as a hash
+    hashed_password = Column(
+        String(255),
+        nullable=False
+    )
 
+    role = Column(
+        String(50),
+        nullable=False
+    )
 
-# -----------------------------
-# Create Multiple Users
-# -----------------------------
-@router.post(
-    "/bulk",
-    response_model=list[UserResponse],
-    status_code=status.HTTP_201_CREATED
-)
-def create_multiple_users(
-    users: List[UserCreate],
-    db: Session = Depends(get_db)
-):
-    created_users = []
+    is_active = Column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
 
-    for user_data in users:
+    # -----------------------------
+    # Relationships
+    # -----------------------------
 
-        existing_user = db.query(User).filter(
-            User.email == user_data.email
-        ).first()
+    # One User → Many Contracts
+    contracts = relationship(
+        "Contract",
+        back_populates="owner"
+    )
 
-        if existing_user:
-            continue
+    # One User → Many Notifications
+    notifications = relationship(
+        "Notification",
+        back_populates="user"
+    )
 
-        user = User(
-            full_name=user_data.full_name,
-            email=user_data.email,
-            role=user_data.role
-        )
+    # One User → Many Reports
+    reports = relationship(
+        "Report",
+        back_populates="generated_by_user"
+    )
 
-        db.add(user)
-        created_users.append(user)
+    # One User → Many Audit Logs
+    audit_logs = relationship(
+        "AuditLog",
+        back_populates="user"
+    )
 
-    db.commit()
-
-    for user in created_users:
-        db.refresh(user)
-
-    return created_users
-
-
-# -----------------------------
-# Get All Users
-# -----------------------------
-@router.get(
-    "/",
-    response_model=list[UserResponse]
-)
-def get_users(
-    db: Session = Depends(get_db)
-):
-    return db.query(User).all()
-
-
-# -----------------------------
-# Get User By ID
-# -----------------------------
-@router.get(
-    "/{user_id}",
-    response_model=UserResponse
-)
-def get_user(
-    user_id: int,
-    db: Session = Depends(get_db)
-):
-    user = db.query(User).filter(
-        User.id == user_id
-    ).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-
-    return user
-
-
-# -----------------------------
-# Update User
-# -----------------------------
-@router.put(
-    "/{user_id}",
-    response_model=UserResponse
-)
-def update_user(
-    user_id: int,
-    user_data: UserCreate,
-    db: Session = Depends(get_db)
-):
-    user = db.query(User).filter(
-        User.id == user_id
-    ).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-
-    user.full_name = user_data.full_name
-    user.email = user_data.email
-    user.role = user_data.role
-
-    db.commit()
-    db.refresh(user)
-
-    return user
-
-
-# -----------------------------
-# Delete User
-# -----------------------------
-@router.delete(
-    "/{user_id}"
-)
-def delete_user(
-    user_id: int,
-    db: Session = Depends(get_db)
-):
-    user = db.query(User).filter(
-        User.id == user_id
-    ).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-
-    db.delete(user)
-    db.commit()
-
-    return {
-        "message": "User deleted successfully"
-    }
+    # One User → Many Activities
+    activities = relationship(
+        "Activity",
+        back_populates="user"
+    )
