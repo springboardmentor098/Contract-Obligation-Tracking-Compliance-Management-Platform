@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 from app.database.database import Base
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -23,7 +24,50 @@ class User(Base):
 
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
 
+    # Relationship with Contracts
     contracts = relationship(
         "Contract",
         back_populates="owner"
+    )
+
+    # Relationship with Contract Versions
+    contract_versions = relationship(
+        "ContractVersion",
+        back_populates="creator"
+    )
+
+    # Relationship with Obligations
+    obligations = relationship(
+        "Obligation",
+        back_populates="assignee"
+    )
+
+    # Relationship with Renewals
+    approved_renewals = relationship(
+        "Renewal",
+        back_populates="approver"
+    )
+
+    # Relationship with Notifications
+    notifications = relationship(
+        "Notification",
+        back_populates="user"
+    )
+
+    # Relationship with Reports
+    reports = relationship(
+        "Report",
+        back_populates="generator"
+    )
+
+    # Relationship with Audit Logs
+    audit_logs = relationship(
+        "AuditLog",
+        back_populates="user"
+    )
+
+    # Relationship with Activities
+    activities = relationship(
+        "Activity",
+        back_populates="user"
     )
