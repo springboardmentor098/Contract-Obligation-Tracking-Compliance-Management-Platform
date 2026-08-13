@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 from app.database.database import Base
-from app.models.user import User
+from app import models  # Import all models to ensure they are registered with SQLAlchemy's metadata
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from app.core.config import settings
