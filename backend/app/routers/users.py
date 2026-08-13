@@ -3,6 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import require_roles
+from app.core.rbac import UserRole
 from app.database.database import get_db
 from app.models.user import User as UserModel
 from app.schemas.user import UserCreate, UserResponse
@@ -28,7 +30,7 @@ def create_user_db(
     user = UserModel(
         full_name=user_data.full_name,
         email=user_data.email,
-        role=user_data.role,
+        role=user_data.role.value,
         password_hash=hash_password(user_data.password),
     )
 
@@ -82,7 +84,7 @@ def get_user(
 
 
 # ============================================================
-# UPDATE USER
+# UPDATE USER - ADMINISTRATOR ONLY
 # ============================================================
 
 @router.put(
@@ -93,6 +95,9 @@ def update_user(
     user_id: UUID,
     user_data: UserCreate,
     db: Session = Depends(get_db),
+    current_user: UserModel = Depends(
+        require_roles(UserRole.ADMINISTRATOR)
+    ),
 ):
     user = (
         db.query(UserModel)
@@ -108,7 +113,7 @@ def update_user(
 
     user.full_name = user_data.full_name
     user.email = user_data.email
-    user.role = user_data.role
+    user.role = user_data.role.value
     user.password_hash = hash_password(user_data.password)
 
     db.commit()
@@ -118,13 +123,16 @@ def update_user(
 
 
 # ============================================================
-# DELETE USER
+# DELETE USER - ADMINISTRATOR ONLY
 # ============================================================
 
 @router.delete("/users/{user_id}")
 def delete_user(
     user_id: UUID,
     db: Session = Depends(get_db),
+    current_user: UserModel = Depends(
+        require_roles(UserRole.ADMINISTRATOR)
+    ),
 ):
     user = (
         db.query(UserModel)
