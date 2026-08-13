@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
-from app.utils.security import hash_password
+from app.schemas.user import UserCreate, UserResponse, UserLogin
+from app.utils.security import hash_password, verify_password, create_access_token
+from app.core.roles import UserRole
+from app.dependencies import require_role
 
 router = APIRouter(
     prefix="/users",
@@ -35,6 +37,53 @@ def create_user(
     return user
 
 
+@router.post(
+    "/login",
+    status_code=status.HTTP_200_OK
+)
+def login_user(
+    login_data: UserLogin,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.email == login_data.email
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+
+    if not verify_password(
+        login_data.password,
+        user.password
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive"
+        )
+
+    access_token = create_access_token(
+        data={
+            "sub": str(user.id),
+            "role": user.role
+        }
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": user.role
+    }
+
+
 @router.get(
     "/",
     response_model=list[UserResponse],
@@ -43,6 +92,7 @@ def create_user(
 def get_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
+
 
 @router.get(
     "/{user_id}",
@@ -62,6 +112,7 @@ def get_user(
         )
 
     return user
+
 
 @router.put(
     "/{user_id}",
@@ -91,13 +142,17 @@ def update_user(
 
     return user
 
+
 @router.delete(
     "/{user_id}",
     status_code=status.HTTP_200_OK
 )
 def delete_user(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(
+        require_role(UserRole.ADMINISTRATOR)
+    )
 ):
     user = db.query(User).filter(User.id == user_id).first()
 
