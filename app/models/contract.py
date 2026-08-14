@@ -27,20 +27,29 @@ class Contract(Base):
 
     end_date = Column(Date, nullable=True)
 
-    status = Column(String(50), nullable=False)
+    status = Column(String(50), nullable=False, default="Draft")
 
-    owner_id = Column(
+    # User who created the contract
+    created_by = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False
     )
 
-    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        server_default=func.now()
+    )
 
-    updated_at = Column(DateTime, nullable=True, onupdate=func.now())
+    updated_at = Column(
+        DateTime,
+        nullable=True,
+        onupdate=func.now()
+    )
 
     # Relationship with User
-    owner = relationship(
+    creator = relationship(
         "User",
         back_populates="contracts"
     )

@@ -27,7 +27,7 @@ class User(Base):
     # Relationship with Contracts
     contracts = relationship(
         "Contract",
-        back_populates="owner"
+        back_populates="creator"
     )
 
     # Relationship with Contract Versions

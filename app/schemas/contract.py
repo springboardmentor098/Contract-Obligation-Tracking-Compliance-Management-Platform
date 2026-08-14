@@ -1,9 +1,9 @@
-# app/schemas/contract.py
-
 from datetime import date, datetime
-from pydantic import BaseModel, ConfigDict
+
+from pydantic import BaseModel
 
 
+# Schema used when creating a contract
 class ContractCreate(BaseModel):
     title: str
     contract_number: str
@@ -11,10 +11,20 @@ class ContractCreate(BaseModel):
     description: str | None = None
     start_date: date
     end_date: date | None = None
+
+
+# Schema used when updating a contract
+class ContractUpdate(BaseModel):
+    title: str
+    contract_number: str
+    category: str
+    description: str | None = None
+    start_date: date
+    end_date: date | None = None
     status: str
-    owner_id: int
 
 
+# Schema returned by the API
 class ContractResponse(BaseModel):
     id: int
     title: str
@@ -24,8 +34,9 @@ class ContractResponse(BaseModel):
     start_date: date
     end_date: date | None
     status: str
-    owner_id: int
+    created_by: int
     created_at: datetime
     updated_at: datetime | None
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True

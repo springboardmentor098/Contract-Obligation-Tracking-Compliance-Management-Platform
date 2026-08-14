@@ -1,12 +1,16 @@
-# app/routers/contract.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.contract import Contract
-from app.schemas.contract import ContractCreate, ContractResponse
+from app.schemas.contract import (
+    ContractCreate,
+    ContractUpdate,
+    ContractResponse
+)
+from app.dependencies.authentication import get_current_user
 from app.dependencies.authorization import require_roles
+from app.models.user import User
 
 
 router = APIRouter(
@@ -15,8 +19,10 @@ router = APIRouter(
 )
 
 
-# Create Contract
+# ============================================================
+# CREATE CONTRACT
 # Administrator, Legal Manager, Contract Manager
+# ============================================================
 
 @router.post(
     "",
@@ -26,7 +32,7 @@ router = APIRouter(
 def create_contract(
     contract_data: ContractCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(
+    current_user: User = Depends(
         require_roles(
             "Administrator",
             "Legal Manager",
@@ -34,6 +40,19 @@ def create_contract(
         )
     )
 ):
+
+    # Check duplicate contract number
+    existing_contract = db.query(Contract).filter(
+        Contract.contract_number == contract_data.contract_number
+    ).first()
+
+    if existing_contract:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Contract number already exists"
+        )
+
+    # Create contract
     contract = Contract(
         title=contract_data.title,
         contract_number=contract_data.contract_number,
@@ -41,27 +60,23 @@ def create_contract(
         description=contract_data.description,
         start_date=contract_data.start_date,
         end_date=contract_data.end_date,
-        status=contract_data.status,
-        owner_id=contract_data.owner_id
+
+        # Backend determines these values
+        status="Draft",
+        created_by=current_user.id
     )
 
     db.add(contract)
     db.commit()
     db.refresh(contract)
-    print(
-        "CREATED CONTRACT:",
-        contract.id,
-        contract.contract_number,
-        contract.title
-    )
-
 
     return contract
 
 
-
-# Get All Contracts
-# All roles
+# ============================================================
+# GET ALL CONTRACTS
+# All authenticated roles
+# ============================================================
 
 @router.get(
     "",
@@ -69,7 +84,7 @@ def create_contract(
 )
 def get_contracts(
     db: Session = Depends(get_db),
-    current_user=Depends(
+    current_user: User = Depends(
         require_roles(
             "Administrator",
             "Legal Manager",
@@ -80,11 +95,14 @@ def get_contracts(
         )
     )
 ):
+
     return db.query(Contract).all()
 
 
-# Get Contract by ID
-# All roles
+# ============================================================
+# GET CONTRACT BY ID
+# All authenticated roles
+# ============================================================
 
 @router.get(
     "/{contract_id}",
@@ -93,7 +111,7 @@ def get_contracts(
 def get_contract(
     contract_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(
+    current_user: User = Depends(
         require_roles(
             "Administrator",
             "Legal Manager",
@@ -104,21 +122,24 @@ def get_contract(
         )
     )
 ):
+
     contract = db.query(Contract).filter(
         Contract.id == contract_id
     ).first()
 
     if not contract:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Contract {contract_id} not found"
         )
 
     return contract
 
 
-# Update Contract
+# ============================================================
+# UPDATE CONTRACT
 # Administrator, Legal Manager, Contract Manager
+# ============================================================
 
 @router.put(
     "/{contract_id}",
@@ -126,9 +147,9 @@ def get_contract(
 )
 def update_contract(
     contract_id: int,
-    contract_data: ContractCreate,
+    contract_data: ContractUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(
+    current_user: User = Depends(
         require_roles(
             "Administrator",
             "Legal Manager",
@@ -136,13 +157,14 @@ def update_contract(
         )
     )
 ):
+
     contract = db.query(Contract).filter(
         Contract.id == contract_id
     ).first()
 
     if not contract:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Contract {contract_id} not found"
         )
 
@@ -153,7 +175,6 @@ def update_contract(
     contract.start_date = contract_data.start_date
     contract.end_date = contract_data.end_date
     contract.status = contract_data.status
-    contract.owner_id = contract_data.owner_id
 
     db.commit()
     db.refresh(contract)
@@ -161,8 +182,10 @@ def update_contract(
     return contract
 
 
-# Delete Contract
+# ============================================================
+# DELETE CONTRACT
 # Administrator, Legal Manager, Contract Manager
+# ============================================================
 
 @router.delete(
     "/{contract_id}",
@@ -171,7 +194,7 @@ def update_contract(
 def delete_contract(
     contract_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(
+    current_user: User = Depends(
         require_roles(
             "Administrator",
             "Legal Manager",
@@ -179,13 +202,14 @@ def delete_contract(
         )
     )
 ):
+
     contract = db.query(Contract).filter(
         Contract.id == contract_id
     ).first()
 
     if not contract:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Contract {contract_id} not found"
         )
 
