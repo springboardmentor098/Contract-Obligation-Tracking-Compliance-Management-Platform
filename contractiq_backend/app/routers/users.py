@@ -46,7 +46,10 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.user import User
+from app.core.dependencies import require_role
+from app.core.roles import UserRole
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
+from app.utils.security import hash_password
 
 router = APIRouter(
     prefix="/users",
@@ -64,7 +67,8 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     user = User(
         full_name=user_data.full_name,
         email=user_data.email,
-        role=user_data.role
+        role=user_data.role,
+        password_hash=hash_password(user_data.password)
     )
 
     db.add(user)
@@ -121,6 +125,7 @@ def update_user(
     user.full_name = user_data.full_name
     user.email = user_data.email
     user.role = user_data.role
+    user.password_hash = hash_password(user_data.password)
     user.is_active = user_data.is_active
 
     db.commit()
@@ -131,7 +136,13 @@ def update_user(
 
 # Delete User
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(UserRole.ADMINISTRATOR.value)
+    )
+):
     user = db.query(User).filter(User.id == user_id).first()
 
     if user is None:
