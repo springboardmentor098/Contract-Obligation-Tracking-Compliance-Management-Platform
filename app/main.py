@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from app.database.database import test_database_connection
 from app.routers.users import router as users_router
 from app.routers.auth import router as auth_router
-
+from app.routers.contracts import router as contracts_router
 
 app = FastAPI(
     title="ContractIQ API",
@@ -11,6 +11,7 @@ app = FastAPI(
 )
 app.include_router(users_router)
 app.include_router(auth_router)
+app.include_router(contracts_router)
 
 @app.on_event("startup")
 def startup_event():
