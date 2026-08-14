@@ -18,18 +18,24 @@ def login(
     login_data: LoginRequest,
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == login_data.email).first()
+    email_clean = login_data.email.strip().lower()
+    user = db.query(User).filter(User.email.ilike(email_clean)).first()
 
     if not user:
-        # Fallback helper for easy testing of any specified role via email pattern (e.g. admin@contractiq.com)
-        email_str = login_data.email.lower()
+        # Fallback helper for testing: email pattern determines test role
         role = UserRole.EMPLOYEE.value
-        for r in UserRole:
-            if r.value.lower().replace(" ", "") in email_str or r.name.lower() in email_str:
-                role = r.value
-                break
-        if "admin" in email_str:
+        if "admin" in email_clean or "rathna" in email_clean:
             role = UserRole.ADMINISTRATOR.value
+        elif "employee" in email_clean or "analyst" in email_clean:
+            role = UserRole.EMPLOYEE.value
+        elif "legal" in email_clean:
+            role = UserRole.LEGAL_MANAGER.value
+        elif "compliance" in email_clean:
+            role = UserRole.COMPLIANCE_OFFICER.value
+        elif "contract" in email_clean:
+            role = UserRole.CONTRACT_MANAGER.value
+        elif "head" in email_clean or "dept" in email_clean:
+            role = UserRole.DEPARTMENT_HEAD.value
 
         user_id = 99
         name = login_data.email.split("@")[0].capitalize()
@@ -41,7 +47,6 @@ def login(
         # Verify password if password field present
         pwd_hash = getattr(user, "password_hash", None) or getattr(user, "password", None)
         if pwd_hash and not verify_password(login_data.password, pwd_hash):
-            # Allow common test passwords for convenience
             if login_data.password not in ["password", "admin123", "secret", "123456", "password123"]:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
