@@ -6,12 +6,14 @@ from app.database.database import get_db
 from app.models.all_models import User
 from app.schemas.user_schema import UserCreate, UserResponse
 from app.core.security import get_password_hash
+from app.core.permissions import RoleChecker
+from app.core.roles import UserRole
 
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
-
+require_admin = RoleChecker([UserRole.ADMINISTRATOR])
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)): 
@@ -44,7 +46,7 @@ def get_users(db: Session = Depends(get_db)):
     "/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, db: Session = Depends(get_db), current_user: dict = Depends(require_admin)):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:

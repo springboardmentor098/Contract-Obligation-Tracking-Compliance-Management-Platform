@@ -1,8 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.user_schema import UserCreate, UserResponse
 from app.core.security import get_password_hash
+from app.core.roles import UserRole
+from app.core.permissions import RoleChecker
 
 router = APIRouter()
+
+# Define the security rule: Only Administrators allowed!
+require_admin = RoleChecker([UserRole.ADMINISTRATOR])
 
 # Temporary Storage
 users = []
@@ -85,12 +90,12 @@ def update_user(user_id: int, updated_user: UserCreate):
     )
 
 # -------------------------
-# DELETE USER
+# DELETE USER (Protected)
 # -------------------------
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int):
+def delete_user(user_id: int, current_user: dict = Depends(require_admin)):
     for index, user in enumerate(users):
-        if user["id"] == user_id:  # 👈 Fixed: changed user.id to user["id"]
+        if user["id"] == user_id:  
             deleted_user = users.pop(index)
             return {
                 "message": "User deleted successfully",
