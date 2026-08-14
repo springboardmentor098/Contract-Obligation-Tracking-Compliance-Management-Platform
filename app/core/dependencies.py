@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from app.core.roles import UserRole
+from app.core.roles import UserRole, normalize_role
 from app.core.security import decode_access_token
 from app.database.database import get_db
 from app.models.user import User
@@ -41,12 +41,14 @@ def get_current_user(
             user = db.query(User).filter(User.user_id == uid).first()
         except Exception:
             user = None
+
     if not user and email:
         user = db.query(User).filter(User.email == email).first()
 
     if not user:
-        # If user not found in DB but payload contains valid JWT data, construct transient User object
-        role = payload.get("role", UserRole.EMPLOYEE.value)
+        # If user not in DB, construct transient user with normalized role from payload
+        raw_role = payload.get("role", UserRole.EMPLOYEE.value)
+        role = normalize_role(raw_role)
         name = payload.get("name") or payload.get("full_name") or "User"
         user = User(
             user_id=int(user_id) if user_id and str(user_id).isdigit() else 1,
@@ -56,6 +58,9 @@ def get_current_user(
             role=role,
             is_active=True
         )
+    else:
+        # Normalize DB user role
+        user.role = normalize_role(user.role)
 
     if hasattr(user, "is_active") and not user.is_active:
         raise HTTPException(
@@ -70,10 +75,11 @@ def get_current_user(
 class RoleChecker:
     """Reusable dependency to enforce role-based permissions."""
     def __init__(self, allowed_roles: List[UserRole]):
-        self.allowed_roles = [r.value if isinstance(r, UserRole) else str(r) for r in allowed_roles]
+        self.allowed_roles = [normalize_role(r.value if isinstance(r, UserRole) else str(r)) for r in allowed_roles]
 
     def __call__(self, current_user: User = Depends(get_current_user)) -> User:
-        user_role = getattr(current_user, "role", None)
+        user_role = normalize_role(getattr(current_user, "role", ""))
+        
         if user_role not in self.allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

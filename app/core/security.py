@@ -1,26 +1,30 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 SECRET_KEY = "contractiq_secret_key_super_secure_jwt_token_key_change_in_production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password: str) -> str:
+    pwd_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     if not hashed_password:
         return False
     try:
-        return pwd_context.verify(plain_password, hashed_password)
+        if hashed_password.startswith("$2b$") or hashed_password.startswith("$2a$"):
+            pwd_bytes = plain_password.encode("utf-8")[:72]
+            hash_bytes = hashed_password.encode("utf-8")
+            return bcrypt.checkpw(pwd_bytes, hash_bytes)
+        return plain_password == hashed_password
     except Exception:
         return plain_password == hashed_password
-
-
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

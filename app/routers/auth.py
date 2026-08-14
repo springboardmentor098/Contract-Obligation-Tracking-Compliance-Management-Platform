@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.roles import UserRole
+from app.core.roles import UserRole, normalize_role
 from app.core.security import create_access_token, verify_password
 from app.database.database import get_db
 from app.models.user import User
@@ -21,7 +21,7 @@ def login(
     user = db.query(User).filter(User.email == login_data.email).first()
 
     if not user:
-        # Fallback helper for easy testing of any specified role via email pattern (e.g. employee@contractiq.com)
+        # Fallback helper for easy testing of any specified role via email pattern (e.g. admin@contractiq.com)
         email_str = login_data.email.lower()
         role = UserRole.EMPLOYEE.value
         for r in UserRole:
@@ -35,7 +35,7 @@ def login(
         name = login_data.email.split("@")[0].capitalize()
     else:
         user_id = getattr(user, "user_id", None) or getattr(user, "id", 1)
-        role = user.role
+        role = normalize_role(user.role)
         name = getattr(user, "name", None) or getattr(user, "full_name", "User")
         
         # Verify password if password field present
@@ -49,12 +49,14 @@ def login(
                     headers={"WWW-Authenticate": "Bearer"}
                 )
 
+    normalized_role = normalize_role(role)
+
     access_token = create_access_token(
         data={
             "sub": str(user_id),
             "user_id": user_id,
             "email": login_data.email,
-            "role": role,
+            "role": normalized_role,
             "name": name
         }
     )
@@ -64,5 +66,5 @@ def login(
         token_type="bearer",
         user_id=user_id,
         email=login_data.email,
-        role=role
+        role=normalized_role
     )
