@@ -1,4 +1,14 @@
-from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey
+from datetime import datetime, timezone
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Date,
+    DateTime,
+    ForeignKey
+)
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -7,9 +17,16 @@ from app.database.database import Base
 class Contract(Base):
     __tablename__ = "contracts"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
-    title = Column(String, nullable=False)
+    title = Column(
+        String,
+        nullable=False
+    )
 
     contract_number = Column(
         String,
@@ -18,20 +35,52 @@ class Contract(Base):
         index=True
     )
 
-    description = Column(Text, nullable=True)
+    category = Column(
+        String,
+        nullable=False
+    )
 
-    status = Column(String, nullable=False)
+    description = Column(
+        Text,
+        nullable=True
+    )
 
-    start_date = Column(Date, nullable=False)
+    start_date = Column(
+        Date,
+        nullable=False
+    )
 
-    end_date = Column(Date, nullable=False)
+    end_date = Column(
+        Date,
+        nullable=False
+    )
 
-    owner_id = Column(
+    status = Column(
+        String,
+        nullable=False,
+        default="Draft"
+    )
+
+    created_by = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False
     )
 
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc)
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )
+
+    # User who created the contract
     owner = relationship(
         "User",
         back_populates="contracts"
