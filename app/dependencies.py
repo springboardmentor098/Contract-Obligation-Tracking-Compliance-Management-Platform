@@ -1,24 +1,18 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import OAuth2PasswordBearer
 
 from app.core.roles import UserRole
 from app.utils.security import decode_access_token
 
-security = HTTPBearer(auto_error=False)
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/users/login"
+)
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(security)
+    token: str = Depends(oauth2_scheme)
 ):
-    if credentials is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication credentials are required",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    token = credentials.credentials
-
     payload = decode_access_token(token)
 
     if payload is None:
