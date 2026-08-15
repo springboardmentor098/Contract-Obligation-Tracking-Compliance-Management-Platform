@@ -34,7 +34,65 @@ class Contract(Base):
         nullable=False
     )
 
+    # -------------------- USER --------------------
+
     owner = relationship(
         "User",
         back_populates="contracts"
+    )
+
+    # -------------------- CONTRACT VERSIONS --------------------
+
+    versions = relationship(
+        "ContractVersion",
+        back_populates="contract",
+        cascade="all, delete-orphan"
+    )
+
+    # -------------------- OBLIGATIONS --------------------
+
+    obligations = relationship(
+        "Obligation",
+        back_populates="contract",
+        cascade="all, delete-orphan"
+    )
+
+    # -------------------- RENEWALS --------------------
+
+    renewals = relationship(
+        "Renewal",
+        back_populates="contract",
+        cascade="all, delete-orphan"
+    )
+
+    # -------------------- NOTIFICATIONS --------------------
+
+    notifications = relationship(
+        "Notification",
+        back_populates="contract",
+        cascade="all, delete-orphan"
+    )
+
+    # -------------------- REPORTS --------------------
+
+    reports = relationship(
+        "Report",
+        back_populates="contract",
+        cascade="all, delete-orphan"
+    )
+
+    # -------------------- AUDIT LOGS --------------------
+
+    audit_logs = relationship(
+        "AuditLog",
+        back_populates="contract",
+        cascade="all, delete-orphan"
+    )
+
+    # -------------------- ACTIVITIES --------------------
+
+    activities = relationship(
+        "Activity",
+        back_populates="contract",
+        cascade="all, delete-orphan"
     )

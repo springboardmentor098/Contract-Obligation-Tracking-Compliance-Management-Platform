@@ -20,6 +20,11 @@ class User(Base):
 
     role = Column(String(50), nullable=False)
 
+    password_hash = Column(
+        String(255),
+        nullable=False
+    )
+
     is_active = Column(
         Boolean,
         default=True,
