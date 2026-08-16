@@ -14,6 +14,7 @@ router = APIRouter(
     tags=["Users"]
 )
 require_admin = RoleChecker([UserRole.ADMINISTRATOR])
+require_auth = RoleChecker([UserRole.ADMINISTRATOR, UserRole.EMPLOYEE])
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)): 
@@ -38,7 +39,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     response_model=list[UserResponse],
     status_code=status.HTTP_200_OK
 )
-def get_users(db: Session = Depends(get_db)):
+# Add the current_user dependency here:
+def get_users(db: Session = Depends(get_db), current_user: dict = Depends(require_auth)):
     users = db.query(User).all()
     return users
 
@@ -62,12 +64,11 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: dict 
     response_model=UserResponse,
     status_code=status.HTTP_200_OK
 )
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(user_id: int, db: Session = Depends(get_db), current_user: dict = Depends(require_auth)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
-
 
 # PUT (Update) a specific user by their ID
 @router.put(
@@ -75,7 +76,12 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     response_model=UserResponse,
     status_code=status.HTTP_200_OK
 )
-def update_user(user_id: int, user_data: UserCreate, db: Session = Depends(get_db)):
+def update_user(
+    user_id: int, 
+    user_data: UserCreate, 
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_admin)  #  Security lock added here!
+):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
