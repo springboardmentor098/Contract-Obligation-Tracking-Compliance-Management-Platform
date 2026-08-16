@@ -8,7 +8,7 @@ class Obligation(Base):
     __tablename__ = "obligations"
 
     obligation_id = Column(Integer, primary_key=True, index=True)
-    contract_id = Column(Integer, ForeignKey("contracts.contract_id", ondelete="CASCADE"), nullable=False)
+    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     obligation_type = Column(String(50), nullable=False)

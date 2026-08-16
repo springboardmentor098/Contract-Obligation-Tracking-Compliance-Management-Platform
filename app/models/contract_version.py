@@ -9,7 +9,7 @@ class ContractVersion(Base):
     __tablename__ = "contract_versions"
 
     version_id = Column(Integer, primary_key=True, index=True)
-    contract_id = Column(Integer, ForeignKey("contracts.contract_id", ondelete="CASCADE"), nullable=False)
+    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
     version_number = Column(Integer, nullable=False)
     file_url = Column(String(500), nullable=True)
     summary = Column(Text, nullable=True)

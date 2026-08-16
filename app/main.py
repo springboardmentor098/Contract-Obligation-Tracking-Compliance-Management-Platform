@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import auth, users
+from app.routers import auth, contracts, users
 from app.database.database import test_database_connection
 
 
@@ -11,6 +11,8 @@ app = FastAPI(
 
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(contracts.router)
+
 
 
 @app.on_event("startup")

@@ -8,7 +8,7 @@ class Renewal(Base):
     __tablename__ = "renewals"
 
     renewal_id = Column(Integer, primary_key=True, index=True)
-    contract_id = Column(Integer, ForeignKey("contracts.contract_id", ondelete="CASCADE"), nullable=False)
+    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
     renewal_type = Column(String(20), nullable=False)
     notice_period_days = Column(Integer, nullable=True)
     renewal_date = Column(Date, nullable=True)

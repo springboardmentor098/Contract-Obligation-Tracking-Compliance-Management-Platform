@@ -9,7 +9,7 @@ class Notification(Base):
 
     notification_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
-    related_contract_id = Column(Integer, ForeignKey("contracts.contract_id", ondelete="CASCADE"), nullable=True)
+    related_contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=True)
     related_obligation_id = Column(Integer, ForeignKey("obligations.obligation_id", ondelete="CASCADE"), nullable=True)
     type = Column(String(20), nullable=False)
     message = Column(Text, nullable=False)
