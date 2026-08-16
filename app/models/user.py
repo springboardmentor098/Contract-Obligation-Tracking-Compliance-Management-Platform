@@ -31,43 +31,64 @@ class User(Base):
         nullable=False
     )
 
-    # Relationship with Contracts
+    # ============================================================
+    # RELATIONSHIP WITH CONTRACTS
+    # ============================================================
+
     contracts = relationship(
         "Contract",
-        back_populates="owner"
+        back_populates="creator"
     )
 
-    # Relationship with Contract Versions
+    # ============================================================
+    # RELATIONSHIP WITH CONTRACT VERSIONS
+    # ============================================================
+
     created_versions = relationship(
         "ContractVersion",
         back_populates="creator"
     )
 
-    # Relationship with Obligations
+    # ============================================================
+    # RELATIONSHIP WITH OBLIGATIONS
+    # ============================================================
+
     obligations = relationship(
         "Obligation",
         back_populates="assignee"
     )
 
-    # Relationship with Notifications
+    # ============================================================
+    # RELATIONSHIP WITH NOTIFICATIONS
+    # ============================================================
+
     notifications = relationship(
         "Notification",
         back_populates="user"
     )
 
-    # Relationship with Reports
+    # ============================================================
+    # RELATIONSHIP WITH REPORTS
+    # ============================================================
+
     reports = relationship(
         "Report",
         back_populates="generator"
     )
 
-    # Relationship with Audit Logs
+    # ============================================================
+    # RELATIONSHIP WITH AUDIT LOGS
+    # ============================================================
+
     audit_logs = relationship(
         "AuditLog",
         back_populates="user"
     )
 
-    # Relationship with Activities
+    # ============================================================
+    # RELATIONSHIP WITH ACTIVITIES
+    # ============================================================
+
     activities = relationship(
         "Activity",
         back_populates="user"

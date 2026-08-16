@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.contract import Contract
-from app.schemas.contract_schema import ContractCreate, ContractResponse
+from app.schemas.contract_schema import (
+    ContractCreate,
+    ContractUpdate,
+    ContractResponse
+)
 from app.middleware.auth import require_roles
 
 
@@ -16,6 +20,9 @@ router = APIRouter(
 # ============================================================
 # CREATE CONTRACT
 # Administrator, Legal Manager, Contract Manager
+#
+# created_by is taken from JWT.
+# Client is NOT allowed to provide created_by.
 # ============================================================
 
 @router.post(
@@ -34,43 +41,53 @@ router = APIRouter(
 )
 def create_contract(
     contract_data: ContractCreate,
+    current_user: dict = Depends(
+        require_roles(
+            "Administrator",
+            "Legal Manager",
+            "Contract Manager"
+        )
+    ),
     db: Session = Depends(get_db)
 ):
 
+    # --------------------------------------------------------
     # Check duplicate contract number
-    if contract_data.contract_number:
-        existing_contract = db.query(Contract).filter(
-            Contract.contract_number == contract_data.contract_number
-        ).first()
+    # --------------------------------------------------------
 
-        if existing_contract:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Contract number already exists"
-            )
-
-    # Check owner exists
-    from app.models.user import User
-
-    owner = db.query(User).filter(
-        User.id == contract_data.owner_id
+    existing_contract = db.query(Contract).filter(
+        Contract.contract_number == contract_data.contract_number
     ).first()
 
-    if not owner:
+    if existing_contract:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Contract owner not found"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contract number already exists"
         )
+
+    # --------------------------------------------------------
+    # Get authenticated user from JWT
+    # --------------------------------------------------------
+
+    user_id = current_user["user_id"]
+
+    # --------------------------------------------------------
+    # Create contract
+    #
+    # IMPORTANT:
+    # created_by comes from JWT, NOT request body.
+    # status automatically starts as Draft.
+    # --------------------------------------------------------
 
     contract = Contract(
         title=contract_data.title,
         contract_number=contract_data.contract_number,
+        category=contract_data.category,
         description=contract_data.description,
-        party_name=contract_data.party_name,
         start_date=contract_data.start_date,
         end_date=contract_data.end_date,
-        status=contract_data.status,
-        owner_id=contract_data.owner_id
+        status="Draft",
+        created_by=user_id
     )
 
     db.add(contract)
@@ -172,7 +189,7 @@ def get_contract(
 )
 def update_contract(
     contract_id: int,
-    contract_data: ContractCreate,
+    contract_data: ContractUpdate,
     db: Session = Depends(get_db)
 ):
 
@@ -186,41 +203,34 @@ def update_contract(
             detail="Contract not found"
         )
 
+    # --------------------------------------------------------
     # Check duplicate contract number
-    if contract_data.contract_number:
+    # --------------------------------------------------------
 
-        existing_contract = db.query(Contract).filter(
-            Contract.contract_number == contract_data.contract_number,
-            Contract.id != contract_id
-        ).first()
-
-        if existing_contract:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Contract number already exists"
-            )
-
-    # Check owner
-    from app.models.user import User
-
-    owner = db.query(User).filter(
-        User.id == contract_data.owner_id
+    existing_contract = db.query(Contract).filter(
+        Contract.contract_number == contract_data.contract_number,
+        Contract.id != contract_id
     ).first()
 
-    if not owner:
+    if existing_contract:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Contract owner not found"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contract number already exists"
         )
+
+    # --------------------------------------------------------
+    # Update contract
+    # --------------------------------------------------------
 
     contract.title = contract_data.title
     contract.contract_number = contract_data.contract_number
+    contract.category = contract_data.category
     contract.description = contract_data.description
-    contract.party_name = contract_data.party_name
     contract.start_date = contract_data.start_date
     contract.end_date = contract_data.end_date
-    contract.status = contract_data.status
-    contract.owner_id = contract_data.owner_id
+
+    if contract_data.status:
+        contract.status = contract_data.status
 
     db.commit()
     db.refresh(contract)

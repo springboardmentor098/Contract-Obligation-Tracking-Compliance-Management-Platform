@@ -1,28 +1,79 @@
-from datetime import date
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
 
+# ============================================================
+# CONTRACT CATEGORIES
+# ============================================================
+
+CONTRACT_CATEGORIES = {
+    "Employment Contract",
+    "Vendor Contract",
+    "Service Agreement",
+    "Lease Agreement",
+    "Purchase Agreement",
+    "Partnership Agreement",
+    "Confidentiality Agreement",
+}
+
+
+# ============================================================
+# CONTRACT STATUS
+# ============================================================
+
+CONTRACT_STATUSES = {
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Expired",
+    "Terminated",
+}
+
+
+# ============================================================
+# CREATE CONTRACT
+# ============================================================
+
 class ContractCreate(BaseModel):
     title: str
-    contract_number: str | None = None
+    contract_number: str
+    category: str
     description: str | None = None
-    party_name: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+
+
+# ============================================================
+# UPDATE CONTRACT
+# ============================================================
+
+class ContractUpdate(BaseModel):
+    title: str
+    contract_number: str
+    category: str
+    description: str | None = None
     start_date: date | None = None
     end_date: date | None = None
     status: str | None = None
-    owner_id: int
 
+
+# ============================================================
+# CONTRACT RESPONSE
+# ============================================================
 
 class ContractResponse(BaseModel):
     id: int
     title: str
-    contract_number: str | None
+    contract_number: str
+    category: str
     description: str | None
-    party_name: str | None
     start_date: date | None
     end_date: date | None
-    status: str | None
-    owner_id: int
+    status: str
+    created_by: int
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

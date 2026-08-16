@@ -1,4 +1,14 @@
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import (
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text
+)
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -7,41 +17,105 @@ from app.database.database import Base
 class Contract(Base):
     __tablename__ = "contracts"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # ============================================================
+    # PRIMARY KEY
+    # ============================================================
 
-    title = Column(String(255), nullable=False)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    # ============================================================
+    # BASIC CONTRACT INFORMATION
+    # ============================================================
+
+    title = Column(
+        String(255),
+        nullable=False
+    )
 
     contract_number = Column(
         String(100),
         unique=True,
-        nullable=True,
+        nullable=False,
         index=True
     )
 
-    description = Column(Text, nullable=True)
+    category = Column(
+        String(100),
+        nullable=False
+    )
 
-    party_name = Column(String(255), nullable=True)
+    description = Column(
+        Text,
+        nullable=True
+    )
 
-    start_date = Column(Date, nullable=True)
+    # ============================================================
+    # CONTRACT DATES
+    # ============================================================
 
-    end_date = Column(Date, nullable=True)
+    start_date = Column(
+        Date,
+        nullable=True
+    )
 
-    status = Column(String(50), nullable=True)
+    end_date = Column(
+        Date,
+        nullable=True
+    )
 
-    owner_id = Column(
+    # ============================================================
+    # CONTRACT STATUS
+    # ============================================================
+
+    status = Column(
+        String(50),
+        nullable=False,
+        default="Draft"
+    )
+
+    # ============================================================
+    # CONTRACT CREATOR
+    # ============================================================
+
+    created_by = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False
     )
 
-    # -------------------- USER --------------------
+    # ============================================================
+    # TIMESTAMPS
+    # ============================================================
 
-    owner = relationship(
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow
+    )
+
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    # ============================================================
+    # USER RELATIONSHIP
+    # ============================================================
+
+    creator = relationship(
         "User",
         back_populates="contracts"
     )
 
-    # -------------------- CONTRACT VERSIONS --------------------
+    # ============================================================
+    # CONTRACT VERSIONS
+    # ============================================================
 
     versions = relationship(
         "ContractVersion",
@@ -49,7 +123,9 @@ class Contract(Base):
         cascade="all, delete-orphan"
     )
 
-    # -------------------- OBLIGATIONS --------------------
+    # ============================================================
+    # OBLIGATIONS
+    # ============================================================
 
     obligations = relationship(
         "Obligation",
@@ -57,7 +133,9 @@ class Contract(Base):
         cascade="all, delete-orphan"
     )
 
-    # -------------------- RENEWALS --------------------
+    # ============================================================
+    # RENEWALS
+    # ============================================================
 
     renewals = relationship(
         "Renewal",
@@ -65,7 +143,9 @@ class Contract(Base):
         cascade="all, delete-orphan"
     )
 
-    # -------------------- NOTIFICATIONS --------------------
+    # ============================================================
+    # NOTIFICATIONS
+    # ============================================================
 
     notifications = relationship(
         "Notification",
@@ -73,7 +153,9 @@ class Contract(Base):
         cascade="all, delete-orphan"
     )
 
-    # -------------------- REPORTS --------------------
+    # ============================================================
+    # REPORTS
+    # ============================================================
 
     reports = relationship(
         "Report",
@@ -81,7 +163,9 @@ class Contract(Base):
         cascade="all, delete-orphan"
     )
 
-    # -------------------- AUDIT LOGS --------------------
+    # ============================================================
+    # AUDIT LOGS
+    # ============================================================
 
     audit_logs = relationship(
         "AuditLog",
@@ -89,7 +173,9 @@ class Contract(Base):
         cascade="all, delete-orphan"
     )
 
-    # -------------------- ACTIVITIES --------------------
+    # ============================================================
+    # ACTIVITIES
+    # ============================================================
 
     activities = relationship(
         "Activity",
