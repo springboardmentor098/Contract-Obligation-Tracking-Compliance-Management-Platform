@@ -21,9 +21,15 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
-# Request schema - Used while updating a user
+# Request schema - Used while updating an existing user
 class UserUpdate(BaseModel):
     full_name: str | None = None
     email: str | None = None
     password: str | None = None
     role: str | None = None
+
+
+# Request schema - Used while logging in
+class LoginRequest(BaseModel):
+    email: str
+    password: str

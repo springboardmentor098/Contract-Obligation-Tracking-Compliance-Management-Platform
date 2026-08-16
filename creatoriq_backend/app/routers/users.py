@@ -2,10 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 
+
 from app.database.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
-from app.core.security import hash_password
+from app.schemas.user import UserCreate, UserResponse, LoginRequest
+from app.core.dependencies import require_permission
+from app.schemas.permissions import Permission
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_access_token
+)
+
 
 router = APIRouter(
     prefix="/users",
@@ -13,7 +21,60 @@ router = APIRouter(
 )
 
 
-# 1. POST - Create User
+# ============================================================
+# 1. POST - Login User
+# ============================================================
+@router.post("/login")
+def login(
+    login_data: LoginRequest,
+    db: Session = Depends(get_db)
+):
+    # Find user by email
+    user = db.query(User).filter(
+        User.email == login_data.email
+    ).first()
+
+    # User not found
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+
+    # Verify password
+    if not verify_password(
+        login_data.password,
+        user.password
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+
+    # Check whether account is active
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive"
+        )
+
+    # Create JWT access token
+    access_token = create_access_token(
+        {
+            "sub": str(user.id),
+            "role": user.role
+        }
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
+
+
+# ============================================================
+# 2. POST - Create User
+# ============================================================
 @router.post(
     "",
     response_model=UserResponse,
@@ -25,7 +86,9 @@ def create_user(
 ):
 
     # Check if email already exists
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    existing_user = db.query(User).filter(
+        User.email == user_data.email
+    ).first()
 
     if existing_user:
         raise HTTPException(
@@ -47,25 +110,36 @@ def create_user(
     return user
 
 
-# 2. GET - List All Users
+# ============================================================
+# 3. GET - List All Users
+# ============================================================
 @router.get(
     "",
     response_model=list[UserResponse],
     status_code=status.HTTP_200_OK
 )
-def get_users(db: Session = Depends(get_db)):
+def get_users(
+    db: Session = Depends(get_db)
+):
     return db.query(User).all()
 
 
-# 3. GET - Fetch Single User by ID
+# ============================================================
+# 4. GET - Fetch Single User by ID
+# ============================================================
 @router.get(
     "/{user_id}",
     response_model=UserResponse,
     status_code=status.HTTP_200_OK
 )
-def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+def get_user_by_id(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
     if not user:
         raise HTTPException(
@@ -76,7 +150,9 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
-# 4. PUT - Update User by ID
+# ============================================================
+# 5. PUT - Update User by ID
+# ============================================================
 @router.put(
     "/{user_id}",
     response_model=UserResponse,
@@ -88,7 +164,10 @@ def update_user(
     db: Session = Depends(get_db)
 ):
 
-    user_query = db.query(User).filter(User.id == user_id)
+    user_query = db.query(User).filter(
+        User.id == user_id
+    )
+
     existing_user = user_query.first()
 
     if not existing_user:
@@ -104,7 +183,10 @@ def update_user(
         "role": user_data.role
     }
 
-    user_query.update(update_data, synchronize_session=False)
+    user_query.update(
+        update_data,
+        synchronize_session=False
+    )
 
     db.commit()
     db.refresh(existing_user)
@@ -112,14 +194,24 @@ def update_user(
     return existing_user
 
 
-# 5. DELETE - Delete User by ID
+# ============================================================
+# 6. DELETE - Delete User by ID
+# ============================================================
 @router.delete(
     "/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_permission(Permission.MANAGE_USERS)
+    )
+):
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
     if not user:
         raise HTTPException(
