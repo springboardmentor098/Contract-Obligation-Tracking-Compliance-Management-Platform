@@ -14,4 +14,8 @@ class User(Base):
     role = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
-    contracts = relationship("Contract", back_populates="user")
+    contracts = relationship(
+        "Contract",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )

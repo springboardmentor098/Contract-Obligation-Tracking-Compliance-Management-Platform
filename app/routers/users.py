@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
+from app.dependencies.roles import PermissionChecker
+from app.models.user import User
 from app.database.database import get_db
-from app.models.user import User as UserModel
 from app.schemas.user import UserCreate, UserResponse
-from app.utils.security import hash_password
 from app.services.user import (
     register_user,
     get_all_users,
@@ -24,7 +24,8 @@ router = APIRouter()
 )
 def create_user_db(
     user_data: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(PermissionChecker("create_user"))
 ):
     try:
         return register_user(db, user_data)
@@ -42,7 +43,8 @@ def create_user_db(
     response_model=list[UserResponse]
 )
 def get_users_db(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(PermissionChecker("view_user"))
 ):
     return get_all_users(db)
 
@@ -54,7 +56,8 @@ def get_users_db(
 )
 def get_user(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(PermissionChecker("view_user"))
 ):
     user = get_user_by_id(db, user_id)
 
@@ -75,7 +78,8 @@ def get_user(
 def update_user(
     user_id: int,
     user_data: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(PermissionChecker("update_user"))
 ):
     try:
         return update_user_service(db, user_id, user_data)
@@ -91,7 +95,8 @@ def update_user(
 @router.delete("/users/{user_id}")
 def delete_user(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(PermissionChecker("delete_user"))
 ):
     try:
         return delete_user_service(db, user_id)

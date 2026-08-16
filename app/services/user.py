@@ -1,5 +1,8 @@
 from sqlalchemy.orm import Session
 
+from app.models.contracts import Contract
+from app.models.activities import Activity
+
 from app.models.user import User
 from app.repositories.user import (
     get_user_by_email,
@@ -57,15 +60,28 @@ def update_user_service(
 def delete_user_service(
     db: Session,
     user_id: int
-):
-    user = db.query(User).filter(User.id == user_id).first()
+    ):
+        user = db.query(User).filter(User.id == user_id).first()
 
-    if not user:
-        raise ValueError("User not found")
+        if not user:
+            raise ValueError("User not found")
 
-    db.delete(user)
-    db.commit()
+        contracts = db.query(Contract).filter(
+            Contract.user_id == user_id
+        ).all()
 
-    return {
-        "message": "User deleted successfully"
-    }
+        for contract in contracts:
+            db.query(Activity).filter(
+                Activity.contract_id == contract.id
+            ).delete()
+
+        db.query(Contract).filter(
+            Contract.user_id == user_id
+        ).delete()
+
+        db.delete(user)
+        db.commit()
+
+        return {
+            "message": "User deleted successfully"
+        }
