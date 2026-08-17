@@ -32,6 +32,11 @@ class Contract(Base):
         nullable=False
     )
 
+    description = Column(
+    String(1000),
+    nullable=True
+    )
+    
     counterparty = Column(
         String(255),
         nullable=False

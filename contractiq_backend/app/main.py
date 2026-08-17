@@ -50,6 +50,7 @@ from fastapi import FastAPI
 from app.database.database import test_database_connection
 from app.routers.users import router
 from app.routers.auth import router as auth_router
+from app.routers.contracts import router as contracts_router
 
 app = FastAPI(
     title="ContractIQ API",
@@ -68,3 +69,4 @@ def root():
 
 app.include_router(router)
 app.include_router(auth_router)
+app.include_router(contracts_router)
