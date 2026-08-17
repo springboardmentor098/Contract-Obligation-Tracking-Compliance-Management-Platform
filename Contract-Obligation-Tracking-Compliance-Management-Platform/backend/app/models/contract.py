@@ -1,6 +1,15 @@
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Date,
+    DateTime,
+    ForeignKey
+)
+from sqlalchemy.orm import relationship
 
 from app.database.database import Base
 
@@ -8,22 +17,115 @@ from app.database.database import Base
 class Contract(Base):
     __tablename__ = "contracts"
 
-    id = Column(Integer, primary_key=True, index=True)
-    contract_name = Column(String(200), nullable=False)
-    contract_number = Column(String(100), unique=True, nullable=False)
-    vendor_name = Column(String(200), nullable=False)
-    description = Column(Text)
+    # ============================================================
+    # Primary Key
+    # ============================================================
 
-    start_date = Column(Date)
-    end_date = Column(Date)
-    status = Column(String(50), default="Active")
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    # ============================================================
+    # Contract Information
+    # ============================================================
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    title = Column(
+        String(200),
+        nullable=False
+    )
 
-    owner = relationship("User", back_populates="contracts")
+    contract_number = Column(
+        String(100),
+        unique=True,
+        nullable=False,
+        index=True
+    )
 
-    versions = relationship("ContractVersion", back_populates="contract")
-    obligations = relationship("Obligation", back_populates="contract")
+    category = Column(
+        String(100),
+        nullable=False
+    )
+
+    description = Column(
+        Text,
+        nullable=True
+    )
+
+    # ============================================================
+    # Contract Dates
+    # ============================================================
+
+    start_date = Column(
+        Date,
+        nullable=False
+    )
+
+    end_date = Column(
+        Date,
+        nullable=False
+    )
+
+    # ============================================================
+    # Contract Status
+    # ============================================================
+
+    # Every newly created contract starts as Draft.
+    status = Column(
+        String(50),
+        nullable=False,
+        default="Draft"
+    )
+
+    # ============================================================
+    # Contract Creator
+    # Foreign Key → users.id
+    # ============================================================
+
+    created_by = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    # ============================================================
+    # Timestamps
+    # ============================================================
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+
+    # ============================================================
+    # User Relationship
+    # One User → Many Contracts
+    # ============================================================
+
+    owner = relationship(
+        "User",
+        back_populates="contracts"
+    )
+
+    # ============================================================
+    # Future Contract Relationships
+    # ============================================================
+
+    versions = relationship(
+        "ContractVersion",
+        back_populates="contract"
+    )
+
+    obligations = relationship(
+        "Obligation",
+        back_populates="contract"
+    )
