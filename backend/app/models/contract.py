@@ -21,6 +21,8 @@ class Contract(Base):
     contract_number: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
+        unique=True,
+        index=True,
     )
 
     title: Mapped[str] = mapped_column(
@@ -33,15 +35,15 @@ class Contract(Base):
         nullable=True,
     )
 
-    owner_id: Mapped[uuid.UUID] = mapped_column(
+    created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
         nullable=False,
     )
 
-    contract_type: Mapped[str | None] = mapped_column(
+    category: Mapped[str] = mapped_column(
         String(100),
-        nullable=True,
+        nullable=False,
     )
 
     counterparty_name: Mapped[str | None] = mapped_column(
@@ -49,9 +51,10 @@ class Contract(Base):
         nullable=True,
     )
 
-    status: Mapped[str | None] = mapped_column(
+    status: Mapped[str] = mapped_column(
         String(50),
-        nullable=True,
+        nullable=False,
+        default="Draft",
     )
 
     start_date: Mapped[date | None] = mapped_column(
