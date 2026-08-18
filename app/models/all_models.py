@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, Date,
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.database import Base
+from app.models.contract import Contract
 
 # 1. USERS TABLE
 class User(Base):
@@ -17,23 +18,7 @@ class User(Base):
     # Relationships
     contracts = relationship("Contract", back_populates="owner")
     obligations = relationship("Obligation", back_populates="assignee")
-
-# 2. CONTRACTS TABLE
-class Contract(Base):
-    __tablename__ = "contracts"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    status = Column(String(50), nullable=False)
-    start_date = Column(Date, nullable=True)
-    end_date = Column(Date, nullable=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
-
-    # Relationships
-    owner = relationship("User", back_populates="contracts")
-    versions = relationship("ContractVersion", back_populates="contract")
-    obligations = relationship("Obligation", back_populates="contract")
-    renewal = relationship("Renewal", back_populates="contract", uselist=False) # 1-to-1
+    contracts = relationship("Contract", back_populates="creator")
 
 # 3. CONTRACT VERSIONS TABLE
 class ContractVersion(Base):

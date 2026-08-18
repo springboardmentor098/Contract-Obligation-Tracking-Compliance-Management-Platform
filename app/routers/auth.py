@@ -21,9 +21,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
         
-    # 3. Create the JWT Token containing the user's role
+    # 3. Create the JWT Token containing the user's role AND id
     access_token = create_access_token(
-        data={"sub": user.email, "role": user.role} 
+        data={"sub": user.email, "role": user.role, "id": user.id} # 👈 Added "id" here!
     )
     
     # 4. Return the token to Swagger UI
