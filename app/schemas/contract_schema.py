@@ -1,11 +1,7 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
-
-# ============================================================
-# CONTRACT CATEGORIES
-# ============================================================
 
 CONTRACT_CATEGORIES = {
     "Employment Contract",
@@ -18,10 +14,6 @@ CONTRACT_CATEGORIES = {
 }
 
 
-# ============================================================
-# CONTRACT STATUS
-# ============================================================
-
 CONTRACT_STATUSES = {
     "Draft",
     "Under Review",
@@ -32,10 +24,6 @@ CONTRACT_STATUSES = {
 }
 
 
-# ============================================================
-# CREATE CONTRACT
-# ============================================================
-
 class ContractCreate(BaseModel):
     title: str
     contract_number: str
@@ -44,10 +32,16 @@ class ContractCreate(BaseModel):
     start_date: date | None = None
     end_date: date | None = None
 
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, value: str):
+        if value not in CONTRACT_CATEGORIES:
+            raise ValueError(
+                f"Invalid contract category. Allowed categories: "
+                f"{', '.join(sorted(CONTRACT_CATEGORIES))}"
+            )
+        return value
 
-# ============================================================
-# UPDATE CONTRACT
-# ============================================================
 
 class ContractUpdate(BaseModel):
     title: str
@@ -56,12 +50,35 @@ class ContractUpdate(BaseModel):
     description: str | None = None
     start_date: date | None = None
     end_date: date | None = None
-    status: str | None = None
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, value: str):
+        if value not in CONTRACT_CATEGORIES:
+            raise ValueError(
+                f"Invalid contract category. Allowed categories: "
+                f"{', '.join(sorted(CONTRACT_CATEGORIES))}"
+            )
+        return value
 
 
-# ============================================================
-# CONTRACT RESPONSE
-# ============================================================
+class ContractStatusUpdate(BaseModel):
+    status: str
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str):
+        if value not in CONTRACT_STATUSES:
+            raise ValueError(
+                f"Invalid contract status. Allowed statuses: "
+                f"{', '.join(sorted(CONTRACT_STATUSES))}"
+            )
+        return value
+
+
+class ContractAssignment(BaseModel):
+    assigned_to: int
+
 
 class ContractResponse(BaseModel):
     id: int
@@ -73,7 +90,12 @@ class ContractResponse(BaseModel):
     end_date: date | None
     status: str
     created_by: int
+    assigned_to: int | None
+    reviewed_at: datetime | None
+    approved_at: datetime | None
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )

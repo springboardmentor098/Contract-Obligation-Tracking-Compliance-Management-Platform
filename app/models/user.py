@@ -32,12 +32,23 @@ class User(Base):
     )
 
     # ============================================================
-    # RELATIONSHIP WITH CONTRACTS
+    # CONTRACTS CREATED BY THIS USER
     # ============================================================
 
     contracts = relationship(
         "Contract",
+        foreign_keys="Contract.created_by",
         back_populates="creator"
+    )
+
+    # ============================================================
+    # CONTRACTS ASSIGNED TO THIS USER
+    # ============================================================
+
+    assigned_contracts = relationship(
+        "Contract",
+        foreign_keys="Contract.assigned_to",
+        back_populates="assigned_user"
     )
 
     # ============================================================

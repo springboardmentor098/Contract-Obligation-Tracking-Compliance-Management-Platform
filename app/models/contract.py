@@ -69,6 +69,12 @@ class Contract(Base):
 
     # ============================================================
     # CONTRACT STATUS
+    # Draft
+    # Under Review
+    # Approved
+    # Active
+    # Expired
+    # Terminated
     # ============================================================
 
     status = Column(
@@ -88,7 +94,31 @@ class Contract(Base):
     )
 
     # ============================================================
-    # TIMESTAMPS
+    # CONTRACT ASSIGNMENT
+    # ============================================================
+
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    # ============================================================
+    # WORKFLOW TIMESTAMPS
+    # ============================================================
+
+    reviewed_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    # ============================================================
+    # SYSTEM TIMESTAMPS
     # ============================================================
 
     created_at = Column(
@@ -105,12 +135,23 @@ class Contract(Base):
     )
 
     # ============================================================
-    # USER RELATIONSHIP
+    # CREATOR RELATIONSHIP
     # ============================================================
 
     creator = relationship(
         "User",
+        foreign_keys=[created_by],
         back_populates="contracts"
+    )
+
+    # ============================================================
+    # ASSIGNED USER RELATIONSHIP
+    # ============================================================
+
+    assigned_user = relationship(
+        "User",
+        foreign_keys=[assigned_to],
+        back_populates="assigned_contracts"
     )
 
     # ============================================================
