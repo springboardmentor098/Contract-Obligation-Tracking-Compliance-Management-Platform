@@ -7,6 +7,7 @@ from app.database.database import test_database_connection
 from app.api.user_api import router as user_router
 from app.api.auth import router as auth_router
 from app.api.contract import router as contract_router
+from app.api.obligation import router as obligation_router
 
 # Import all SQLAlchemy models
 # This ensures SQLAlchemy knows about all relationships.
@@ -44,6 +45,9 @@ app.include_router(auth_router)
 
 # Contract Management APIs
 app.include_router(contract_router)
+
+# Obligation Management APIs
+app.include_router(obligation_router)
 
 
 # -------------------- ROOT --------------------

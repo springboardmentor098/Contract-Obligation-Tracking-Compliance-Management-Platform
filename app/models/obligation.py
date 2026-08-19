@@ -1,4 +1,14 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import (
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text
+)
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -7,7 +17,19 @@ from app.database.database import Base
 class Obligation(Base):
     __tablename__ = "obligations"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # ============================================================
+    # PRIMARY KEY
+    # ============================================================
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    # ============================================================
+    # CONTRACT
+    # ============================================================
 
     contract_id = Column(
         Integer,
@@ -15,15 +37,74 @@ class Obligation(Base):
         nullable=False
     )
 
-    title = Column(String(255), nullable=False)
+    # ============================================================
+    # BASIC INFORMATION
+    # ============================================================
 
-    description = Column(Text, nullable=True)
+    title = Column(
+        String(255),
+        nullable=False
+    )
 
-    due_date = Column(Date, nullable=True)
+    description = Column(
+        Text,
+        nullable=True
+    )
 
-    status = Column(String(50), nullable=True)
+    # ============================================================
+    # OBLIGATION TYPE
+    #
+    # Payment Obligation
+    # Delivery Commitment
+    # Reporting Requirement
+    # Renewal Condition
+    # Service Level Agreement
+    # Legal Compliance Requirement
+    # ============================================================
 
-    priority = Column(String(50), nullable=True)
+    obligation_type = Column(
+        String(100),
+        nullable=False
+    )
+
+    # ============================================================
+    # DUE DATE
+    # ============================================================
+
+    due_date = Column(
+        Date,
+        nullable=False
+    )
+
+    # ============================================================
+    # STATUS
+    #
+    # Pending
+    # In Progress
+    # Completed
+    # Delayed
+    # Overdue
+    # ============================================================
+
+    status = Column(
+        String(50),
+        nullable=False,
+        default="Pending"
+    )
+
+    # ============================================================
+    # PRIORITY
+    # Existing project field - preserved
+    # ============================================================
+
+    priority = Column(
+        String(50),
+        nullable=True
+    )
+
+    # ============================================================
+    # ASSIGNED USER
+    # ============================================================
 
     assigned_to = Column(
         Integer,
@@ -31,17 +112,45 @@ class Obligation(Base):
         nullable=False
     )
 
-    created_at = Column(DateTime, nullable=True)
+    # ============================================================
+    # COMPLETION
+    # ============================================================
 
-    updated_at = Column(DateTime, nullable=True)
+    completion_date = Column(
+        Date,
+        nullable=True
+    )
 
-    # Relationship with Contract
+    # ============================================================
+    # TIMESTAMPS
+    # ============================================================
+
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow
+    )
+
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    # ============================================================
+    # CONTRACT RELATIONSHIP
+    # ============================================================
+
     contract = relationship(
         "Contract",
         back_populates="obligations"
     )
 
-    # Relationship with User
+    # ============================================================
+    # USER RELATIONSHIP
+    # ============================================================
+
     assignee = relationship(
         "User",
         back_populates="obligations"
