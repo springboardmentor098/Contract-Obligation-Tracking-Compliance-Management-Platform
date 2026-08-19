@@ -12,6 +12,22 @@ class ContractCreate(BaseModel):
     end_date: date
 
 
+class ContractUpdate(BaseModel):
+    title: str | None = None
+    category: str | None = None
+    description: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+
+
+class ContractStatusUpdate(BaseModel):
+    status: str
+
+
+class ContractAssignment(BaseModel):
+    assigned_to: int
+
+
 class ContractResponse(BaseModel):
     id: int
     title: str
@@ -22,16 +38,10 @@ class ContractResponse(BaseModel):
     end_date: date
     status: str
     created_by: int
+    assigned_to: int | None
+    reviewed_at: datetime | None
+    approved_at: datetime | None
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class ContractUpdate(BaseModel):
-    title: str | None = None
-    category: str | None = None
-    description: str | None = None
-    start_date: date | None = None
-    end_date: date | None = None
-    status: str | None = None

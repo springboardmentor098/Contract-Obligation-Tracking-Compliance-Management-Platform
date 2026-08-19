@@ -37,6 +37,22 @@ class Contract(Base):
         nullable=False
     )
 
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    reviewed_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime,
+        nullable=True
+    )
+
     created_at = Column(
         DateTime,
         server_default=func.now(),
@@ -52,7 +68,14 @@ class Contract(Base):
 
     created_by_user = relationship(
         "User",
+        foreign_keys=[created_by],
         back_populates="contracts"
+    )
+
+    assigned_to_user = relationship(
+        "User",
+        foreign_keys=[assigned_to],
+        back_populates="assigned_contracts"
     )
 
     contract_versions = relationship(

@@ -14,7 +14,16 @@ class User(Base):
     role = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
-    contracts = relationship("Contract", back_populates="created_by_user")
+    contracts = relationship(
+    "Contract",
+    foreign_keys="Contract.created_by",
+    back_populates="created_by_user"
+)
+    assigned_contracts = relationship(
+    "Contract",
+    foreign_keys="Contract.assigned_to",
+    back_populates="assigned_to_user"
+)
     notifications = relationship("Notification", back_populates="user")
     reports = relationship("Report", back_populates="generated_by_user")
     audit_logs = relationship("AuditLog", back_populates="user")
