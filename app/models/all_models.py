@@ -16,9 +16,8 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    contracts = relationship("Contract", back_populates="owner")
+    contracts = relationship("Contract", back_populates="creator", foreign_keys="[Contract.created_by]")
     obligations = relationship("Obligation", back_populates="assignee")
-    contracts = relationship("Contract", back_populates="creator")
 
 # 3. CONTRACT VERSIONS TABLE
 class ContractVersion(Base):

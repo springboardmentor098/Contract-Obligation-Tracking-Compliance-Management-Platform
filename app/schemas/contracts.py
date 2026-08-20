@@ -11,15 +11,33 @@ class ContractBase(BaseModel):
     start_date: date
     end_date: date
 
-# Used for POST /contracts (Notice we don't ask for 'status' or 'created_by' here!)
 class ContractCreate(ContractBase):
     pass 
 
-# Used for returning data back to the user
+#  NEW: Schema for updating contract details (PUT)
+class ContractUpdate(BaseModel):
+    title: Optional[str] = None
+    category: Optional[ContractCategory] = None
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+#  NEW: Schema for manually updating status (PATCH)
+class ContractStatusUpdate(BaseModel):
+    status: ContractStatus
+
+#  NEW: Schema for assigning a contract
+class ContractAssign(BaseModel):
+    assigned_to: int
+
+
 class ContractResponse(ContractBase):
     id: int
     status: ContractStatus
     created_by: int
+    assigned_to: Optional[int] = None  # New field
+    reviewed_at: Optional[datetime] = None  # New field
+    approved_at: Optional[datetime] = None  # New field
     created_at: datetime
     updated_at: datetime
 

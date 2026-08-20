@@ -41,10 +41,14 @@ class Contract(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    assigned_to = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+
     # Relationship to fetch the user easily later
-    creator = relationship("User", back_populates="contracts")
-    
+    creator = relationship("User", foreign_keys=[created_by], back_populates="contracts")
     versions = relationship("ContractVersion", back_populates="contract")
-    
+    assignee = relationship("User", foreign_keys=[assigned_to])
+
     obligations = relationship("Obligation")
     renewal = relationship("Renewal", uselist=False)
