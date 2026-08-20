@@ -8,65 +8,136 @@ from app.database.database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # =========================================================
+    # USER INFORMATION
+    # =========================================================
 
-    full_name = Column(String(100), nullable=False)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
-    email = Column(String(255), unique=True, nullable=False, index=True)
+    full_name = Column(
+        String(100),
+        nullable=False
+    )
 
-    password = Column(String(255), nullable=False)
+    email = Column(
+        String(255),
+        unique=True,
+        nullable=False,
+        index=True
+    )
 
-    role = Column(String(50), nullable=False)
+    password = Column(
+        String(255),
+        nullable=False
+    )
 
-    is_active = Column(Boolean, nullable=False, default=True)
+    role = Column(
+        String(50),
+        nullable=False
+    )
 
-    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    is_active = Column(
+        Boolean,
+        nullable=False,
+        default=True
+    )
 
-    updated_at = Column(DateTime, nullable=True, onupdate=func.now())
+    # =========================================================
+    # TIMESTAMPS
+    # =========================================================
 
-    # Relationship with Contracts
-    contracts = relationship(
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        server_default=func.now()
+    )
+
+    updated_at = Column(
+        DateTime,
+        nullable=True,
+        onupdate=func.now()
+    )
+
+    # =========================================================
+    # CONTRACT RELATIONSHIPS
+    # =========================================================
+
+    # Contracts created by this user
+    created_contracts = relationship(
         "Contract",
+        foreign_keys="Contract.created_by",
         back_populates="creator"
     )
 
-    # Relationship with Contract Versions
+    # Contracts assigned to this user
+    assigned_contracts = relationship(
+        "Contract",
+        foreign_keys="Contract.assigned_to",
+        back_populates="assigned_user"
+    )
+
+    # =========================================================
+    # CONTRACT VERSION RELATIONSHIP
+    # =========================================================
+
     contract_versions = relationship(
         "ContractVersion",
         back_populates="creator"
     )
 
-    # Relationship with Obligations
+    # =========================================================
+    # OBLIGATION RELATIONSHIP
+    # =========================================================
+
     obligations = relationship(
         "Obligation",
         back_populates="assignee"
     )
 
-    # Relationship with Renewals
+    # =========================================================
+    # RENEWAL RELATIONSHIP
+    # =========================================================
+
     approved_renewals = relationship(
         "Renewal",
         back_populates="approver"
     )
 
-    # Relationship with Notifications
+    # =========================================================
+    # NOTIFICATION RELATIONSHIP
+    # =========================================================
+
     notifications = relationship(
         "Notification",
         back_populates="user"
     )
 
-    # Relationship with Reports
+    # =========================================================
+    # REPORT RELATIONSHIP
+    # =========================================================
+
     reports = relationship(
         "Report",
         back_populates="generator"
     )
 
-    # Relationship with Audit Logs
+    # =========================================================
+    # AUDIT LOG RELATIONSHIP
+    # =========================================================
+
     audit_logs = relationship(
         "AuditLog",
         back_populates="user"
     )
 
-    # Relationship with Activities
+    # =========================================================
+    # ACTIVITY RELATIONSHIP
+    # =========================================================
+
     activities = relationship(
         "Activity",
         back_populates="user"

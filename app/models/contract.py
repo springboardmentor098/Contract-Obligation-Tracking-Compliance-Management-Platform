@@ -1,4 +1,12 @@
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Date,
+    DateTime,
+    ForeignKey
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -8,9 +16,24 @@ from app.database.database import Base
 class Contract(Base):
     __tablename__ = "contracts"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # =========================================================
+    # PRIMARY KEY
+    # =========================================================
 
-    title = Column(String(255), nullable=False)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    # =========================================================
+    # CONTRACT INFORMATION
+    # =========================================================
+
+    title = Column(
+        String(255),
+        nullable=False
+    )
 
     contract_number = Column(
         String(100),
@@ -19,22 +42,85 @@ class Contract(Base):
         index=True
     )
 
-    category = Column(String(100), nullable=False)
+    category = Column(
+        String(100),
+        nullable=False
+    )
 
-    description = Column(Text, nullable=True)
+    description = Column(
+        Text,
+        nullable=True
+    )
 
-    start_date = Column(Date, nullable=False)
+    start_date = Column(
+        Date,
+        nullable=False
+    )
 
-    end_date = Column(Date, nullable=True)
+    end_date = Column(
+        Date,
+        nullable=True
+    )
 
-    status = Column(String(50), nullable=False, default="Draft")
+    # =========================================================
+    # CONTRACT WORKFLOW STATUS
+    #
+    # Draft
+    #   ↓
+    # Under Review
+    #   ↓
+    # Approved
+    #   ↓
+    # Active
+    #   ↓
+    # Expired / Terminated
+    # =========================================================
 
-    # User who created the contract
+    status = Column(
+        String(50),
+        nullable=False,
+        default="Draft"
+    )
+
+    # =========================================================
+    # CONTRACT CREATOR / OWNER
+    # =========================================================
+
     created_by = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False
     )
+
+    # =========================================================
+    # CONTRACT ASSIGNMENT
+    #
+    # A user can be assigned to multiple contracts.
+    # =========================================================
+
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    # =========================================================
+    # WORKFLOW TIMESTAMPS
+    # =========================================================
+
+    reviewed_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    # =========================================================
+    # RECORD TIMESTAMPS
+    # =========================================================
 
     created_at = Column(
         DateTime,
@@ -44,17 +130,33 @@ class Contract(Base):
 
     updated_at = Column(
         DateTime,
-        nullable=True,
+        nullable=False,
+        server_default=func.now(),
         onupdate=func.now()
     )
 
-    # Relationship with User
+    # =========================================================
+    # USER RELATIONSHIPS
+    # =========================================================
+
+    # User who created the contract
     creator = relationship(
         "User",
-        back_populates="contracts"
+        foreign_keys=[created_by],
+        back_populates="created_contracts"
     )
 
-    # Relationships with other tables
+    # User responsible for the contract
+    assigned_user = relationship(
+        "User",
+        foreign_keys=[assigned_to],
+        back_populates="assigned_contracts"
+    )
+
+    # =========================================================
+    # CONTRACT RELATIONSHIPS
+    # =========================================================
+
     versions = relationship(
         "ContractVersion",
         back_populates="contract",
