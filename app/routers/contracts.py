@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
+from app.models.obligation import Obligation
 from app.database.database import get_db
 from app.models.contract import Contract
 from app.models.user import User
@@ -78,7 +78,38 @@ def get_contracts(
 ):
     return db.query(Contract).all()
 
+# ---------------------------------------------------------
+# GET OBLIGATIONS FOR CONTRACT
+# ---------------------------------------------------------
 
+@router.get(
+    "/{contract_id}/obligations",
+    status_code=status.HTTP_200_OK
+)
+def get_contract_obligations(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    contract = (
+        db.query(Contract)
+        .filter(Contract.id == contract_id)
+        .first()
+    )
+
+    if not contract:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Contract not found"
+        )
+
+    obligations = (
+        db.query(Obligation)
+        .filter(Obligation.contract_id == contract_id)
+        .all()
+    )
+
+    return obligations
 # ---------------------------------------------------------
 # GET CONTRACT BY ID
 # ---------------------------------------------------------
