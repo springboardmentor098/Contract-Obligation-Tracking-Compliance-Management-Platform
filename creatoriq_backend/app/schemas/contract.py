@@ -1,14 +1,32 @@
-from datetime import date
-from pydantic import BaseModel, Field
+from datetime import date, datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 
 class ContractCreate(BaseModel):
-    title: str = Field(..., min_length=1, max_length=255)
-    contract_number: str = Field(..., min_length=1, max_length=100)
+    title: str
+    contract_number: str
     category: str
-    description: str | None = None
-    start_date: date | None = None
-    end_date: date | None = None
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+
+class ContractUpdate(BaseModel):
+    title: Optional[str] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+
+class ContractStatusUpdate(BaseModel):
+    status: str
+
+
+class ContractAssignment(BaseModel):
+    assigned_to: int
 
 
 class ContractResponse(BaseModel):
@@ -16,22 +34,15 @@ class ContractResponse(BaseModel):
     title: str
     contract_number: str
     category: str
-    description: str | None
-    start_date: date | None
-    end_date: date | None
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     status: str
     created_by: int
     assigned_to: int
+    created_at: datetime
+    updated_at: datetime
+    reviewed_at: Optional[datetime] = None
+    approved_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
-
-class ContractUpdate(BaseModel):
-    title: str | None = None
-    category: str | None = None
-    description: str | None = None
-    start_date: date | None = None
-    end_date: date | None = None
-    status: str | None = None
-    assigned_to: int | None = None
+    model_config = ConfigDict(from_attributes=True)
