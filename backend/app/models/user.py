@@ -58,10 +58,27 @@ class User(Base):
         nullable=False,
     )
 
+    # ============================================================
+    # CONTRACT RELATIONSHIPS
+    # ============================================================
+
+    # Contracts created/owned by this user
     contracts = relationship(
         "Contract",
+        foreign_keys="Contract.created_by",
         back_populates="owner",
     )
+
+    # Contracts assigned to this user
+    assigned_contracts = relationship(
+        "Contract",
+        foreign_keys="Contract.assigned_to",
+        back_populates="assignee",
+    )
+
+    # ============================================================
+    # OTHER RELATIONSHIPS
+    # ============================================================
 
     contract_versions = relationship(
         "ContractVersion",

@@ -41,6 +41,12 @@ class Contract(Base):
         nullable=False,
     )
 
+    assigned_to: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True,
+    )
+
     category: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
@@ -90,9 +96,18 @@ class Contract(Base):
         nullable=False,
     )
 
+    # User who created/owns the contract
     owner = relationship(
         "User",
         back_populates="contracts",
+        foreign_keys=[created_by],
+    )
+
+    # User to whom the contract is assigned
+    assignee = relationship(
+        "User",
+        back_populates="assigned_contracts",
+        foreign_keys=[assigned_to],
     )
 
     versions = relationship(
