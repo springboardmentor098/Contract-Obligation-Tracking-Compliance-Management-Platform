@@ -1,4 +1,14 @@
-from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey
+from datetime import datetime, timezone
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Date,
+    DateTime,
+    ForeignKey
+)
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -7,7 +17,11 @@ from app.database.database import Base
 class Obligation(Base):
     __tablename__ = "obligations"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
     contract_id = Column(
         Integer,
@@ -25,6 +39,11 @@ class Obligation(Base):
         nullable=True
     )
 
+    obligation_type = Column(
+        String,
+        nullable=False
+    )
+
     due_date = Column(
         Date,
         nullable=False
@@ -32,13 +51,33 @@ class Obligation(Base):
 
     status = Column(
         String,
-        nullable=False
+        nullable=False,
+        default="Pending"
+    )
+
+    progress = Column(
+        Integer,
+        nullable=False,
+        default=0
     )
 
     assigned_to = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc)
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
     )
 
     contract = relationship(
@@ -48,5 +87,6 @@ class Obligation(Base):
 
     assigned_user = relationship(
         "User",
+        foreign_keys=[assigned_to],
         back_populates="obligations"
     )
