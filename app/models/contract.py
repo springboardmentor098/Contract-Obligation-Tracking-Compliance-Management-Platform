@@ -55,18 +55,39 @@ class Contract(Base):
         nullable=False
     )
 
+    # Contract workflow status
     status = Column(
         String,
         nullable=False,
         default="Draft"
     )
 
+    # User who created the contract
     created_by = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False
     )
 
+    # User responsible for the contract
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    # Workflow timestamps
+    reviewed_at = Column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+    # Required timestamps
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
@@ -83,7 +104,14 @@ class Contract(Base):
     # User who created the contract
     owner = relationship(
         "User",
+        foreign_keys=[created_by],
         back_populates="contracts"
+    )
+
+    # User responsible for the contract
+    assignee = relationship(
+        "User",
+        foreign_keys=[assigned_to]
     )
 
     versions = relationship(

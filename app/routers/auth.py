@@ -10,7 +10,9 @@ from app.utils.security import (
 )
 
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Authentication"]
+)
 
 
 @router.post("/login")

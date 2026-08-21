@@ -14,10 +14,10 @@ class User(Base):
     password = Column(String, nullable=False)
 
     contracts = relationship(
-        "Contract",
-        back_populates="owner"
+    "Contract",
+    foreign_keys="Contract.created_by",
+    back_populates="owner"
     )
-
     obligations = relationship(
         "Obligation",
         back_populates="assigned_user"
