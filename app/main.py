@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 
 from app.database.database import test_database_connection
+
 from app.routers.users import router as user_router
 from app.routers.auth import router as auth_router
 from app.routers.contracts import router as contract_router
+from app.routers.obligations import router as obligation_router
 
 
 app = FastAPI(
@@ -20,6 +22,7 @@ def startup_event():
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(contract_router)
+app.include_router(obligation_router)
 
 
 @app.get("/")

@@ -48,6 +48,12 @@ class Contract(Base):
         nullable=False
     )
 
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
     created_at = Column(
         DateTime,
         default=datetime.utcnow,
@@ -61,7 +67,28 @@ class Contract(Base):
         nullable=False
     )
 
+    reviewed_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime,
+        nullable=True
+    )
+
     user = relationship(
         "User",
+        foreign_keys=[created_by],
         back_populates="contracts"
+    )
+
+    assigned_user = relationship(
+        "User",
+        foreign_keys=[assigned_to]
+    )
+    obligations = relationship(
+        "Obligation",
+        back_populates="contract",
+        cascade="all, delete-orphan"
     )
