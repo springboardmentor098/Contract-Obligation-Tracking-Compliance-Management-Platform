@@ -66,10 +66,29 @@ class Contract(Base):
         default="Draft"
     )
 
+    # User who created the contract
     owner_id = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False
+    )
+
+    # User responsible for the contract
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    # Workflow timestamps
+    reviewed_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime,
+        nullable=True
     )
 
     created_at = Column(
@@ -88,7 +107,15 @@ class Contract(Base):
     # User who created the contract
     owner = relationship(
         "User",
+        foreign_keys=[owner_id],
         back_populates="contracts"
+    )
+
+    # User assigned to the contract
+    assigned_user = relationship(
+        "User",
+        foreign_keys=[assigned_to],
+        back_populates="assigned_contracts"
     )
 
     # Existing ContractIQ relationships
