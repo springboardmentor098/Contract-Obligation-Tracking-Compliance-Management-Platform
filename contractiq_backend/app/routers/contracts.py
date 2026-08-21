@@ -1,153 +1,10 @@
-# from fastapi import APIRouter, Depends, HTTPException, status
-# from sqlalchemy.exc import IntegrityError
-# from sqlalchemy.orm import Session
-
-# from app.database.database import get_db
-# from app.models.contract import Contract
-# from app.models.user import User
-# from app.schemas.contract import (
-#     ContractCreate,
-#     ContractResponse,
-#     ContractUpdate,
-# )
-# from app.core.dependencies import get_current_user
-
-
-# router = APIRouter(
-#     prefix="/contracts",
-#     tags=["Contracts"]
-# )
-
-
-# @router.post(
-#     "/",
-#     response_model=ContractResponse,
-#     status_code=status.HTTP_201_CREATED
-# )
-# def create_contract(
-#     contract_data: ContractCreate,
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(get_current_user)
-# ):
-#     contract = Contract(
-#         owner_id=current_user.id,
-#         contract_code=contract_data.contract_code,
-#         title=contract_data.title,
-#         description=contract_data.description,
-#         counterparty=contract_data.counterparty,
-#         category=contract_data.category,
-#         status="Draft",
-#         risk_level=contract_data.risk_level,
-#         start_date=contract_data.start_date,
-#         end_date=contract_data.end_date
-#     )
-
-#     db.add(contract)
-
-#     try:
-#         db.commit()
-#         db.refresh(contract)
-#     except IntegrityError:
-#         db.rollback()
-#         raise HTTPException(
-#             status_code=status.HTTP_409_CONFLICT,
-#             detail="Contract code already exists"
-#         )
-
-#     return contract
-
-
-# @router.get(
-#     "/",
-#     response_model=list[ContractResponse]
-# )
-# def get_contracts(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(get_current_user)
-# ):
-#     contracts = (
-#         db.query(Contract)
-#         .filter(Contract.owner_id == current_user.id)
-#         .all()
-#     )
-
-#     return contracts
-
-
-# @router.get(
-#     "/{contract_id}",
-#     response_model=ContractResponse
-# )
-# def get_contract(
-#     contract_id: int,
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(get_current_user)
-# ):
-#     contract = (
-#         db.query(Contract)
-#         .filter(
-#             Contract.id == contract_id,
-#             Contract.owner_id == current_user.id
-#         )
-#         .first()
-#     )
-
-#     if contract is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Contract not found"
-#         )
-
-#     return contract
-
-
-# @router.put(
-#     "/{contract_id}",
-#     response_model=ContractResponse
-# )
-# def update_contract(
-#     contract_id: int,
-#     contract_data: ContractUpdate,
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(get_current_user)
-# ):
-#     contract = (
-#         db.query(Contract)
-#         .filter(
-#             Contract.id == contract_id,
-#             Contract.owner_id == current_user.id
-#         )
-#         .first()
-#     )
-
-#     if contract is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Contract not found"
-#         )
-
-#     update_data = contract_data.model_dump(exclude_unset=True)
-
-#     for field, value in update_data.items():
-#         setattr(contract, field, value)
-
-#     try:
-#         db.commit()
-#         db.refresh(contract)
-#     except IntegrityError:
-#         db.rollback()
-#         raise HTTPException(
-#             status_code=status.HTTP_409_CONFLICT,
-#             detail="Contract code already exists"
-#         )
-
-#     return contract
-
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from app.models.obligation import Obligation
+from app.schemas.obligation import ObligationResponse
 
 from app.database.database import get_db
 from app.models.contract import Contract
@@ -167,10 +24,6 @@ router = APIRouter(
     tags=["Contracts"]
 )
 
-
-# ---------------------------------------------------------
-# Helper: Get contract owned by current user
-# ---------------------------------------------------------
 
 def get_owned_contract(
     contract_id: int,
@@ -194,10 +47,6 @@ def get_owned_contract(
 
     return contract
 
-
-# ---------------------------------------------------------
-# Create Contract
-# ---------------------------------------------------------
 
 @router.post(
     "/",
@@ -237,10 +86,6 @@ def create_contract(
     return contract
 
 
-# ---------------------------------------------------------
-# Get All Contracts
-# ---------------------------------------------------------
-
 @router.get(
     "/",
     response_model=list[ContractResponse]
@@ -257,10 +102,38 @@ def get_contracts(
 
     return contracts
 
+@router.get(
+    "/{contract_id}/obligations",
+    response_model=list[ObligationResponse]
+)
+def get_contract_obligations(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    contract = (
+        db.query(Contract)
+        .filter(
+            Contract.id == contract_id,
+            Contract.owner_id == current_user.id
+        )
+        .first()
+    )
 
-# ---------------------------------------------------------
-# Get Contract By ID
-# ---------------------------------------------------------
+    if contract is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Contract not found"
+        )
+
+    obligations = (
+        db.query(Obligation)
+        .filter(Obligation.contract_id == contract_id)
+        .all()
+    )
+
+    return obligations
+
 
 @router.get(
     "/{contract_id}",
@@ -277,10 +150,6 @@ def get_contract(
         db
     )
 
-
-# ---------------------------------------------------------
-# Update Contract
-# ---------------------------------------------------------
 
 @router.put(
     "/{contract_id}",
@@ -319,9 +188,6 @@ def update_contract(
     return contract
 
 
-# ---------------------------------------------------------
-# Change Contract Status
-# ---------------------------------------------------------
 
 @router.patch(
     "/{contract_id}/status",
@@ -400,9 +266,6 @@ def update_contract_status(
     return contract
 
 
-# ---------------------------------------------------------
-# Submit Contract For Review
-# ---------------------------------------------------------
 
 @router.post(
     "/{contract_id}/submit-review",
@@ -437,9 +300,6 @@ def submit_for_review(
     return contract
 
 
-# ---------------------------------------------------------
-# Approve Contract
-# ---------------------------------------------------------
 
 @router.post(
     "/{contract_id}/approve",
@@ -491,10 +351,6 @@ def approve_contract(
     return contract
 
 
-# ---------------------------------------------------------
-# Activate Contract
-# ---------------------------------------------------------
-
 @router.post(
     "/{contract_id}/activate",
     response_model=ContractResponse
@@ -526,9 +382,6 @@ def activate_contract(
     return contract
 
 
-# ---------------------------------------------------------
-# Assign Contract
-# ---------------------------------------------------------
 
 @router.patch(
     "/{contract_id}/assign",
