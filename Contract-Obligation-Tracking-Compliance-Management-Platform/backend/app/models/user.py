@@ -10,7 +10,12 @@ class User(Base):
     # -----------------------------
     # User Columns
     # -----------------------------
-    id = Column(Integer, primary_key=True, index=True)
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
     full_name = Column(
         String(100),
@@ -45,10 +50,25 @@ class User(Base):
     # Relationships
     # -----------------------------
 
-    # One User → Many Contracts
+    # One User → Many Contracts Created
     contracts = relationship(
         "Contract",
+        foreign_keys="Contract.created_by",
         back_populates="owner"
+    )
+
+    # One User → Many Contracts Assigned
+    assigned_contracts = relationship(
+        "Contract",
+        foreign_keys="Contract.assigned_to",
+        back_populates="assignee"
+    )
+
+    # One User → Many Obligations Assigned
+    assigned_obligations = relationship(
+        "Obligation",
+        foreign_keys="Obligation.assigned_to",
+        back_populates="assignee"
     )
 
     # One User → Many Notifications
