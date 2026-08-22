@@ -49,17 +49,59 @@ class ContractCreate(BaseModel):
         extra="forbid"
     )
 
+
 # ============================================================
 # Update Contract Schema
 # ============================================================
 
 class ContractUpdate(BaseModel):
+    """
+    Used only for updating contract information.
+
+    Status must NOT be changed through this schema.
+    Status changes are handled by dedicated workflow APIs.
+    """
+
     title: str | None = None
     category: ContractCategory | None = None
     description: str | None = None
     start_date: date | None = None
     end_date: date | None = None
-    status: ContractStatus | None = None
+
+    model_config = ConfigDict(
+        extra="forbid"
+    )
+
+
+# ============================================================
+# Contract Status Update Schema
+# ============================================================
+
+class ContractStatusUpdate(BaseModel):
+    status: ContractStatus
+
+    model_config = ConfigDict(
+        extra="forbid"
+    )
+
+
+# ============================================================
+# Contract Assignment Schema
+# ============================================================
+
+class ContractAssignment(BaseModel):
+    assigned_to: int
+
+    model_config = ConfigDict(
+        extra="forbid"
+    )
+
+
+class ContractAssignmentResponse(BaseModel):
+    message: str
+    contract_id: int
+    assigned_to: int
+    contract: "ContractResponse"
 
 
 # ============================================================
@@ -74,9 +116,20 @@ class ContractResponse(BaseModel):
     description: str | None
     start_date: date
     end_date: date
+
+    # Workflow
     status: ContractStatus
+
+    # Users
     created_by: int
+    assigned_to: int | None
+
+    # Timestamps
+    reviewed_at: datetime | None
+    approved_at: datetime | None
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
