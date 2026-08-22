@@ -1,6 +1,16 @@
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Date,
+    DateTime,
+    ForeignKey
+)
+
+from sqlalchemy.orm import relationship
 
 from app.database.database import Base
 
@@ -8,19 +18,142 @@ from app.database.database import Base
 class Obligation(Base):
     __tablename__ = "obligations"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # ============================================================
+    # Primary Key
+    # ============================================================
 
-    contract_id = Column(Integer, ForeignKey("contracts.id"))
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
-    obligation_name = Column(String(200), nullable=False)
-    description = Column(Text)
+    # ============================================================
+    # Contract
+    # Foreign Key → contracts.id
+    # ============================================================
 
-    due_date = Column(Date)
-    status = Column(String(50), default="Pending")
+    contract_id = Column(
+        Integer,
+        ForeignKey(
+            "contracts.id",
+            ondelete="CASCADE"
+        ),
+        nullable=False,
+        index=True
+    )
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    # ============================================================
+    # Obligation Information
+    # ============================================================
 
-    contract = relationship("Contract", back_populates="obligations")
+    title = Column(
+        String(200),
+        nullable=False
+    )
 
-    renewals = relationship("Renewal", back_populates="obligation")
-    notifications = relationship("Notification", back_populates="obligation")
+    description = Column(
+        Text,
+        nullable=True
+    )
+
+    obligation_type = Column(
+        String(100),
+        nullable=False
+    )
+
+    # ============================================================
+    # Due Date
+    # ============================================================
+
+    due_date = Column(
+        Date,
+        nullable=False
+    )
+
+    # ============================================================
+    # Responsible User
+    # Foreign Key → users.id
+    # ============================================================
+
+    assigned_to = Column(
+        Integer,
+        ForeignKey(
+            "users.id",
+            ondelete="SET NULL"
+        ),
+        nullable=True,
+        index=True
+    )
+
+    # ============================================================
+    # Status
+    # ============================================================
+
+    status = Column(
+        String(50),
+        nullable=False,
+        default="Pending"
+    )
+
+    # ============================================================
+    # Completion
+    # ============================================================
+
+    completion_date = Column(
+        Date,
+        nullable=True
+    )
+
+    # ============================================================
+    # Timestamps
+    # ============================================================
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+
+    # ============================================================
+    # Contract Relationship
+    # ============================================================
+
+    contract = relationship(
+        "Contract",
+        back_populates="obligations"
+    )
+
+    # ============================================================
+    # Assigned User Relationship
+    # ============================================================
+
+    assignee = relationship(
+        "User",
+        back_populates="assigned_obligations"
+    )
+
+    # ============================================================
+    # Renewal Relationship
+    # ============================================================
+
+    renewals = relationship(
+        "Renewal",
+        back_populates="obligation"
+    )
+
+    # ============================================================
+    # Notification Relationship
+    # ============================================================
+
+    notifications = relationship(
+        "Notification",
+        back_populates="obligation"
+    )
