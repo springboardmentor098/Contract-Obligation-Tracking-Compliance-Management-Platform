@@ -11,15 +11,23 @@ from app.schemas.obligation import (
     ObligationCreate,
     ObligationUpdate,
     ObligationStatusUpdate,
-    ObligationComplete,
     ObligationResponse,
     ObligationStatus,
 )
 from app.core.security import get_current_user
 
 
+# ============================================================
+# Routers
+# ============================================================
+
 router = APIRouter(
     prefix="/obligations",
+    tags=["Obligations"]
+)
+
+contract_obligations_router = APIRouter(
+    prefix="/contracts",
     tags=["Obligations"]
 )
 
@@ -129,14 +137,20 @@ def is_obligation_overdue(
 
 def apply_overdue_status(
     obligation: Obligation
-) -> None:
+) -> bool:
     """
-    Update the in-memory obligation status to Overdue
-    when its due date has passed and it is not completed.
+    Apply Overdue status when an obligation is overdue.
+
+    Returns True if the status was changed.
     """
 
     if is_obligation_overdue(obligation):
-        obligation.status = "Overdue"
+
+        if obligation.status != "Overdue":
+            obligation.status = "Overdue"
+            return True
+
+    return False
 
 
 # ============================================================
@@ -224,8 +238,8 @@ def can_modify_obligation(
 
     Managers can modify obligations.
 
-    The user assigned to an obligation can also update
-    its progress/status.
+    The user assigned to an obligation can also
+    update its progress/status.
     """
 
     if is_manager(current_user):
@@ -268,9 +282,8 @@ def create_obligation(
     # Verify Assigned User
     # --------------------------------------------------------
 
-    assigned_user = None
-
     if obligation_data.assigned_to is not None:
+
         assigned_user = get_user_or_404(
             obligation_data.assigned_to,
             db
@@ -354,21 +367,18 @@ def get_obligations(
         )
 
     # --------------------------------------------------------
-    # Apply reusable overdue detection
+    # Apply overdue detection
     # --------------------------------------------------------
 
     changed = False
 
     for obligation in obligations:
 
-        if is_obligation_overdue(obligation):
-
-            if obligation.status != "Overdue":
-
-                obligation.status = "Overdue"
-                changed = True
+        if apply_overdue_status(obligation):
+            changed = True
 
     if changed:
+
         db.commit()
 
         for obligation in obligations:
@@ -409,20 +419,20 @@ def get_obligation(
 
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to view this obligation"
+                detail=(
+                    "You do not have permission "
+                    "to view this obligation"
+                )
             )
 
     # --------------------------------------------------------
     # Overdue Detection
     # --------------------------------------------------------
 
-    if is_obligation_overdue(obligation):
+    if apply_overdue_status(obligation):
 
-        if obligation.status != "Overdue":
-
-            obligation.status = "Overdue"
-            db.commit()
-            db.refresh(obligation)
+        db.commit()
+        db.refresh(obligation)
 
     return obligation
 
@@ -431,8 +441,8 @@ def get_obligation(
 # API 4 — Get Obligations for a Contract
 # ============================================================
 
-@router.get(
-    "/contract/{contract_id}",
+@contract_obligations_router.get(
+    "/{contract_id}/obligations",
     response_model=list[ObligationResponse]
 )
 def get_contract_obligations(
@@ -443,6 +453,10 @@ def get_contract_obligations(
     """
     Return all obligations belonging to a contract.
     """
+
+    # --------------------------------------------------------
+    # Verify Contract
+    # --------------------------------------------------------
 
     contract = get_contract_or_404(
         contract_id,
@@ -456,9 +470,6 @@ def get_contract_obligations(
     if not is_manager(current_user):
 
         if contract.created_by != current_user.id:
-
-            # Check whether user is assigned to
-            # at least one obligation for this contract.
 
             assigned_obligation_exists = (
                 db.query(Obligation)
@@ -525,14 +536,11 @@ def get_contract_obligations(
 
     for obligation in obligations:
 
-        if is_obligation_overdue(obligation):
-
-            if obligation.status != "Overdue":
-
-                obligation.status = "Overdue"
-                changed = True
+        if apply_overdue_status(obligation):
+            changed = True
 
     if changed:
+
         db.commit()
 
         for obligation in obligations:
@@ -575,7 +583,10 @@ def update_obligation(
 
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to update this obligation"
+            detail=(
+                "You do not have permission "
+                "to update this obligation"
+            )
         )
 
     # --------------------------------------------------------
@@ -597,7 +608,7 @@ def update_obligation(
             )
 
     # --------------------------------------------------------
-    # Update only supplied fields
+    # Update Only Supplied Fields
     # --------------------------------------------------------
 
     update_data = obligation_data.model_dump(
@@ -659,20 +670,19 @@ def update_obligation_status(
         )
 
     # --------------------------------------------------------
-    # Detect overdue before transition
+    # Detect Overdue
     # --------------------------------------------------------
 
     if is_obligation_overdue(obligation):
 
         if obligation.status != "Completed":
-
             obligation.status = "Overdue"
 
     current_status = obligation.status
     new_status = status_data.status
 
     # --------------------------------------------------------
-    # Same status
+    # Same Status
     # --------------------------------------------------------
 
     if current_status == new_status:
@@ -686,7 +696,7 @@ def update_obligation_status(
         )
 
     # --------------------------------------------------------
-    # Validate transition
+    # Validate Transition
     # --------------------------------------------------------
 
     validate_status_transition(
@@ -695,7 +705,7 @@ def update_obligation_status(
     )
 
     # --------------------------------------------------------
-    # Completed status
+    # Completed Status
     # --------------------------------------------------------
 
     if new_status == "Completed":
@@ -706,12 +716,6 @@ def update_obligation_status(
     else:
 
         obligation.status = new_status
-
-        # If moving away from Completed,
-        # clear completion date.
-        if current_status == "Completed":
-
-            obligation.completion_date = None
 
     db.commit()
     db.refresh(obligation)
@@ -729,14 +733,14 @@ def update_obligation_status(
 )
 def complete_obligation(
     obligation_id: int,
-    completion_data: ObligationComplete,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
     Complete an obligation.
 
-    The completion date is determined by the backend.
+    The completion date is determined automatically
+    by the backend.
     """
 
     obligation = get_obligation_or_404(
@@ -762,7 +766,7 @@ def complete_obligation(
         )
 
     # --------------------------------------------------------
-    # Already completed
+    # Already Completed
     # --------------------------------------------------------
 
     if obligation.status == "Completed":
@@ -777,8 +781,6 @@ def complete_obligation(
     # --------------------------------------------------------
 
     obligation.status = "Completed"
-
-    # Backend determines completion date.
     obligation.completion_date = date.today()
 
     db.commit()
