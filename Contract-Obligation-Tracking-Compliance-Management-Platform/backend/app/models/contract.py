@@ -9,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey
 )
+
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -68,10 +69,9 @@ class Contract(Base):
     )
 
     # ============================================================
-    # Contract Status
+    # Contract Workflow Status
     # ============================================================
 
-    # Every newly created contract starts as Draft.
     status = Column(
         String(50),
         nullable=False,
@@ -80,7 +80,6 @@ class Contract(Base):
 
     # ============================================================
     # Contract Creator
-    # Foreign Key → users.id
     # ============================================================
 
     created_by = Column(
@@ -90,7 +89,32 @@ class Contract(Base):
     )
 
     # ============================================================
-    # Timestamps
+    # Assigned Responsible User
+    # ============================================================
+
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True
+    )
+
+    # ============================================================
+    # Workflow Timestamps
+    # ============================================================
+
+    reviewed_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    # ============================================================
+    # General Timestamps
     # ============================================================
 
     created_at = Column(
@@ -107,17 +131,27 @@ class Contract(Base):
     )
 
     # ============================================================
-    # User Relationship
-    # One User → Many Contracts
+    # Creator Relationship
     # ============================================================
 
     owner = relationship(
         "User",
+        foreign_keys=[created_by],
         back_populates="contracts"
     )
 
     # ============================================================
-    # Future Contract Relationships
+    # Assigned User Relationship
+    # ============================================================
+
+    assignee = relationship(
+        "User",
+        foreign_keys=[assigned_to],
+        back_populates="assigned_contracts"
+    )
+
+    # ============================================================
+    # Contract Versions
     # ============================================================
 
     versions = relationship(
@@ -125,7 +159,13 @@ class Contract(Base):
         back_populates="contract"
     )
 
+    # ============================================================
+    # Obligations
+    # One Contract → Many Obligations
+    # ============================================================
+
     obligations = relationship(
         "Obligation",
-        back_populates="contract"
+        back_populates="contract",
+        cascade="all, delete-orphan"
     )
