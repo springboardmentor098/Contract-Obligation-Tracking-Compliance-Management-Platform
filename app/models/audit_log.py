@@ -20,7 +20,7 @@ class AuditLog(Base):
 
     contract_id = Column(
         Integer,
-        ForeignKey("contracts.id", ondelete="CASCADE"),
+        ForeignKey("contracts.id", ondelete="SET NULL"),
         nullable=True,
         index=True
     )

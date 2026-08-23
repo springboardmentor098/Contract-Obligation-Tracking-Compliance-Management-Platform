@@ -159,7 +159,7 @@ class Contract(Base):
     audit_logs = relationship(
         "AuditLog",
         back_populates="contract",
-        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     activities = relationship(

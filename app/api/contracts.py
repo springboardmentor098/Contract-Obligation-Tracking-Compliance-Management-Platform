@@ -8,6 +8,7 @@ from app.models import contract
 from app.models.contract import Contract
 from app.models.user import User
 from app.models.audit_log import AuditLog
+from app.services.audit_service import create_audit_log
 from app.schemas.contract_schema import (
     ContractCreate,
     ContractRead,
@@ -94,6 +95,18 @@ def create_contract(
     )
 
     db.add(contract)
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        user_id=user_id,
+        action="Created contract",
+        entity_type="Contract",
+        entity_id=contract.id,
+        contract_id=contract.id,
+        details=f"Contract {contract.contract_number} created",
+    )
+
     db.commit()
     db.refresh(contract)
 
@@ -205,6 +218,16 @@ def update_contract(
 
     contract.updated_at = datetime.now(timezone.utc)
 
+    create_audit_log(
+        db=db,
+        user_id=get_user_id(current_user),
+        action="Updated contract",
+        entity_type="Contract",
+        entity_id=contract.id,
+        contract_id=contract.id,
+        details=f"Contract {contract.contract_number} updated",
+    )
+
     db.commit()
     db.refresh(contract)
 
@@ -237,6 +260,16 @@ def delete_contract(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Contract not found",
         )
+
+    create_audit_log(
+        db=db,
+        user_id=get_user_id(current_user),
+        action="Deleted contract",
+        entity_type="Contract",
+        entity_id=contract.id,
+        contract_id=contract.id,
+        details=f"Contract {contract.contract_number} deleted",
+    )
 
     db.delete(contract)
     db.commit()
