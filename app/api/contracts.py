@@ -408,3 +408,4 @@ def update_contract_status(
     db.refresh(contract)
 
     return contract
+
