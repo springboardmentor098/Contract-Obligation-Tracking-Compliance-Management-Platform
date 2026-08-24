@@ -4,6 +4,7 @@ from datetime import datetime
 import enum
 from app.database.database import Base 
 
+
 # 1. Define Categories
 class ContractCategory(str, enum.Enum):
     EMPLOYMENT = "Employment Contract"
@@ -50,5 +51,5 @@ class Contract(Base):
     versions = relationship("ContractVersion", back_populates="contract")
     assignee = relationship("User", foreign_keys=[assigned_to])
 
-    obligations = relationship("Obligation")
-    renewal = relationship("Renewal", uselist=False)
+    obligations = relationship("Obligation", back_populates="contract")
+    renewal = relationship("Renewal", uselist=False, back_populates="contract")

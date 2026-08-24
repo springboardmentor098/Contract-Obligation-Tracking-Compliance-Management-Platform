@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.database import Base
 from app.models.contract import Contract
+import enum
+from sqlalchemy import Enum, Date, DateTime, Column, Integer, String, ForeignKey
 
 # 1. USERS TABLE
 class User(Base):
@@ -32,15 +34,41 @@ class ContractVersion(Base):
     contract = relationship("Contract", back_populates="versions")
 
 # 4. OBLIGATIONS TABLE
+class ObligationType(str, enum.Enum):
+    PAYMENT = "Payment Obligation"
+    DELIVERY = "Delivery Commitment"
+    REPORTING = "Reporting Requirement"
+    RENEWAL = "Renewal Condition"
+    SLA = "Service Level Agreement"
+    LEGAL = "Legal Compliance Requirement"
+
+class ObligationStatus(str, enum.Enum):
+    PENDING = "Pending"
+    IN_PROGRESS = "In Progress"
+    COMPLETED = "Completed"
+    DELAYED = "Delayed"
+    OVERDUE = "Overdue"
+
 class Obligation(Base):
     __tablename__ = "obligations"
-    id = Column(Integer, primary_key=True, index=True)
-    contract_id = Column(Integer, ForeignKey("contracts.id"))
-    description = Column(Text, nullable=False)
-    due_date = Column(Date, nullable=False)
-    status = Column(String(50), nullable=False)
-    assigned_to = Column(Integer, ForeignKey("users.id"))
 
+    id = Column(Integer, primary_key=True, index=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(String)
+    obligation_type = Column(Enum(ObligationType, native_enum=False), nullable=False)
+    due_date = Column(Date, nullable=False)
+    
+    # Link to the User responsible for it
+    assigned_to = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    status = Column(Enum(ObligationStatus, native_enum=False), default=ObligationStatus.PENDING, nullable=False)
+    completion_date = Column(DateTime, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships (Make sure these match your User and Contract back_populates!)
     contract = relationship("Contract", back_populates="obligations")
     assignee = relationship("User", back_populates="obligations")
 
