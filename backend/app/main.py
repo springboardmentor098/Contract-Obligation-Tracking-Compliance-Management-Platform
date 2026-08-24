@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from backend.app.api import user
 from backend.app.api import contracts
+from backend.app.api import obligations
 
 
 app = FastAPI(
@@ -9,6 +10,7 @@ app = FastAPI(
 )
 
 
+# Users
 app.include_router(
     user.router,
     prefix="/users",
@@ -16,12 +18,19 @@ app.include_router(
 )
 
 
+# Contracts
 app.include_router(
     contracts.router,
     prefix="/contracts",
     tags=["Contracts"]
 )
 
+
+# Obligations
+app.include_router(
+    obligations.router,
+    tags=["Obligations"]
+)
 
 @app.get("/")
 def root():

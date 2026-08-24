@@ -41,7 +41,16 @@ class User(Base):
         default="Employee"
     )
 
-    contracts = relationship(
+    # Contracts owned/created by this user
+    owned_contracts = relationship(
         "Contract",
+        foreign_keys="Contract.owner_id",
         back_populates="owner"
+    )
+
+    # Contracts assigned to this user
+    assigned_contracts = relationship(
+        "Contract",
+        foreign_keys="Contract.assigned_to",
+        back_populates="assigned_user"
     )
