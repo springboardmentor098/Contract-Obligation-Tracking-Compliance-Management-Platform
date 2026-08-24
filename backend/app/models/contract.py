@@ -47,6 +47,22 @@ class Contract(Base):
         default="Draft"
     )
 
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    reviewed_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime,
+        nullable=True
+    )
+
     created_at = Column(
         DateTime,
         nullable=False,
@@ -60,9 +76,18 @@ class Contract(Base):
         onupdate=datetime.utcnow
     )
 
+    # Owner of the contract
     owner = relationship(
         "User",
-        back_populates="contracts"
+        foreign_keys=[owner_id],
+        back_populates="owned_contracts"
+    )
+
+    # User assigned to the contract
+    assigned_user = relationship(
+        "User",
+        foreign_keys=[assigned_to],
+        back_populates="assigned_contracts"
     )
 
     versions = relationship(
