@@ -1,4 +1,14 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import (
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text
+)
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -7,7 +17,19 @@ from app.database.database import Base
 class Renewal(Base):
     __tablename__ = "renewals"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # ============================================================
+    # PRIMARY KEY
+    # ============================================================
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    # ============================================================
+    # CONTRACT
+    # ============================================================
 
     contract_id = Column(
         Integer,
@@ -15,18 +37,85 @@ class Renewal(Base):
         nullable=False
     )
 
-    renewal_date = Column(Date, nullable=False)
+    # ============================================================
+    # RENEWAL DATES
+    # ============================================================
 
-    status = Column(String(50), nullable=True)
+    renewal_date = Column(
+        Date,
+        nullable=False
+    )
 
-    renewal_period = Column(Integer, nullable=True)
+    previous_expiry_date = Column(
+        Date,
+        nullable=False
+    )
 
-    notes = Column(Text, nullable=True)
+    new_expiry_date = Column(
+        Date,
+        nullable=True
+    )
 
-    created_at = Column(DateTime, nullable=True)
+    # ============================================================
+    # STATUS
+    # ============================================================
 
-    # Relationship with Contract
+    status = Column(
+        String(50),
+        nullable=False,
+        default="Upcoming"
+    )
+
+    # ============================================================
+    # ASSIGNED USER
+    # ============================================================
+
+    assigned_to = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    # ============================================================
+    # ADDITIONAL INFORMATION
+    # ============================================================
+
+    notes = Column(
+        Text,
+        nullable=True
+    )
+
+    # ============================================================
+    # TIMESTAMPS
+    # ============================================================
+
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow
+    )
+
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    # ============================================================
+    # CONTRACT RELATIONSHIP
+    # ============================================================
+
     contract = relationship(
         "Contract",
+        back_populates="renewals"
+    )
+
+    # ============================================================
+    # USER RELATIONSHIP
+    # ============================================================
+
+    assignee = relationship(
+        "User",
         back_populates="renewals"
     )
