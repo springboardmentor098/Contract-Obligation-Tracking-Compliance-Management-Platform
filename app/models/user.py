@@ -24,11 +24,16 @@ class User(Base):
     foreign_keys="Contract.assigned_to",
     back_populates="assigned_to_user"
 )
+    
     assigned_obligations = relationship(
     "Obligation",
     foreign_keys="Obligation.assigned_to",
     back_populates="assigned_to_user"
 )
+    renewals = relationship(
+        "Renewal",
+        back_populates="assigned_user"
+    )
     notifications = relationship("Notification", back_populates="user")
     reports = relationship("Report", back_populates="generated_by_user")
     audit_logs = relationship("AuditLog", back_populates="user")

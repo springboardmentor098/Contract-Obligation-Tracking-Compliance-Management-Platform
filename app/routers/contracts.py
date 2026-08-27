@@ -7,6 +7,8 @@ from app.models.obligation import Obligation
 from app.database.database import get_db
 from app.models.contract import Contract
 from app.models.user import User
+from datetime import date
+from app.models.renewal import Renewal
 from app.schemas.contract import (
     ContractAssignment,
     ContractCreate,
@@ -53,6 +55,25 @@ def create_contract(
     try:
         db.commit()
         db.refresh(contract)
+
+        # Automatically create a renewal record for an already expired contract
+        if contract.end_date < date.today():
+            contract.status = "Expired"
+        db.commit()
+        db.refresh(contract)
+        renewal = Renewal(
+                contract_id=contract.id,
+                renewal_date=date.today(),
+                previous_expiry_date=contract.end_date,
+                new_expiry_date=contract.end_date,
+                renewal_status="Upcoming",
+                assigned_to=current_user.id,
+                notes="Automatically created for expired contract"
+            )
+
+        db.add(renewal)
+        db.commit()
+
     except IntegrityError:
         db.rollback()
         raise HTTPException(
