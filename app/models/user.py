@@ -22,6 +22,11 @@ class User(Base):
         "Obligation",
         back_populates="assigned_user"
     )
+    
+    renewals = relationship(
+    "Renewal",
+    back_populates="assigned_user"
+    )
 
     notifications = relationship(
         "Notification",
