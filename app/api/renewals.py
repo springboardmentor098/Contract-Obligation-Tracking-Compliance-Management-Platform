@@ -47,15 +47,20 @@ def create_renewal(
         )
 
     # 2. Verify assigned user exists if provided
-    if renewal_in.assigned_to is not None:
+    assigned_user_id = renewal_in.assigned_to
+    if assigned_user_id is not None and assigned_user_id <= 0:
+        assigned_user_id = None
+
+    if assigned_user_id is not None:
         assigned_user = db.query(User).filter(
-            (User.user_id == renewal_in.assigned_to) | (User.id == renewal_in.assigned_to)
+            (User.user_id == assigned_user_id) | (User.id == assigned_user_id)
         ).first()
         if not assigned_user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Assigned user with ID {renewal_in.assigned_to} not found."
+                detail=f"Assigned user with ID {assigned_user_id} not found."
             )
+
 
     # 3. Date range validation
     prev_expiry = renewal_in.previous_expiry_date or contract.end_date
@@ -82,8 +87,9 @@ def create_renewal(
         previous_expiry_date=prev_expiry,
         new_expiry_date=new_expiry,
         status=init_status,
-        assigned_to=renewal_in.assigned_to,
+        assigned_to=assigned_user_id,
         notes=renewal_in.notes.strip() if renewal_in.notes else None
+
     )
 
     db.add(new_renewal)

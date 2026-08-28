@@ -27,13 +27,14 @@ class RenewalBase(BaseModel):
 
 
 class RenewalCreate(BaseModel):
-    contract_id: int
+    contract_id: int = Field(1, description="ID of associated contract")
     renewal_date: Optional[date] = None
     previous_expiry_date: Optional[date] = None
     new_expiry_date: Optional[date] = None
-    assigned_to: Optional[int] = None
+    assigned_to: Optional[int] = Field(None, description="Assigned user ID")
     notes: Optional[str] = None
     status: Optional[str] = "Upcoming"
+
 
 
 class RenewalUpdate(BaseModel):
