@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.database.database import test_database_connection
-
+from app.routers.compliance import router as compliance_router
 from app.routers.users import router as user_router
 from app.routers.auth import router as auth_router
 from app.routers.contracts import router as contract_router
@@ -25,6 +25,7 @@ app.include_router(user_router)
 app.include_router(contract_router)
 app.include_router(obligation_router)
 app.include_router(renewal_router)
+app.include_router(compliance_router)
 
 @app.get("/")
 def root():
