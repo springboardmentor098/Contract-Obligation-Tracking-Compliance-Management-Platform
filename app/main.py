@@ -1,17 +1,18 @@
 from fastapi import FastAPI
-from app.routers import auth, contracts, users
+from app.routers import auth, contracts, obligations, users
 from app.database.database import test_database_connection
 
 
 app = FastAPI(
-    title="ContractIQ API - Role-Based Access Control (RBAC)",
-    description="ContractIQ Compliance & Contract Management Platform with RBAC authorization",
+    title="ContractIQ API - Contract & Obligation Management Platform",
+    description="ContractIQ Compliance & Contract Management Platform with RBAC authorization and Obligation Tracking",
     version="1.0.0"
 )
 
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(contracts.router)
+app.include_router(obligations.router)
 
 
 
