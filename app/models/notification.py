@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
+# app/models/notification.py
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    DateTime,
+    ForeignKey,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -8,52 +17,138 @@ from app.database.database import Base
 class Notification(Base):
     __tablename__ = "notifications"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # =========================================================
+    # PRIMARY KEY
+    # =========================================================
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    # =========================================================
+    # USER
+    # =========================================================
 
     user_id = Column(
         Integer,
         ForeignKey("users.id"),
-        nullable=False
+        nullable=False,
     )
+
+    # =========================================================
+    # CONTRACT
+    # =========================================================
 
     contract_id = Column(
         Integer,
         ForeignKey("contracts.id"),
-        nullable=True
+        nullable=True,
     )
+
+    # =========================================================
+    # OBLIGATION
+    # =========================================================
 
     obligation_id = Column(
         Integer,
         ForeignKey("obligations.id"),
-        nullable=True
+        nullable=True,
     )
 
-    notification_type = Column(String(100), nullable=False)
+    # =========================================================
+    # NOTIFICATION INFORMATION
+    # =========================================================
 
-    message = Column(Text, nullable=False)
+    notification_type = Column(
+        String(100),
+        nullable=False,
+    )
 
-    channel = Column(String(50), nullable=False)
+    title = Column(
+        String(255),
+        nullable=False,
+    )
 
-    is_read = Column(Boolean, nullable=False, default=False)
+    message = Column(
+        Text,
+        nullable=False,
+    )
 
-    sent_at = Column(DateTime, nullable=True)
+    # =========================================================
+    # NOTIFICATION STATUS
+    # =========================================================
 
-    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    status = Column(
+        String(20),
+        nullable=False,
+        default="Unread",
+    )
 
-    # Relationship with User
+    # =========================================================
+    # SCHEDULING / DELIVERY
+    # =========================================================
+
+    scheduled_at = Column(
+        DateTime,
+        nullable=True,
+    )
+
+    sent_at = Column(
+        DateTime,
+        nullable=True,
+    )
+
+    # =========================================================
+    # READ INFORMATION
+    # =========================================================
+
+    read_at = Column(
+        DateTime,
+        nullable=True,
+    )
+
+    # =========================================================
+    # TIMESTAMPS
+    # =========================================================
+
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    # =========================================================
+    # USER RELATIONSHIP
+    # =========================================================
+
     user = relationship(
         "User",
-        back_populates="notifications"
+        back_populates="notifications",
     )
 
-    # Relationship with Contract
+    # =========================================================
+    # CONTRACT RELATIONSHIP
+    # =========================================================
+
     contract = relationship(
         "Contract",
-        back_populates="notifications"
+        back_populates="notifications",
     )
 
-    # Relationship with Obligation
+    # =========================================================
+    # OBLIGATION RELATIONSHIP
+    # =========================================================
+
     obligation = relationship(
         "Obligation",
-        back_populates="notifications"
+        back_populates="notifications",
     )
