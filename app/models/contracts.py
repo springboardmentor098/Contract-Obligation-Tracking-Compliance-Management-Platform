@@ -92,3 +92,8 @@ class Contract(Base):
         back_populates="contract",
         cascade="all, delete-orphan"
     )
+    renewals = relationship(
+    "Renewal",
+    back_populates="contract",
+    cascade="all, delete-orphan"
+)

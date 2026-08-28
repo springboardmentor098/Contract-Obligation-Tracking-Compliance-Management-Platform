@@ -14,7 +14,7 @@ from app.models.audit_logs import AuditLog
 from app.models.contract_versions import ContractVersion
 from app.models.notifications import Notification
 from app.models.obligations import Obligation
-from app.models.renewals import Renewal
+from app.models.renewal import Renewal
 from app.models.reports import Report
 
 # this is the Alembic Config object, which provides

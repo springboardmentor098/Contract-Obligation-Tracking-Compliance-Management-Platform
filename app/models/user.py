@@ -63,3 +63,8 @@ class User(Base):
         foreign_keys="Obligation.assigned_to",
         back_populates="assigned_user"
     )
+    assigned_renewals = relationship(
+    "Renewal",
+    foreign_keys="Renewal.assigned_to",
+    back_populates="assigned_user"
+)

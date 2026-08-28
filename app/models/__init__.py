@@ -4,8 +4,8 @@ from .user import User
 from .contracts import Contract
 from .contract_versions import ContractVersion
 from .obligations import Obligation
-from .renewals import Renewal
 from .notifications import Notification
 from .reports import Report
 from .audit_logs import AuditLog
 from .activities import Activity
+from .renewal import Renewal
