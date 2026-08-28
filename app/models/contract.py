@@ -17,6 +17,9 @@ class Contract(Base):
     end_date = Column(Date, nullable=True)
     status = Column(String(50), nullable=False, default="Draft")
     created_by = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    assigned_to = Column(Integer, ForeignKey("users.user_id"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    approved_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -24,4 +27,6 @@ class Contract(Base):
     contract_id = synonym("id")
 
     creator = relationship("User", foreign_keys=[created_by])
+    assignee = relationship("User", foreign_keys=[assigned_to])
+    obligations = relationship("Obligation", back_populates="contract", cascade="all, delete-orphan")
 

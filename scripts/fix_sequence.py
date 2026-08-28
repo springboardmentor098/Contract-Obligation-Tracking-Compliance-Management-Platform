@@ -14,8 +14,18 @@ def fix_sequences():
                 COALESCE((SELECT MAX(id) FROM contracts), 0) + 1,
                 false
             );
+            SELECT setval(
+                pg_get_serial_sequence('obligations', 'obligation_id'),
+                COALESCE((SELECT MAX(obligation_id) FROM obligations), 0) + 1,
+                false
+            );
+            SELECT setval(
+                pg_get_serial_sequence('users', 'user_id'),
+                COALESCE((SELECT MAX(user_id) FROM users), 0) + 1,
+                false
+            );
         """))
-    print("PostgreSQL contracts sequence reset successfully!")
+    print("PostgreSQL sequences reset successfully!")
 
 if __name__ == "__main__":
     fix_sequences()
