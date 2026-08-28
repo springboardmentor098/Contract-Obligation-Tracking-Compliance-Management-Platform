@@ -11,10 +11,12 @@ VALID_RENEWAL_STATUSES = ["Upcoming", "In Progress", "Renewed", "Expired", "Canc
 VALID_STATUS_TRANSITIONS = {
     "Upcoming": ["In Progress", "Expired", "Cancelled"],
     "In Progress": ["Renewed", "Cancelled"],
-    "Renewed": [],
-    "Expired": [],
-    "Cancelled": [],
+    "Renewed": ["In Progress", "Upcoming", "Renewed", "Cancelled", "Expired"],
+    "Expired": ["In Progress", "Upcoming", "Expired", "Renewed", "Cancelled"],
+    "Cancelled": ["In Progress", "Upcoming", "Cancelled", "Renewed", "Expired"],
 }
+
+
 
 
 class RenewalBase(BaseModel):

@@ -333,7 +333,12 @@ def update_renewal_status(
         )
 
     current_status = renewal.status
+    if current_status == new_status:
+        return renewal
+
     allowed_transitions = VALID_STATUS_TRANSITIONS.get(current_status, [])
+
+
 
     if new_status not in allowed_transitions:
         raise HTTPException(
