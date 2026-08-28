@@ -7,3 +7,4 @@ from app.models.notification import Notification
 from app.models.report import Report
 from app.models.audit_log import AuditLog
 from app.models.activity import Activity
+from app.models.contract_compliance import ContractCompliance

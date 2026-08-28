@@ -12,6 +12,7 @@ from app.routers.notification import router as notifications_router
 from app.routers.report import router as reports_router
 from app.routers.audit_log import router as audit_logs_router
 from app.routers.activity import router as activities_router
+from app.routers.compliance import router as compliance_router
 
 
 app = FastAPI(
@@ -21,15 +22,26 @@ app = FastAPI(
 
 
 app.include_router(users_router)
+
 app.include_router(auth_router)
+
 app.include_router(contracts_router)
+
 app.include_router(contract_versions_router)
+
 app.include_router(obligations_router)
+
 app.include_router(renewals_router)
+
 app.include_router(notifications_router)
+
 app.include_router(reports_router)
+
 app.include_router(audit_logs_router)
+
 app.include_router(activities_router)
+
+app.include_router(compliance_router)
 
 
 @app.on_event("startup")

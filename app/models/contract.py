@@ -64,16 +64,6 @@ class Contract(Base):
 
     # =========================================================
     # CONTRACT WORKFLOW STATUS
-    #
-    # Draft
-    #   ↓
-    # Under Review
-    #   ↓
-    # Approved
-    #   ↓
-    # Active
-    #   ↓
-    # Expired / Terminated
     # =========================================================
 
     status = Column(
@@ -94,8 +84,6 @@ class Contract(Base):
 
     # =========================================================
     # CONTRACT ASSIGNMENT
-    #
-    # A user can be assigned to multiple contracts.
     # =========================================================
 
     assigned_to = Column(
@@ -139,14 +127,12 @@ class Contract(Base):
     # USER RELATIONSHIPS
     # =========================================================
 
-    # User who created the contract
     creator = relationship(
         "User",
         foreign_keys=[created_by],
         back_populates="created_contracts"
     )
 
-    # User responsible for the contract
     assigned_user = relationship(
         "User",
         foreign_keys=[assigned_to],
@@ -183,4 +169,14 @@ class Contract(Base):
     activities = relationship(
         "Activity",
         back_populates="contract"
+    )
+
+    # =========================================================
+    # SPRINT 11 - COMPLIANCE RELATIONSHIP
+    # =========================================================
+
+    compliance_records = relationship(
+        "ContractCompliance",
+        back_populates="contract",
+        cascade="all, delete-orphan"
     )

@@ -98,15 +98,16 @@ class User(Base):
         back_populates="assignee"
     )
 
-    # =========================================================
-    # RENEWAL RELATIONSHIP
-    # =========================================================
+   # =========================================================
+   # =========================================================
+   # RENEWAL RELATIONSHIP
+   # =========================================================
 
-    approved_renewals = relationship(
-        "Renewal",
-        back_populates="approver"
+    assigned_renewals = relationship(
+       "Renewal",
+        foreign_keys="Renewal.assigned_to",
+        back_populates="assigned_user"
     )
-
     # =========================================================
     # NOTIFICATION RELATIONSHIP
     # =========================================================
