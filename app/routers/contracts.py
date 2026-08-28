@@ -17,6 +17,12 @@ from app.schemas.contract import (
     ContractUpdate,
 )
 from app.core.dependencies import get_current_user
+from app.services.compliance_service import calculate_contract_compliance
+from app.schemas.compliance import ComplianceResponse
+from app.services.compliance_service import (
+    calculate_contract_compliance,
+    save_compliance_history
+)
 
 
 router = APIRouter(
@@ -431,3 +437,42 @@ def activate_contract(
     db.refresh(contract)
 
     return contract
+@router.get(
+    "/{contract_id}/compliance",
+    response_model=ComplianceResponse
+)
+def get_contract_compliance(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    contract = (
+        db.query(Contract)
+        .filter(Contract.id == contract_id)
+        .first()
+    )
+
+    if not contract:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Contract not found"
+        )
+
+    obligations = (
+        db.query(Obligation)
+        .filter(Obligation.contract_id == contract_id)
+        .all()
+    )
+
+    compliance_data = calculate_contract_compliance(obligations)
+
+    save_compliance_history(
+        db=db,
+        contract_id=contract.id,
+        compliance_data=compliance_data
+    )
+
+    return {
+        "contract_id": contract.id,
+        **compliance_data
+    }

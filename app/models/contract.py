@@ -102,3 +102,7 @@ class Contract(Base):
         "Report",
         back_populates="contract"
     )
+    compliance_records = relationship(
+    "ComplianceRecord",
+    back_populates="contract"
+)

@@ -6,6 +6,7 @@ from app.routers.auth import router as auth_router
 from app.routers.contracts import router as contracts_router
 from app.routers.obligations import router as obligations_router
 from app.routers import renewals
+from app.routers import compliance
 
 app = FastAPI(
     title="ContractIQ API",
@@ -18,6 +19,7 @@ app.include_router(contracts_router)
 app.include_router(obligations_router)
 app.include_router(renewals.router)
 app.include_router(renewals.contract_router)
+app.include_router(compliance.router)
 
 @app.on_event("startup")
 def startup_event():
