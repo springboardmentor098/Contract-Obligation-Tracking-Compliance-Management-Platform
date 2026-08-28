@@ -4,6 +4,7 @@ from app.models.contract import Contract
 from app.models.contract_version import ContractVersion
 from app.models.obligation import Obligation
 from app.models.renewal import Renewal
+from app.models.compliance import ComplianceRecord
 from app.models.notification import Notification
 from app.models.report import Report
 from app.models.audit_log import AuditLog
@@ -16,8 +17,10 @@ __all__ = [
     "ContractVersion",
     "Obligation",
     "Renewal",
+    "ComplianceRecord",
     "Notification",
     "Report",
     "AuditLog",
     "Activity",
 ]
+
