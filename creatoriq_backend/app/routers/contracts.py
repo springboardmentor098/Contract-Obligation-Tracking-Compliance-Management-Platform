@@ -7,6 +7,8 @@ from app.database.database import get_db
 from app.models.contract import Contract
 from app.models.obligation import Obligation
 from app.models.user import User
+from app.models.renewal import Renewal
+from app.schemas.renewal import RenewalResponse
 
 from app.schemas.contract import (
     ContractCreate,
@@ -505,3 +507,30 @@ def get_contract_by_id(
         )
 
     return contract
+@router.get(
+    "/{contract_id}/renewals",
+    response_model=list[RenewalResponse],
+    status_code=status.HTTP_200_OK
+)
+def get_contract_renewals(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    contract = (
+        db.query(Contract)
+        .filter(Contract.id == contract_id)
+        .first()
+    )
+
+    if not contract:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Contract with ID {contract_id} not found"
+        )
+
+    return (
+        db.query(Renewal)
+        .filter(Renewal.contract_id == contract_id)
+        .all()
+    )
