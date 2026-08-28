@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.contract import Contract
+from app.models.obligation import Obligation
 from app.models.user import User
 
 from app.schemas.contract import (
@@ -15,12 +16,11 @@ from app.schemas.contract import (
     ContractResponse,
 )
 
+from app.schemas.permissions import Permission
 from app.core.dependencies import (
     get_current_user,
     require_permission,
 )
-
-from app.schemas.permissions import Permission
 
 
 router = APIRouter(
@@ -36,14 +36,16 @@ router = APIRouter(
 @router.post(
     "",
     response_model=ContractResponse,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 def create_contract(
     contract_data: ContractCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(
+        require_permission(Permission.MANAGE_CONTRACTS)
+    ),
 ):
-    # Check if contract number already exists
+    # Check duplicate contract number
     existing_contract = (
         db.query(Contract)
         .filter(
@@ -55,7 +57,7 @@ def create_contract(
     if existing_contract:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Contract number already exists"
+            detail="Contract number already exists",
         )
 
     contract = Contract(
@@ -65,11 +67,13 @@ def create_contract(
         description=contract_data.description,
         start_date=contract_data.start_date,
         end_date=contract_data.end_date,
+
+        # New contracts always start as Draft
         status="Draft",
 
-        # Automatically get user information from JWT
+        # Authenticated user
         created_by=current_user.id,
-        assigned_to=current_user.id
+        assigned_to=current_user.id,
     )
 
     db.add(contract)
@@ -86,52 +90,23 @@ def create_contract(
 @router.get(
     "",
     response_model=list[ContractResponse],
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def get_contracts(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     return db.query(Contract).all()
 
 
 # ============================================================
-# 3. GET - Get Contract by ID
-# ============================================================
-
-@router.get(
-    "/{contract_id}",
-    response_model=ContractResponse,
-    status_code=status.HTTP_200_OK
-)
-def get_contract_by_id(
-    contract_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    contract = (
-        db.query(Contract)
-        .filter(Contract.id == contract_id)
-        .first()
-    )
-
-    if not contract:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Contract with ID {contract_id} not found"
-        )
-
-    return contract
-
-
-# ============================================================
-# 4. PUT - Update Contract
+# 3. PUT - Update Contract
 # ============================================================
 
 @router.put(
     "/{contract_id}",
     response_model=ContractResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def update_contract(
     contract_id: int,
@@ -139,7 +114,7 @@ def update_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_permission(Permission.MANAGE_CONTRACTS)
-    )
+    ),
 ):
     contract = (
         db.query(Contract)
@@ -150,15 +125,24 @@ def update_contract(
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Contract with ID {contract_id} not found"
+            detail=f"Contract with ID {contract_id} not found",
         )
 
-    update_data = contract_data.model_dump(
-        exclude_unset=True
-    )
+    # Update only fields supplied by the user
+    if contract_data.title is not None:
+        contract.title = contract_data.title
 
-    for field, value in update_data.items():
-        setattr(contract, field, value)
+    if contract_data.category is not None:
+        contract.category = contract_data.category
+
+    if contract_data.description is not None:
+        contract.description = contract_data.description
+
+    if contract_data.start_date is not None:
+        contract.start_date = contract_data.start_date
+
+    if contract_data.end_date is not None:
+        contract.end_date = contract_data.end_date
 
     contract.updated_at = datetime.utcnow()
 
@@ -169,13 +153,50 @@ def update_contract(
 
 
 # ============================================================
-# 5. PATCH - Update Contract Status
+# 4. GET - Get Contract's Obligations
+# ============================================================
+
+@router.get(
+    "/{contract_id}/obligations",
+    status_code=status.HTTP_200_OK,
+)
+def get_contract_obligations(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Check whether contract exists
+    contract = (
+        db.query(Contract)
+        .filter(Contract.id == contract_id)
+        .first()
+    )
+
+    if not contract:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Contract with ID {contract_id} not found",
+        )
+
+    obligations = (
+        db.query(Obligation)
+        .filter(
+            Obligation.contract_id == contract_id
+        )
+        .all()
+    )
+
+    return obligations
+
+
+# ============================================================
+# 5. PATCH - Change Contract Status
 # ============================================================
 
 @router.patch(
     "/{contract_id}/status",
     response_model=ContractResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def update_contract_status(
     contract_id: int,
@@ -183,7 +204,7 @@ def update_contract_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_permission(Permission.MANAGE_CONTRACTS)
-    )
+    ),
 ):
     contract = (
         db.query(Contract)
@@ -194,55 +215,44 @@ def update_contract_status(
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Contract with ID {contract_id} not found"
+            detail=f"Contract with ID {contract_id} not found",
         )
-
-    allowed_statuses = {
-        "Draft",
-        "Under Review",
-        "Approved",
-        "Active",
-        "Expired",
-        "Terminated"
-    }
-
-    if status_data.status not in allowed_statuses:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid contract status"
-        )
-
-    allowed_transitions = {
-        "Draft": {"Under Review"},
-        "Under Review": {"Approved"},
-        "Approved": {"Active"},
-        "Active": {"Expired", "Terminated"},
-        "Expired": set(),
-        "Terminated": set()
-    }
 
     current_status = contract.status
     new_status = status_data.status
 
-    if new_status not in allowed_transitions.get(
+    # Valid contract workflow
+    valid_transitions = {
+        "Draft": ["Under Review"],
+        "Under Review": ["Approved"],
+        "Approved": ["Active"],
+        "Active": ["Expired", "Terminated"],
+        "Expired": [],
+        "Terminated": [],
+    }
+
+    allowed_statuses = valid_transitions.get(
         current_status,
-        set()
-    ):
+        []
+    )
+
+    if new_status not in allowed_statuses:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
                 f"Invalid status transition: "
                 f"{current_status} -> {new_status}"
-            )
+            ),
         )
 
     contract.status = new_status
     contract.updated_at = datetime.utcnow()
 
+    # Workflow timestamps
     if new_status == "Under Review":
         contract.reviewed_at = datetime.utcnow()
 
-    if new_status == "Approved":
+    elif new_status == "Approved":
         contract.approved_at = datetime.utcnow()
 
     db.commit()
@@ -258,14 +268,14 @@ def update_contract_status(
 @router.post(
     "/{contract_id}/submit-review",
     response_model=ContractResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def submit_contract_for_review(
     contract_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_permission(Permission.MANAGE_CONTRACTS)
-    )
+    ),
 ):
     contract = (
         db.query(Contract)
@@ -276,16 +286,17 @@ def submit_contract_for_review(
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Contract with ID {contract_id} not found"
+            detail=f"Contract with ID {contract_id} not found",
         )
 
+    # Only Draft contracts can be submitted
     if contract.status != "Draft":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                f"Contract cannot be submitted for review "
-                f"from status '{contract.status}'"
-            )
+                "Only Draft contracts can be "
+                "submitted for review"
+            ),
         )
 
     contract.status = "Under Review"
@@ -305,15 +316,28 @@ def submit_contract_for_review(
 @router.post(
     "/{contract_id}/approve",
     response_model=ContractResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def approve_contract(
     contract_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_permission(Permission.MANAGE_CONTRACTS)
-    )
+    current_user: User = Depends(get_current_user),
 ):
+    # Only authorized roles can approve
+    allowed_approval_roles = {
+        "Administrator",
+        "Legal Manager",
+    }
+
+    if current_user.role not in allowed_approval_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "Only Administrator or Legal Manager "
+                "can approve contracts"
+            ),
+        )
+
     contract = (
         db.query(Contract)
         .filter(Contract.id == contract_id)
@@ -323,16 +347,17 @@ def approve_contract(
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Contract with ID {contract_id} not found"
+            detail=f"Contract with ID {contract_id} not found",
         )
 
+    # Only Under Review contracts can be approved
     if contract.status != "Under Review":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                f"Contract cannot be approved "
-                f"from status '{contract.status}'"
-            )
+                "Only contracts in Under Review status "
+                "can be approved"
+            ),
         )
 
     contract.status = "Approved"
@@ -352,14 +377,14 @@ def approve_contract(
 @router.post(
     "/{contract_id}/activate",
     response_model=ContractResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def activate_contract(
     contract_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_permission(Permission.MANAGE_CONTRACTS)
-    )
+    ),
 ):
     contract = (
         db.query(Contract)
@@ -370,16 +395,16 @@ def activate_contract(
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Contract with ID {contract_id} not found"
+            detail=f"Contract with ID {contract_id} not found",
         )
 
+    # Only Approved contracts can be activated
     if contract.status != "Approved":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                f"Contract cannot be activated "
-                f"from status '{contract.status}'"
-            )
+                "Only Approved contracts can be activated"
+            ),
         )
 
     contract.status = "Active"
@@ -398,7 +423,7 @@ def activate_contract(
 @router.patch(
     "/{contract_id}/assignment",
     response_model=ContractResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def assign_contract(
     contract_id: int,
@@ -406,7 +431,7 @@ def assign_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_permission(Permission.MANAGE_CONTRACTS)
-    )
+    ),
 ):
     contract = (
         db.query(Contract)
@@ -417,14 +442,14 @@ def assign_contract(
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Contract with ID {contract_id} not found"
+            detail=f"Contract with ID {contract_id} not found",
         )
 
+    # Check assigned user
     assigned_user = (
         db.query(User)
         .filter(
-            User.id == assignment_data.assigned_to,
-            User.is_active == True
+            User.id == assignment_data.assigned_to
         )
         .first()
     )
@@ -432,13 +457,51 @@ def assign_contract(
     if not assigned_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Assigned user not found or inactive"
+            detail=(
+                f"User with ID "
+                f"{assignment_data.assigned_to} not found"
+            ),
         )
 
-    contract.assigned_to = assigned_user.id
+    if not assigned_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot assign contract to an inactive user",
+        )
+
+    contract.assigned_to = assignment_data.assigned_to
     contract.updated_at = datetime.utcnow()
 
     db.commit()
     db.refresh(contract)
+
+    return contract
+
+
+# ============================================================
+# 10. GET - Get Contract By ID
+# ============================================================
+
+@router.get(
+    "/{contract_id}",
+    response_model=ContractResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_contract_by_id(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    contract = (
+        db.query(Contract)
+        .filter(Contract.id == contract_id)
+        .first()
+    )
+
+    if not contract:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Contract with ID {contract_id} not found",
+        )
 
     return contract
