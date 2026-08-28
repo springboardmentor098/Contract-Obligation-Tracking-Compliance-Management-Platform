@@ -1,10 +1,13 @@
 import asyncio
 import time
+import pytest
 import httpx
 from app.main import app
 
 
+@pytest.mark.asyncio
 async def test_sprint8_workflow():
+
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
         print("==================================================")
         print("  SPRINT 8: CONTRACT WORKFLOW TEST SUITE          ")

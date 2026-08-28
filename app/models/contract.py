@@ -29,4 +29,6 @@ class Contract(Base):
     creator = relationship("User", foreign_keys=[created_by])
     assignee = relationship("User", foreign_keys=[assigned_to])
     obligations = relationship("Obligation", back_populates="contract", cascade="all, delete-orphan")
+    renewals = relationship("Renewal", back_populates="contract", cascade="all, delete-orphan")
+
 

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import auth, contracts, obligations, users
+from app.routers import auth, contracts, obligations, renewals, users
 from app.database.database import test_database_connection
 
 
@@ -13,6 +13,8 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(contracts.router)
 app.include_router(obligations.router)
+app.include_router(renewals.router)
+
 
 
 

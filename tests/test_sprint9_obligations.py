@@ -1,11 +1,14 @@
 import asyncio
 import time
 from datetime import date, timedelta
+import pytest
 import httpx
 from app.main import app
 
 
+@pytest.mark.asyncio
 async def test_sprint9_obligations():
+
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
         print("==================================================")
         print("  SPRINT 9: OBLIGATION TRACKING MODULE TEST SUITE ")
