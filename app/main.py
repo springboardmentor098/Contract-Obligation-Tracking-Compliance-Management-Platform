@@ -7,6 +7,7 @@ from app.routers.auth import router as auth_router
 from app.routers.contracts import router as contracts_router
 from app.routers.obligations import router as obligations_router
 from app.routers.renewals import router as renewals_router
+from app.routers.compliance import router as compliance_router
 
 
 app = FastAPI(
@@ -20,7 +21,7 @@ app.include_router(auth_router)
 app.include_router(contracts_router)
 app.include_router(obligations_router)
 app.include_router(renewals_router)
-
+app.include_router(compliance_router)
 
 @app.on_event("startup")
 def startup_event():
