@@ -260,15 +260,19 @@ def update_renewal(
         )
 
     if renewal_in.assigned_to is not None:
-        assigned_user = db.query(User).filter(
-            (User.user_id == renewal_in.assigned_to) | (User.id == renewal_in.assigned_to)
-        ).first()
-        if not assigned_user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Assigned user with ID {renewal_in.assigned_to} not found."
-            )
-        renewal.assigned_to = renewal_in.assigned_to
+        if renewal_in.assigned_to <= 0:
+            renewal.assigned_to = None
+        else:
+            assigned_user = db.query(User).filter(
+                (User.user_id == renewal_in.assigned_to) | (User.id == renewal_in.assigned_to)
+            ).first()
+            if not assigned_user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Assigned user with ID {renewal_in.assigned_to} not found."
+                )
+            renewal.assigned_to = renewal_in.assigned_to
+
 
     if renewal_in.renewal_date is not None:
         renewal.renewal_date = renewal_in.renewal_date

@@ -46,7 +46,8 @@ class RenewalUpdate(BaseModel):
 
 
 class RenewalStatusUpdate(BaseModel):
-    status: str = Field(..., description="New renewal status")
+    status: str = Field("In Progress", description="New renewal status")
+
 
 
 class RenewalComplete(BaseModel):
