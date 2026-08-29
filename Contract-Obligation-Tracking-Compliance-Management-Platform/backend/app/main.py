@@ -17,6 +17,7 @@ from app.api.obligations import (
 # Sprint 10 - Renewal Management
 # renewals.py contains a single router
 from app.api.renewals import router as renewal_router
+from app.api.compliance import router as compliance_router
 
 
 # ============================================================
@@ -73,4 +74,5 @@ app.include_router(contract_obligations_router)
 # ============================================================
 
 app.include_router(renewal_router)
+app.include_router(compliance_router)
 
