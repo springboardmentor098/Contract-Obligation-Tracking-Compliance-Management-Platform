@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from backend.app.api import user
 from backend.app.api import contracts
 from backend.app.api import obligations
+from backend.app.api import renewals
 
 
 app = FastAPI(
@@ -26,10 +27,14 @@ app.include_router(
 )
 
 
-# Obligations
 app.include_router(
     obligations.router,
+    prefix="/obligations",
     tags=["Obligations"]
+)
+
+app.include_router(
+    renewals.router
 )
 
 @app.get("/")
