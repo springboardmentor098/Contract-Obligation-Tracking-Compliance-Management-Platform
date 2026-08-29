@@ -23,13 +23,13 @@ class Renewal(Base):
         nullable=False,
     )
 
-    initiated_by: Mapped[uuid.UUID] = mapped_column(
+    assigned_to: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
         nullable=False,
     )
 
-    previous_end_date: Mapped[date | None] = mapped_column(
+    previous_expiry_date: Mapped[date | None] = mapped_column(
         Date,
         nullable=True,
     )
@@ -39,14 +39,15 @@ class Renewal(Base):
         nullable=True,
     )
 
-    new_end_date: Mapped[date | None] = mapped_column(
+    new_expiry_date: Mapped[date | None] = mapped_column(
         Date,
         nullable=True,
     )
 
-    status: Mapped[str | None] = mapped_column(
+    status: Mapped[str] = mapped_column(
         String(50),
-        nullable=True,
+        nullable=False,
+        default="Upcoming",
     )
 
     notes: Mapped[str | None] = mapped_column(
@@ -72,7 +73,8 @@ class Renewal(Base):
         back_populates="renewals",
     )
 
-    initiator = relationship(
+    assignee = relationship(
         "User",
-        back_populates="renewals",
+        back_populates="assigned_renewals",
+        foreign_keys=[assigned_to],
     )

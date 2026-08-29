@@ -90,9 +90,11 @@ class User(Base):
         back_populates="assignee",
     )
 
-    renewals = relationship(
+    # Renewals assigned to this user
+    assigned_renewals = relationship(
         "Renewal",
-        back_populates="initiator",
+        foreign_keys="Renewal.assigned_to",
+        back_populates="assignee",
     )
 
     notifications = relationship(
