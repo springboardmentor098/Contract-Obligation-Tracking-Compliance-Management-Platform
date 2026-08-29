@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI
 
 from app import models
@@ -10,8 +11,12 @@ from app.api.contracts import router as contract_router
 
 from app.api.obligations import (
     router as obligation_router,
-    contract_obligations_router
+    contract_obligations_router,
 )
+
+# Sprint 10 - Renewal Management
+# renewals.py contains a single router
+from app.api.renewals import router as renewal_router
 
 
 # ============================================================
@@ -20,7 +25,7 @@ from app.api.obligations import (
 
 app = FastAPI(
     title="ContractIQ API",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 
@@ -48,12 +53,24 @@ def root():
 # Include Routers
 # ============================================================
 
+# Authentication
 app.include_router(auth_router)
 
+# Users
 app.include_router(user_router)
 
+# Contracts
 app.include_router(contract_router)
 
+# Obligations
 app.include_router(obligation_router)
 
+# Contract → Obligations
 app.include_router(contract_obligations_router)
+
+# ============================================================
+# Sprint 10 - Renewals
+# ============================================================
+
+app.include_router(renewal_router)
+
