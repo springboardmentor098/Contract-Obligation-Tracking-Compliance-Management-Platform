@@ -1,0 +1,39 @@
+from datetime import date, datetime
+
+from pydantic import BaseModel
+
+
+class RenewalCreate(BaseModel):
+    contract_id: int
+    renewal_date: date
+    previous_expiry_date: date
+    new_expiry_date: date
+    assigned_to: int | None = None
+    notes: str | None = None
+
+
+class RenewalUpdate(BaseModel):
+    renewal_date: date | None = None
+    new_expiry_date: date | None = None
+    assigned_to: int | None = None
+    notes: str | None = None
+
+
+class RenewalStatusUpdate(BaseModel):
+    renewal_status: str
+
+
+class RenewalResponse(BaseModel):
+    id: int
+    contract_id: int
+    renewal_date: date
+    previous_expiry_date: date | None = None
+    new_expiry_date: date | None = None
+    renewal_status: str
+    assigned_to: int | None = None
+    notes: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    class Config:
+        from_attributes = True
