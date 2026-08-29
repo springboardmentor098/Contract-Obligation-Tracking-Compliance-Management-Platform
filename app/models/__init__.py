@@ -1,7 +1,5 @@
 from .user import User
 from .contracts import Contract
-from .user import User
-from .contracts import Contract
 from .contract_versions import ContractVersion
 from .obligations import Obligation
 from .notifications import Notification

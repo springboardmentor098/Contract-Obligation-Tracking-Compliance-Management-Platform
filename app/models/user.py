@@ -67,4 +67,10 @@ class User(Base):
     "Renewal",
     foreign_keys="Renewal.assigned_to",
     back_populates="assigned_user"
-)
+    )
+    notifications = relationship(
+    "Notification",
+    back_populates="user",
+    cascade="all, delete-orphan"
+    )
+  
