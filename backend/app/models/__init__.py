@@ -7,6 +7,7 @@ from app.models.notification import Notification
 from app.models.report import Report
 from app.models.audit_log import AuditLog
 from app.models.activity import Activity
+from app.models.compliance import Compliance
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "Report",
     "AuditLog",
     "Activity",
+    "Compliance",
 ]

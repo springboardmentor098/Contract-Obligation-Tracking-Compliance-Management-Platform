@@ -110,32 +110,45 @@ class Contract(Base):
         foreign_keys=[assigned_to],
     )
 
+    # Contract versions
     versions = relationship(
         "ContractVersion",
         back_populates="contract",
     )
 
+    # Contract obligations
     obligations = relationship(
         "Obligation",
         back_populates="contract",
     )
 
+    # Contract renewals
     renewals = relationship(
         "Renewal",
         back_populates="contract",
     )
 
+    # Contract notifications
     notifications = relationship(
         "Notification",
         back_populates="contract",
     )
 
+    # Contract reports
     reports = relationship(
         "Report",
         back_populates="contract",
     )
 
+    # Contract activities
     activities = relationship(
         "Activity",
         back_populates="contract",
+    )
+
+    # Sprint 11 - Compliance records
+    compliance_records = relationship(
+        "Compliance",
+        back_populates="contract",
+        cascade="all, delete-orphan",
     )
