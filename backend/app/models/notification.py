@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
 from backend.app.database import Base
@@ -7,12 +9,10 @@ from backend.app.database import Base
 class Notification(Base):
     __tablename__ = "notifications"
 
-    id = Column(Integer, primary_key=True, index=True)
-
-    contract_id = Column(
+    id = Column(
         Integer,
-        ForeignKey("contracts.id"),
-        nullable=False
+        primary_key=True,
+        index=True
     )
 
     user_id = Column(
@@ -21,11 +21,70 @@ class Notification(Base):
         nullable=False
     )
 
-    message = Column(String(500))
+    contract_id = Column(
+        Integer,
+        ForeignKey("contracts.id"),
+        nullable=True
+    )
+
+    obligation_id = Column(
+        Integer,
+        ForeignKey("obligations.id"),
+        nullable=True
+    )
+
+    notification_type = Column(
+        String(100),
+        nullable=False
+    )
+
+    title = Column(
+        String(255),
+        nullable=False
+    )
+
+    message = Column(
+        Text,
+        nullable=False
+    )
 
     status = Column(
         String(50),
-        nullable=False
+        nullable=False,
+        default="Unread"
+    )
+
+    scheduled_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    sent_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    read_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    # Relationships
+
+    user = relationship(
+        "User",
+        back_populates="notifications"
     )
 
     contract = relationship(
@@ -33,6 +92,6 @@ class Notification(Base):
         back_populates="notifications"
     )
 
-    user = relationship(
-        "User"
+    obligation = relationship(
+        "Obligation"
     )

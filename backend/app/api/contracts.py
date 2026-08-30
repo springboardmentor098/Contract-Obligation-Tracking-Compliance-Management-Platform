@@ -12,6 +12,10 @@ from backend.app.schemas.contract import (
     ContractAssignment,
     ContractOut
 )
+from backend.app.services.notification_service import (
+    create_approval_notification,
+    create_contract_approved_notification
+)
 from backend.app.core.auth import get_current_user
 
 
@@ -51,56 +55,14 @@ def submit_contract_for_review(
     # Record review time
     contract.reviewed_at = datetime.utcnow()
 
-    db.commit()
-    db.refresh(contract)
+    # Create approval notification
+    create_approval_notification(
+        db=db,
+        user_id=contract.owner_id,
+        contract_id=contract.id,
+        contract_number=contract.contract_number
+    )
 
-    return contract
-# ACTIVATE CONTRACT
-@router.post(
-    "/{contract_id}/activate",
-    response_model=ContractOut
-)
-def activate_contract(
-    contract_id: int,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
-
-    # Find contract
-    contract = db.query(Contract).filter(
-        Contract.id == contract_id
-    ).first()
-
-    if not contract:
-        raise HTTPException(
-            status_code=404,
-            detail="Contract not found"
-        )
-
-    # Only Approved contracts can be activated
-    if contract.status != "Approved":
-        raise HTTPException(
-            status_code=400,
-            detail="Only Approved contracts can be activated"
-        )
-
-    # Check authorized role
-    allowed_roles = [
-        "Administrator",
-        "Legal Manager",
-        "Contract Manager"
-    ]
-
-    if current_user.get("role") not in allowed_roles:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to activate contracts"
-        )
-
-    # Activate contract
-    contract.status = "Active"
-
-    db.commit()
     db.refresh(contract)
 
     return contract
@@ -115,7 +77,6 @@ def approve_contract(
     current_user: dict = Depends(get_current_user)
 ):
 
-    # Find contract
     contract = db.query(Contract).filter(
         Contract.id == contract_id
     ).first()
@@ -126,14 +87,12 @@ def approve_contract(
             detail="Contract not found"
         )
 
-    # Only Under Review contracts can be approved
     if contract.status != "Under Review":
         raise HTTPException(
             status_code=400,
             detail="Only contracts under review can be approved"
         )
 
-    # Check authorized role
     allowed_roles = [
         "Administrator",
         "Legal Manager"
@@ -149,7 +108,14 @@ def approve_contract(
     contract.status = "Approved"
     contract.approved_at = datetime.utcnow()
 
-    db.commit()
+    # Create approval notification
+    create_contract_approved_notification(
+        db=db,
+        user_id=contract.owner_id,
+        contract_id=contract.id,
+        contract_number=contract.contract_number
+    )
+
     db.refresh(contract)
 
     return contract

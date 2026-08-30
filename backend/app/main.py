@@ -5,6 +5,7 @@ from backend.app.api import contracts
 from backend.app.api import obligations
 from backend.app.api import renewals
 from backend.app.api import compliance
+from backend.app.api import notifications
 
 
 app = FastAPI(
@@ -40,7 +41,9 @@ app.include_router(
 app.include_router(
     compliance.router
 )
-
+app.include_router(
+    notifications.router
+)
 @app.get("/")
 def root():
     return {"message": "API is running"}

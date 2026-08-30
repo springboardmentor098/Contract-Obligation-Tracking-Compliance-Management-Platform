@@ -41,26 +41,13 @@ class User(Base):
         default="Employee"
     )
 
-    # Contracts owned/created by this user
-    owned_contracts = relationship(
-        "Contract",
-        foreign_keys="Contract.owner_id",
-        back_populates="owner"
+    # Notifications received by this user
+    notifications = relationship(
+        "Notification",
+        back_populates="user"
     )
 
-    # Contracts assigned to this user
-    assigned_contracts = relationship(
-        "Contract",
-        foreign_keys="Contract.assigned_to",
-        back_populates="assigned_user"
-    )
-        # Renewals assigned to this user
-    assigned_renewals = relationship(
-        "Renewal",
-        foreign_keys="Renewal.assigned_to",
-        back_populates="assigned_user"
-    )
-        # Contracts owned/created by this user
+    # Contracts owned/created by this user
     owned_contracts = relationship(
         "Contract",
         foreign_keys="Contract.owner_id",
