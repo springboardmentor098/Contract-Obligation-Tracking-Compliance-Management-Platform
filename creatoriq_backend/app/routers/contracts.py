@@ -24,6 +24,10 @@ from app.core.dependencies import (
     require_permission,
 )
 
+from app.services.notification_service import (
+    create_contract_approval_notification,
+)
+
 
 router = APIRouter(
     prefix="/contracts",
@@ -305,6 +309,26 @@ def submit_contract_for_review(
     contract.reviewed_at = datetime.utcnow()
     contract.updated_at = datetime.utcnow()
 
+    # --------------------------------------------------------
+    # Create approval notification for Legal Manager
+    # --------------------------------------------------------
+
+    legal_manager = (
+        db.query(User)
+        .filter(
+            User.role == "Legal Manager",
+            User.is_active == True
+        )
+        .first()
+    )
+
+    if legal_manager:
+        create_contract_approval_notification(
+            db=db,
+            contract=contract,
+            user_id=legal_manager.id,
+        )
+
     db.commit()
     db.refresh(contract)
 
@@ -365,6 +389,24 @@ def approve_contract(
     contract.status = "Approved"
     contract.approved_at = datetime.utcnow()
     contract.updated_at = datetime.utcnow()
+
+    # --------------------------------------------------------
+    # Create contract approved notification
+    # --------------------------------------------------------
+
+    if contract.assigned_to:
+        notification = create_contract_approval_notification(
+            db=db,
+            contract=contract,
+            user_id=contract.assigned_to,
+        )
+
+        notification.notification_type = "Contract Status"
+        notification.title = "Contract Approved"
+        notification.message = (
+            f"Contract {contract.contract_number} "
+            "has been approved."
+        )
 
     db.commit()
     db.refresh(contract)
@@ -507,6 +549,12 @@ def get_contract_by_id(
         )
 
     return contract
+
+
+# ============================================================
+# 11. GET - Get Contract Renewals
+# ============================================================
+
 @router.get(
     "/{contract_id}/renewals",
     response_model=list[RenewalResponse],

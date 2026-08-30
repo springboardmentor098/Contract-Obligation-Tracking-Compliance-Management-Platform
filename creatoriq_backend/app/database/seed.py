@@ -59,11 +59,15 @@ def seed_database():
 
         # Get the actual users from the database
         admin = db.scalar(
-            select(User).where(User.email == "seed.admin@contractiq.com")
+            select(User).where(
+                User.email == "seed.admin@contractiq.com"
+            )
         )
 
         manager = db.scalar(
-            select(User).where(User.email == "seed.manager@contractiq.com")
+            select(User).where(
+                User.email == "seed.manager@contractiq.com"
+            )
         )
 
         compliance = db.scalar(
@@ -111,7 +115,8 @@ def seed_database():
         for contract in contracts:
             existing_contract = db.scalar(
                 select(Contract).where(
-                    Contract.contract_number == contract.contract_number
+                    Contract.contract_number
+                    == contract.contract_number
                 )
             )
 
@@ -145,21 +150,30 @@ def seed_database():
             ContractVersion(
                 contract_id=contract1.id,
                 version_number=1,
-                document_path="/documents/contracts/CON-2026-001-v1.pdf",
+                document_path=(
+                    "/documents/contracts/"
+                    "CON-2026-001-v1.pdf"
+                ),
                 created_by=admin.id,
                 created_at=datetime(2026, 1, 10, 10, 30),
             ),
             ContractVersion(
                 contract_id=contract1.id,
                 version_number=2,
-                document_path="/documents/contracts/CON-2026-001-v2.pdf",
+                document_path=(
+                    "/documents/contracts/"
+                    "CON-2026-001-v2.pdf"
+                ),
                 created_by=manager.id,
                 created_at=datetime(2026, 2, 5, 14, 15),
             ),
             ContractVersion(
                 contract_id=contract2.id,
                 version_number=1,
-                document_path="/documents/contracts/CON-2026-002-v1.pdf",
+                document_path=(
+                    "/documents/contracts/"
+                    "CON-2026-002-v1.pdf"
+                ),
                 created_by=manager.id,
                 created_at=datetime(2026, 3, 1, 9, 45),
             ),
@@ -168,8 +182,10 @@ def seed_database():
         for version in versions:
             existing_version = db.scalar(
                 select(ContractVersion).where(
-                    ContractVersion.contract_id == version.contract_id,
-                    ContractVersion.version_number == version.version_number,
+                    ContractVersion.contract_id
+                    == version.contract_id,
+                    ContractVersion.version_number
+                    == version.version_number,
                 )
             )
 
@@ -185,7 +201,9 @@ def seed_database():
             Obligation(
                 contract_id=contract1.id,
                 title="Submit Monthly Compliance Report",
-                description="Submit the required monthly compliance report.",
+                description=(
+                    "Submit the required monthly compliance report."
+                ),
                 obligation_type="Reporting",
                 due_date=date(2026, 9, 5),
                 assigned_to=manager.id,
@@ -195,7 +213,10 @@ def seed_database():
             Obligation(
                 contract_id=contract2.id,
                 title="Review Security Requirements",
-                description="Review and confirm all cloud security requirements.",
+                description=(
+                    "Review and confirm all cloud security "
+                    "requirements."
+                ),
                 obligation_type="Security",
                 due_date=date(2026, 9, 15),
                 assigned_to=compliance.id,
@@ -205,7 +226,10 @@ def seed_database():
             Obligation(
                 contract_id=contract3.id,
                 title="Vendor Performance Review",
-                description="Complete the quarterly vendor performance review.",
+                description=(
+                    "Complete the quarterly vendor performance "
+                    "review."
+                ),
                 obligation_type="Review",
                 due_date=date(2026, 10, 1),
                 assigned_to=manager.id,
@@ -228,14 +252,20 @@ def seed_database():
                 renewal_date=date(2026, 12, 10),
                 status="Upcoming",
                 approval_status="Pending",
-                notes="Renewal review required before the contract end date.",
+                notes=(
+                    "Renewal review required before the "
+                    "contract end date."
+                ),
             ),
             Renewal(
                 contract_id=contract2.id,
                 renewal_date=date(2027, 1, 15),
                 status="Planned",
                 approval_status="Approved",
-                notes="Renewal approved subject to final documentation.",
+                notes=(
+                    "Renewal approved subject to final "
+                    "documentation."
+                ),
             ),
         ]
 
@@ -250,27 +280,57 @@ def seed_database():
         notifications = [
             Notification(
                 user_id=admin.id,
-                notification_type="Contract",
-                message="Contract CON-2026-001 requires attention.",
-                channel="Email",
-                is_read=False,
+                contract_id=contract1.id,
+                obligation_id=None,
+                notification_type="Contract Update",
+                title="Contract Requires Attention",
+                message=(
+                    "Contract CON-2026-001 requires attention."
+                ),
+                status="Unread",
+                scheduled_at=None,
+                sent_at=datetime(2026, 8, 10, 9, 0),
+                read_at=None,
                 created_at=datetime(2026, 8, 10, 9, 0),
+                updated_at=datetime(2026, 8, 10, 9, 0),
             ),
             Notification(
                 user_id=manager.id,
-                notification_type="Obligation",
-                message="An obligation is approaching its due date.",
-                channel="In-App",
-                is_read=False,
+                contract_id=contract1.id,
+                obligation_id=(
+                    db.scalar(
+                        select(Obligation.id).where(
+                            Obligation.contract_id == contract1.id
+                        )
+                    )
+                ),
+                notification_type="Obligation Due",
+                title="Obligation Due Reminder",
+                message=(
+                    "An obligation is approaching its due date."
+                ),
+                status="Unread",
+                scheduled_at=None,
+                sent_at=datetime(2026, 8, 11, 10, 30),
+                read_at=None,
                 created_at=datetime(2026, 8, 11, 10, 30),
+                updated_at=datetime(2026, 8, 11, 10, 30),
             ),
             Notification(
                 user_id=compliance.id,
-                notification_type="Renewal",
-                message="Cloud Services Agreement renewal is upcoming.",
-                channel="Email",
-                is_read=True,
+                contract_id=contract2.id,
+                obligation_id=None,
+                notification_type="Renewal Reminder",
+                title="Renewal Reminder",
+                message=(
+                    "Cloud Services Agreement renewal is upcoming."
+                ),
+                status="Read",
+                scheduled_at=None,
+                sent_at=datetime(2026, 8, 12, 11, 15),
+                read_at=datetime(2026, 8, 12, 11, 15),
                 created_at=datetime(2026, 8, 12, 11, 15),
+                updated_at=datetime(2026, 8, 12, 11, 15),
             ),
         ]
 
@@ -287,14 +347,20 @@ def seed_database():
                 report_type="Contract Summary",
                 generated_by=admin.id,
                 file_format="PDF",
-                file_path="/reports/contract-summary-2026-08.pdf",
+                file_path=(
+                    "/reports/"
+                    "contract-summary-2026-08.pdf"
+                ),
                 created_at=datetime(2026, 8, 10, 15, 0),
             ),
             Report(
                 report_type="Compliance Report",
                 generated_by=compliance.id,
                 file_format="PDF",
-                file_path="/reports/compliance-report-2026-08.pdf",
+                file_path=(
+                    "/reports/"
+                    "compliance-report-2026-08.pdf"
+                ),
                 created_at=datetime(2026, 8, 12, 16, 30),
             ),
         ]
@@ -312,21 +378,27 @@ def seed_database():
                 user_id=admin.id,
                 action="CREATE",
                 entity_type="Contract",
-                details="Created contract CON-2026-001.",
+                details=(
+                    "Created contract CON-2026-001."
+                ),
                 created_at=datetime(2026, 8, 10, 9, 30),
             ),
             AuditLog(
                 user_id=manager.id,
                 action="UPDATE",
                 entity_type="Obligation",
-                details="Updated progress for compliance obligation.",
+                details=(
+                    "Updated progress for compliance obligation."
+                ),
                 created_at=datetime(2026, 8, 11, 13, 20),
             ),
             AuditLog(
                 user_id=compliance.id,
                 action="REVIEW",
                 entity_type="Contract",
-                details="Reviewed contract CON-2026-002.",
+                details=(
+                    "Reviewed contract CON-2026-002."
+                ),
                 created_at=datetime(2026, 8, 12, 14, 10),
             ),
         ]
@@ -343,19 +415,25 @@ def seed_database():
             Activity(
                 user_id=admin.id,
                 activity_type="Contract Created",
-                description="Created a new software development contract.",
+                description=(
+                    "Created a new software development contract."
+                ),
                 created_at=datetime(2026, 8, 10, 9, 35),
             ),
             Activity(
                 user_id=manager.id,
                 activity_type="Obligation Updated",
-                description="Updated the progress of a contract obligation.",
+                description=(
+                    "Updated the progress of a contract obligation."
+                ),
                 created_at=datetime(2026, 8, 11, 13, 25),
             ),
             Activity(
                 user_id=compliance.id,
                 activity_type="Contract Reviewed",
-                description="Reviewed the cloud services contract.",
+                description=(
+                    "Reviewed the cloud services contract."
+                ),
                 created_at=datetime(2026, 8, 12, 14, 15),
             ),
         ]

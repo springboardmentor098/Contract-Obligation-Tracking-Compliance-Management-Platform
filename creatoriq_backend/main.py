@@ -10,6 +10,8 @@ from app.routers.compliance import (
     contract_compliance_router,
 )
 
+from app.routers.notifications import router as notification_router
+
 
 app = FastAPI()
 
@@ -20,3 +22,4 @@ app.include_router(obligation_router)
 app.include_router(renewal_router)
 app.include_router(compliance_router)
 app.include_router(contract_compliance_router)
+app.include_router(notification_router)

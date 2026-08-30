@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -7,7 +9,11 @@ from app.database.database import Base
 class Notification(Base):
     __tablename__ = "notifications"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
     user_id = Column(
         Integer,
@@ -15,8 +21,25 @@ class Notification(Base):
         nullable=False
     )
 
+    contract_id = Column(
+        Integer,
+        ForeignKey("contracts.id"),
+        nullable=True
+    )
+
+    obligation_id = Column(
+        Integer,
+        ForeignKey("obligations.id"),
+        nullable=True
+    )
+
     notification_type = Column(
         String(50),
+        nullable=False
+    )
+
+    title = Column(
+        String(255),
         nullable=False
     )
 
@@ -25,22 +48,51 @@ class Notification(Base):
         nullable=False
     )
 
-    channel = Column(
-        String(30),
-        nullable=False
+    status = Column(
+        String(20),
+        nullable=False,
+        default="Unread"
     )
 
-    is_read = Column(
-        Boolean,
-        nullable=False
+    scheduled_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    sent_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    read_at = Column(
+        DateTime,
+        nullable=True
     )
 
     created_at = Column(
         DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
         nullable=False
     )
 
     user = relationship(
         "User",
         back_populates="notifications"
+    )
+
+    contract = relationship(
+        "Contract",
+        foreign_keys=[contract_id]
+    )
+
+    obligation = relationship(
+        "Obligation",
+        foreign_keys=[obligation_id]
     )

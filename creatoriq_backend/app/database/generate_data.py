@@ -223,7 +223,10 @@ def generate_data():
             version = ContractVersion(
                 contract_id=contracts[i].id,
                 version_number=1,
-                document_path=f"documents/contracts/CIQ-2026-{i + 1:04d}/version-1.pdf",
+                document_path=(
+                    f"documents/contracts/"
+                    f"CIQ-2026-{i + 1:04d}/version-1.pdf"
+                ),
                 created_by=users[(i + 2) % 50].id,
                 created_at=datetime(2026, 1, 1) + timedelta(days=i)
             )
@@ -315,10 +318,14 @@ def generate_data():
                     f"Complete {obligation_titles[i].lower()} "
                     f"for contract {contracts[i].contract_number}."
                 ),
-                obligation_type=obligation_types[i % len(obligation_types)],
+                obligation_type=obligation_types[
+                    i % len(obligation_types)
+                ],
                 due_date=date(2026, 9, 1) + timedelta(days=i * 3),
                 assigned_to=users[(i + 3) % 50].id,
-                status=obligation_statuses[i % len(obligation_statuses)],
+                status=obligation_statuses[
+                    i % len(obligation_statuses)
+                ],
                 progress=[0, 25, 50, 75, 100][i % 5]
             )
 
@@ -351,11 +358,14 @@ def generate_data():
                 contract_id=contracts[i].id,
                 renewal_date=date(2027, 1, 1) + timedelta(days=i * 7),
                 status=renewal_statuses[i % len(renewal_statuses)],
-                approval_status=approval_statuses[i % len(approval_statuses)],
+                approval_status=approval_statuses[
+                    i % len(approval_statuses)
+                ],
                 notes=(
-                    f"Renewal review for {contracts[i].contract_number}. "
-                    "Required approvals and compliance checks should be completed "
-                    "before the renewal date."
+                    f"Renewal review for "
+                    f"{contracts[i].contract_number}. "
+                    "Required approvals and compliance checks "
+                    "should be completed before the renewal date."
                 )
             )
 
@@ -378,10 +388,13 @@ def generate_data():
             "System Notification",
         ]
 
-        channels = [
-            "Email",
-            "In-App",
-            "SMS",
+        notification_titles = [
+            "Contract Renewal Reminder",
+            "Obligation Due Reminder",
+            "Contract Update",
+            "Contract Approval Required",
+            "Compliance Alert",
+            "System Notification",
         ]
 
         notification_messages = [
@@ -394,13 +407,48 @@ def generate_data():
         ]
 
         for i in range(50):
+            is_read = i % 3 == 0
+
             notification = Notification(
                 user_id=users[i % 50].id,
-                notification_type=notification_types[i % len(notification_types)],
-                message=notification_messages[i % len(notification_messages)],
-                channel=channels[i % len(channels)],
-                is_read=(i % 3 == 0),
-                created_at=datetime(2026, 7, 1) + timedelta(days=i)
+
+                notification_type=notification_types[
+                    i % len(notification_types)
+                ],
+
+                title=notification_titles[
+                    i % len(notification_titles)
+                ],
+
+                message=notification_messages[
+                    i % len(notification_messages)
+                ],
+
+                status="Read" if is_read else "Unread",
+
+                scheduled_at=None,
+
+                sent_at=(
+                    datetime(2026, 7, 1)
+                    + timedelta(days=i)
+                ),
+
+                read_at=(
+                    datetime(2026, 7, 1)
+                    + timedelta(days=i)
+                    if is_read
+                    else None
+                ),
+
+                created_at=(
+                    datetime(2026, 7, 1)
+                    + timedelta(days=i)
+                ),
+
+                updated_at=(
+                    datetime(2026, 7, 1)
+                    + timedelta(days=i)
+                ),
             )
 
             db.add(notification)
@@ -431,11 +479,21 @@ def generate_data():
 
         for i in range(50):
             report = Report(
-                report_type=report_types[i % len(report_types)],
+                report_type=report_types[
+                    i % len(report_types)
+                ],
                 generated_by=users[(i + 4) % 50].id,
-                file_format=file_formats[i % len(file_formats)],
-                file_path=f"reports/2026/report-{i + 1:04d}.pdf",
-                created_at=datetime(2026, 7, 1) + timedelta(days=i)
+                file_format=file_formats[
+                    i % len(file_formats)
+                ],
+                file_path=(
+                    f"reports/2026/"
+                    f"report-{i + 1:04d}.pdf"
+                ),
+                created_at=(
+                    datetime(2026, 7, 1)
+                    + timedelta(days=i)
+                )
             )
 
             db.add(report)
@@ -473,14 +531,22 @@ def generate_data():
         for i in range(50):
             audit_log = AuditLog(
                 user_id=users[i % 50].id,
-                action=actions[i % len(actions)],
-                entity_type=entity_types[i % len(entity_types)],
+                action=actions[
+                    i % len(actions)
+                ],
+                entity_type=entity_types[
+                    i % len(entity_types)
+                ],
                 details=(
                     f"User {users[i % 50].full_name} performed "
                     f"{actions[i % len(actions)].lower()} action "
-                    f"on a {entity_types[i % len(entity_types)].lower()}."
+                    f"on a "
+                    f"{entity_types[i % len(entity_types)].lower()}."
                 ),
-                created_at=datetime(2026, 7, 1) + timedelta(hours=i * 5)
+                created_at=(
+                    datetime(2026, 7, 1)
+                    + timedelta(hours=i * 5)
+                )
             )
 
             db.add(audit_log)
@@ -518,9 +584,16 @@ def generate_data():
         for i in range(50):
             activity = Activity(
                 user_id=users[i % 50].id,
-                activity_type=activity_types[i % len(activity_types)],
-                description=activity_descriptions[i % len(activity_descriptions)],
-                created_at=datetime(2026, 7, 1) + timedelta(hours=i * 4)
+                activity_type=activity_types[
+                    i % len(activity_types)
+                ],
+                description=activity_descriptions[
+                    i % len(activity_descriptions)
+                ],
+                created_at=(
+                    datetime(2026, 7, 1)
+                    + timedelta(hours=i * 4)
+                )
             )
 
             db.add(activity)

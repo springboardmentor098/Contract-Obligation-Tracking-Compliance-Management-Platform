@@ -16,6 +16,7 @@ from app.schemas.renewal import (
 )
 from app.core.dependencies import get_current_user, require_permission
 from app.schemas.permissions import Permission
+from app.services.notification_service import create_renewal_reminder
 
 
 router = APIRouter(
@@ -163,6 +164,20 @@ def create_renewal(
     )
 
     db.add(renewal)
+
+    # Make sure renewal.id is available before
+    # creating the notification.
+    db.flush()
+
+    # --------------------------------------------------------
+    # Create automatic renewal notification
+    # --------------------------------------------------------
+
+    create_renewal_reminder(
+        db,
+        renewal
+    )
+
     db.commit()
     db.refresh(renewal)
 
@@ -229,7 +244,7 @@ def get_upcoming_renewals(
 # ============================================================
 # 4. GET - Expired Renewals
 # IMPORTANT:
-# This route must come BEFORE /{renewal_id}
+# These routes must come BEFORE /{renewal_id}
 # ============================================================
 
 @router.get(

@@ -22,6 +22,11 @@ from app.core.dependencies import (
     require_permission,
 )
 
+from app.services.notification_service import (
+    create_obligation_due_notification,
+    create_obligation_overdue_notification,
+)
+
 
 router = APIRouter(
     prefix="/obligations",
@@ -90,6 +95,19 @@ def create_obligation(
     )
 
     db.add(obligation)
+
+    # Generate obligation ID before creating notification
+    db.flush()
+
+    # --------------------------------------------------------
+    # Automatic "Obligation Due" notification
+    # --------------------------------------------------------
+
+    create_obligation_due_notification(
+        db,
+        obligation
+    )
+
     db.commit()
     db.refresh(obligation)
 
@@ -158,22 +176,26 @@ def get_obligation_dashboard(
     total_obligations = len(obligations)
 
     pending_count = sum(
-        1 for obligation in obligations
+        1
+        for obligation in obligations
         if obligation.status == "Pending"
     )
 
     in_progress_count = sum(
-        1 for obligation in obligations
+        1
+        for obligation in obligations
         if obligation.status == "In Progress"
     )
 
     completed_count = sum(
-        1 for obligation in obligations
+        1
+        for obligation in obligations
         if obligation.status == "Completed"
     )
 
     overdue_count = sum(
-        1 for obligation in obligations
+        1
+        for obligation in obligations
         if (
             obligation.due_date < today
             and obligation.status != "Completed"
@@ -379,10 +401,21 @@ def update_obligation_status(
     # Allowed workflow transitions
     allowed_transitions = {
         "Pending": {"In Progress"},
-        "In Progress": {"Completed", "Delayed"},
-        "Delayed": {"In Progress", "Completed"},
+        "In Progress": {
+            "Completed",
+            "Delayed",
+            "Overdue"
+        },
+        "Delayed": {
+            "In Progress",
+            "Completed",
+            "Overdue"
+        },
         "Completed": set(),
-        "Overdue": {"In Progress", "Completed"},
+        "Overdue": {
+            "In Progress",
+            "Completed"
+        },
     }
 
     if new_status not in allowed_transitions.get(
@@ -397,6 +430,7 @@ def update_obligation_status(
             )
         )
 
+    # Update status
     obligation.status = new_status
 
     if new_status == "In Progress":
@@ -406,8 +440,16 @@ def update_obligation_status(
         obligation.progress = 100
         obligation.completion_date = date.today()
 
-    elif new_status == "Delayed":
-        obligation.progress = 50
+    elif new_status == "Overdue":
+
+        # ----------------------------------------------------
+        # Automatic "Obligation Overdue" notification
+        # ----------------------------------------------------
+
+        create_obligation_overdue_notification(
+            db,
+            obligation
+        )
 
     db.commit()
     db.refresh(obligation)
