@@ -5,7 +5,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.models.obligation import Obligation
 from app.schemas.obligation import ObligationResponse
-
+from app.models.renewal import Renewal
+from app.schemas.renewal import RenewalResponse
 from app.database.database import get_db
 from app.models.contract import Contract
 from app.models.user import User
@@ -134,6 +135,40 @@ def get_contract_obligations(
 
     return obligations
 
+
+@router.get(
+    "/{contract_id}/renewals",
+    response_model=list[RenewalResponse]
+)
+def get_contract_renewals(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    contract = (
+        db.query(Contract)
+        .filter(
+            Contract.id == contract_id,
+            Contract.owner_id == current_user.id
+        )
+        .first()
+    )
+
+    if contract is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Contract not found"
+        )
+
+    renewals = (
+        db.query(Renewal)
+        .filter(
+            Renewal.contract_id == contract_id
+        )
+        .all()
+    )
+
+    return renewals
 
 @router.get(
     "/{contract_id}",
