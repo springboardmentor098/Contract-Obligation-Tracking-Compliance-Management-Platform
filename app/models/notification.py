@@ -3,7 +3,6 @@ from sqlalchemy import (
     Integer,
     Text,
     String,
-    Boolean,
     DateTime,
     ForeignKey
 )
@@ -31,6 +30,22 @@ class Notification(Base):
     contract_id = Column(
         Integer,
         ForeignKey("contracts.id"),
+        nullable=True
+    )
+
+    obligation_id = Column(
+        Integer,
+        ForeignKey("obligations.id"),
+        nullable=True
+    )
+
+    notification_type = Column(
+        String(100),
+        nullable=False
+    )
+
+    title = Column(
+        String(255),
         nullable=False
     )
 
@@ -39,15 +54,25 @@ class Notification(Base):
         nullable=False
     )
 
-    notification_type = Column(
-        String,
+    status = Column(
+        String(20),
+        default="Unread",
         nullable=False
     )
 
-    is_read = Column(
-        Boolean,
-        default=False,
-        nullable=False
+    scheduled_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    sent_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    read_at = Column(
+        DateTime,
+        nullable=True
     )
 
     created_at = Column(
@@ -56,6 +81,14 @@ class Notification(Base):
         nullable=False
     )
 
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+
+    # Relationships
     user = relationship(
         "User",
         back_populates="notifications"
@@ -63,5 +96,10 @@ class Notification(Base):
 
     contract = relationship(
         "Contract",
+        back_populates="notifications"
+    )
+
+    obligation = relationship(
+        "Obligation",
         back_populates="notifications"
     )

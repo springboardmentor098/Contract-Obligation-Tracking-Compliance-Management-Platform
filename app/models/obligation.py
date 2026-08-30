@@ -90,3 +90,8 @@ class Obligation(Base):
         foreign_keys=[assigned_to],
         back_populates="obligations"
     )
+
+    notifications = relationship(
+        "Notification",
+        back_populates="obligation"
+    )

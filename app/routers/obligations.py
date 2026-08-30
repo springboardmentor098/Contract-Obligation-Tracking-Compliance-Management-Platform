@@ -7,6 +7,7 @@ from app.database.database import get_db
 from app.models.obligation import Obligation
 from app.models.contract import Contract
 from app.models.user import User
+from app.services.notification_service import NotificationService
 
 from app.schemas.obligation import (
     ObligationCreate,
@@ -74,6 +75,18 @@ def create_obligation(
     db.commit()
     db.refresh(obligation)
 
+# Create obligation due alert notification
+    NotificationService.create_obligation_due_alert(
+    db=db,
+    user_id=obligation.assigned_to,
+    contract_id=obligation.contract_id,
+    obligation_id=obligation.id,
+    message=(
+        f"Obligation '{obligation.title}' is due on "
+        f"{obligation.due_date}."
+    )
+)
+
     return obligation
 
 
@@ -113,6 +126,17 @@ def get_overdue_obligations(
     for obligation in obligations:
         if obligation.status != "Overdue":
             obligation.status = "Overdue"
+
+        NotificationService.create_obligation_overdue_alert(
+            db=db,
+            user_id=obligation.assigned_to,
+            contract_id=obligation.contract_id,
+            obligation_id=obligation.id,
+            message=(
+                f"Obligation '{obligation.title}' is overdue. "
+                f"The due date was {obligation.due_date}."
+            )
+        )
 
     db.commit()
 

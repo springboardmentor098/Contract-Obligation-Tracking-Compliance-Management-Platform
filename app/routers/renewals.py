@@ -7,6 +7,7 @@ from app.database.database import get_db
 from app.models.renewal import Renewal
 from app.models.contract import Contract
 from app.models.user import User
+from app.services.notification_service import NotificationService
 
 from app.schemas.renewal import (
     RenewalCreate,
@@ -107,8 +108,19 @@ def create_renewal(
     db.commit()
     db.refresh(renewal)
 
-    return renewal
+# Create renewal reminder notification
+    if renewal.assigned_to is not None:
+        NotificationService.create_renewal_reminder(
+        db=db,
+        user_id=renewal.assigned_to,
+        contract_id=renewal.contract_id,
+        message=(
+            f"Contract {renewal.contract_id} renewal is scheduled for "
+            f"{renewal.renewal_date}."
+        )
+    )
 
+    return renewal
 
 # ============================================================
 # GET ALL RENEWALS
