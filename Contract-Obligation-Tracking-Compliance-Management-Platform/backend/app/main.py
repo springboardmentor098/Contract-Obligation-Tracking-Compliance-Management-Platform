@@ -18,6 +18,7 @@ from app.api.obligations import (
 # renewals.py contains a single router
 from app.api.renewals import router as renewal_router
 from app.api.compliance import router as compliance_router
+from app.api.notifications import router as notification_router
 
 
 # ============================================================
@@ -69,10 +70,11 @@ app.include_router(obligation_router)
 # Contract → Obligations
 app.include_router(contract_obligations_router)
 
-# ============================================================
 # Sprint 10 - Renewals
-# ============================================================
-
 app.include_router(renewal_router)
+
+# Sprint 11 - Compliance
 app.include_router(compliance_router)
 
+# Sprint 12 - Notifications
+app.include_router(notification_router)
