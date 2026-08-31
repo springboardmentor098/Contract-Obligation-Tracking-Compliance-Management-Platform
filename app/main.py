@@ -6,6 +6,7 @@ from app.routers.auth import router as auth_router
 from app.routers.contracts import router as contract_router
 from app.routers.obligations import router as obligation_router
 from app.routers.renewals import router as renewal_router
+from app.routers.compliance import router as compliance_router
 
 app = FastAPI(
     title="ContractIQ API",
@@ -34,3 +35,4 @@ app.include_router(auth_router)
 app.include_router(contract_router)
 app.include_router(obligation_router)
 app.include_router(renewal_router)
+app.include_router(compliance_router)
