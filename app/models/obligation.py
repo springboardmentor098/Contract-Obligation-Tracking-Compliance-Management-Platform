@@ -76,3 +76,8 @@ class Obligation(Base):
         "User",
         back_populates="obligations"
     )
+
+    notifications = relationship(
+    "Notification",
+    back_populates="obligation"
+    )

@@ -7,3 +7,4 @@ from .notification import Notification
 from .report import Report
 from .audit_log import AuditLog
 from .activity import Activity
+from .notification import Notification

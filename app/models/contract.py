@@ -101,3 +101,8 @@ class Contract(Base):
         "Activity",
         back_populates="contract"
     )
+
+    notifications = relationship(
+    "Notification",
+    back_populates="contract"
+    )

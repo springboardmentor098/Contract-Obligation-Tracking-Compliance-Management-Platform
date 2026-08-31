@@ -62,3 +62,8 @@ class User(Base):
     back_populates="user",
     passive_deletes=True
     )
+
+    notifications = relationship(
+    "Notification",
+    back_populates="user"
+    )
