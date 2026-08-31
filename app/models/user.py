@@ -61,6 +61,11 @@ class User(Base):
         back_populates="assignee"
     )
 
+    renewals = relationship(
+        "Renewal",
+        back_populates = 'assignee'
+    )
+
     notifications = relationship(
         "Notification",
         back_populates="user"
