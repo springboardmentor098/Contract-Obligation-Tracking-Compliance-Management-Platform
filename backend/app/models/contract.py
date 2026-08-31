@@ -131,3 +131,8 @@ class Contract(Base):
         back_populates="contract",
         cascade="all, delete-orphan"
     )
+    compliance_records = relationship(
+    "Compliance",
+    back_populates="contract",
+    cascade="all, delete-orphan"
+    )

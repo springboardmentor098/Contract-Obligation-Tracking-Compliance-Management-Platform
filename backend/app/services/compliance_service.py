@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 
 from backend.app.models.contract import Contract
 from backend.app.models.obligation import Obligation
+from backend.app.models.compliance import Compliance
 
 
 def calculate_contract_compliance(
@@ -96,3 +99,21 @@ def calculate_contract_compliance(
         "overdue_obligations": overdue,
         "risk_level": risk_level
     }
+def save_compliance_history(
+    compliance_data: dict,
+    db: Session
+):
+     compliance_record = Compliance(
+        contract_id=compliance_data["contract_id"],
+        status=compliance_data["compliance_status"],
+        compliance_score=compliance_data["compliance_score"],
+        risk_level=compliance_data["risk_level"],
+        evaluated_at=datetime.utcnow(),
+        notes="Compliance evaluation generated automatically"
+    )
+
+     db.add(compliance_record)
+     db.commit()
+     db.refresh(compliance_record)
+
+     return compliance_record 

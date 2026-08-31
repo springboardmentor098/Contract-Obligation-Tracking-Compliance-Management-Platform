@@ -3,14 +3,17 @@ from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
 from backend.app.models.contract import Contract
-from backend.app.core.auth import get_current_user
+from backend.app.models.compliance import Compliance
+from backend.app.core.auth import get_current_user, require_role
+from backend.app.core.roles import UserRole
 from backend.app.schemas.compliance import (
     ComplianceResponse,
     ComplianceSummary,
     ComplianceRiskResponse
 )
 from backend.app.services.compliance_service import (
-    calculate_contract_compliance
+    calculate_contract_compliance,
+    save_compliance_history
 )
 
 
@@ -44,10 +47,17 @@ def get_contract_compliance(
             detail="Contract not found"
         )
 
-    return calculate_contract_compliance(
-        contract,
-        db
-    )
+    result = calculate_contract_compliance(
+    contract,
+    db
+)
+
+    save_compliance_history(
+    result,
+    db
+)
+
+    return result
 
 
 # ============================================================
@@ -185,7 +195,13 @@ def get_non_compliant_contracts(
 )
 def get_high_risk_contracts(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(
+    require_role(
+        UserRole.ADMINISTRATOR,
+        UserRole.LEGAL_MANAGER,
+        UserRole.COMPLIANCE_OFFICER
+    )
+    )
 ):
 
     contracts = db.query(Contract).all()
@@ -211,3 +227,33 @@ def get_high_risk_contracts(
             })
 
     return results
+# ============================================================
+# GET COMPLIANCE HISTORY
+# ============================================================
+
+@router.get(
+    "/contracts/{contract_id}/history"
+)
+def get_compliance_history(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+
+    contract = db.query(Contract).filter(
+        Contract.id == contract_id
+    ).first()
+
+    if not contract:
+        raise HTTPException(
+            status_code=404,
+            detail="Contract not found"
+        )
+
+    history = db.query(Compliance).filter(
+        Compliance.contract_id == contract_id
+    ).order_by(
+        Compliance.evaluated_at.desc()
+    ).all()
+
+    return history

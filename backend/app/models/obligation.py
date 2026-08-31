@@ -81,3 +81,7 @@ class Obligation(Base):
     user = relationship(
         "User"
     )
+    compliance_records = relationship(
+    "Compliance",
+    back_populates="obligation"
+)
