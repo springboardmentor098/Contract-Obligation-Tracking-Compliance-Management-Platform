@@ -4,6 +4,9 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
+from app.utils.security import hash_password
+from app.utils.authorization import require_roles
+
 
 router = APIRouter(
     prefix="/users",
@@ -21,10 +24,24 @@ def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
+    existing_user = db.query(User).filter(
+        User.email == user_data.email
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+
+    hashed_password = hash_password(user_data.password)
+
     user = User(
         full_name=user_data.full_name,
         email=user_data.email,
-        role=user_data.role
+        role=user_data.role,
+        is_active=True,
+        password=hashed_password
     )
 
     db.add(user)
@@ -40,7 +57,9 @@ def create_user(
     response_model=list[UserResponse],
     status_code=status.HTTP_200_OK
 )
-def get_users(db: Session = Depends(get_db)):
+def get_users(
+    db: Session = Depends(get_db)
+):
     users = db.query(User).all()
     return users
 
@@ -55,7 +74,9 @@ def get_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
     if user is None:
         raise HTTPException(
@@ -77,7 +98,9 @@ def update_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
     if user is None:
         raise HTTPException(
@@ -88,6 +111,7 @@ def update_user(
     user.full_name = user_data.full_name
     user.email = user_data.email
     user.role = user_data.role
+    user.password = hash_password(user_data.password)
 
     db.commit()
     db.refresh(user)
@@ -95,16 +119,21 @@ def update_user(
     return user
 
 
-# DELETE USER
+# DELETE USER - ADMINISTRATOR ONLY
 @router.delete(
     "/{user_id}",
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(require_roles("Administrator"))
+    ]
 )
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
 
     if user is None:
         raise HTTPException(

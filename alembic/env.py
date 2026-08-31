@@ -7,10 +7,21 @@ from alembic import context
 
 from app.core.config import settings
 from app.database.database import Base
+
 from app.models.user import User
+from app.models.contract import Contract
+from app.models.contract_version import ContractVersion
+from app.models.obligation import Obligation
+from app.models.renewal import Renewal
+from app.models.notification import Notification
+from app.models.report import Report
+from app.models.audit_log import AuditLog
+from app.models.activity import Activity
+
 
 # Alembic Config object
 config = context.config
+
 
 # Read DATABASE_URL from .env
 config.set_main_option(
@@ -18,9 +29,11 @@ config.set_main_option(
     settings.DATABASE_URL
 )
 
+
 # Configure logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
 
 # Metadata for autogenerate
 target_metadata = Base.metadata
