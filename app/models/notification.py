@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -12,40 +12,44 @@ class Notification(Base):
     user_id = Column(
         Integer,
         ForeignKey("users.id"),
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     contract_id = Column(
         Integer,
         ForeignKey("contracts.id"),
-        nullable=False
+        nullable=True,
+        index=True
     )
 
     obligation_id = Column(
         Integer,
         ForeignKey("obligations.id"),
-        nullable=False
+        nullable=True,
+        index=True
     )
 
-    type = Column(
-        String(50),
-        nullable=True
+    notification_type = Column(
+        String(100),
+        nullable=False
     )
 
     title = Column(
         String(255),
-        nullable=True
+        nullable=False
     )
 
     message = Column(
         Text,
-        nullable=True
+        nullable=False
     )
 
-    is_read = Column(
-        Boolean,
-        default=False,
-        nullable=False
+    status = Column(
+        String(20),
+        nullable=False,
+        default="Unread",
+        index=True
     )
 
     scheduled_at = Column(
@@ -58,9 +62,19 @@ class Notification(Base):
         nullable=True
     )
 
-    created_at = Column(
+    read_at = Column(
         DateTime,
         nullable=True
+    )
+
+    created_at = Column(
+        DateTime,
+        nullable=False
+    )
+
+    updated_at = Column(
+        DateTime,
+        nullable=False
     )
 
     user = relationship(

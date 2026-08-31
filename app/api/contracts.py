@@ -16,6 +16,10 @@ from app.schemas.contract import (
 )
 from app.schemas.obligation import ObligationResponse
 from app.utils.authorization import get_current_user
+from app.services.notification_service import (
+    generate_contract_approval_notification,
+    generate_contract_status_notification,
+)
 
 
 router = APIRouter(
@@ -260,6 +264,26 @@ def submit_contract_for_review(
     db.commit()
     db.refresh(contract)
 
+    # Notify active Legal Managers.
+    legal_managers = db.query(User).filter(
+        User.role == "Legal Manager",
+        User.is_active == True,
+    ).all()
+
+    for manager in legal_managers:
+        generate_contract_approval_notification(
+            db=db,
+            contract=contract,
+            user_id=manager.id,
+        )
+
+    # Notify the contract creator.
+    generate_contract_status_notification(
+        db=db,
+        contract=contract,
+        user_id=contract.created_by,
+    )
+
     return contract
 
 
@@ -289,6 +313,13 @@ def approve_contract(
 
     db.commit()
     db.refresh(contract)
+
+    # Notify the contract creator that the contract was approved.
+    generate_contract_status_notification(
+        db=db,
+        contract=contract,
+        user_id=contract.created_by,
+    )
 
     return contract
 
@@ -324,6 +355,13 @@ def activate_contract(
 
     db.commit()
     db.refresh(contract)
+
+    # Notify the contract creator that the contract is now active.
+    generate_contract_status_notification(
+        db=db,
+        contract=contract,
+        user_id=contract.created_by,
+    )
 
     return contract
 
@@ -365,41 +403,3 @@ def assign_contract(
     db.refresh(contract)
 
     return contract
-
-
-@router.get(
-    "/{contract_id}/obligations",
-    response_model=list[ObligationResponse]
-)
-def get_contract_obligations(
-    contract_id: int,
-    current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    contract = get_contract_or_404(contract_id, db)
-
-    from app.models.obligation import Obligation
-
-    obligations = db.query(Obligation).filter(
-        Obligation.contract_id == contract.id
-    ).all()
-
-    for obligation in obligations:
-        old_status = obligation.status
-
-        if (
-            obligation.status != "Completed"
-            and obligation.due_date < datetime.now(
-                timezone.utc
-            ).date()
-        ):
-            obligation.status = "Overdue"
-
-        if obligation.status != old_status:
-            obligation.updated_at = datetime.now(
-                timezone.utc
-            ).replace(tzinfo=None)
-
-    db.commit()
-
-    return obligations

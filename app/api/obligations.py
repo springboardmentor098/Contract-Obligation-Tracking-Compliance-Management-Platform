@@ -122,12 +122,6 @@ def create_obligation(
             detail="Invalid obligation type"
         )
 
-    if obligation_data.due_date < date.today():
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Due date cannot be in the past"
-        )
-
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     obligation = Obligation(
