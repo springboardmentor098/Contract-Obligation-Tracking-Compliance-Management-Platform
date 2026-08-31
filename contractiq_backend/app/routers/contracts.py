@@ -3,13 +3,13 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from app.models.obligation import Obligation
-from app.schemas.obligation import ObligationResponse
-from app.models.renewal import Renewal
-from app.schemas.renewal import RenewalResponse
+
 from app.database.database import get_db
 from app.models.contract import Contract
 from app.models.user import User
+from app.models.obligation import Obligation
+from app.models.renewal import Renewal
+
 from app.schemas.contract import (
     ContractCreate,
     ContractResponse,
@@ -17,6 +17,13 @@ from app.schemas.contract import (
     ContractStatusUpdate,
     ContractAssignment,
 )
+
+from app.schemas.obligation import ObligationResponse
+from app.schemas.renewal import RenewalResponse
+from app.schemas.compliance import ComplianceResponse
+
+from app.services.compliance_service import calculate_contract_compliance
+
 from app.core.dependencies import get_current_user
 
 
@@ -97,11 +104,14 @@ def get_contracts(
 ):
     contracts = (
         db.query(Contract)
-        .filter(Contract.owner_id == current_user.id)
+        .filter(
+            Contract.owner_id == current_user.id
+        )
         .all()
     )
 
     return contracts
+
 
 @router.get(
     "/{contract_id}/obligations",
@@ -129,7 +139,9 @@ def get_contract_obligations(
 
     obligations = (
         db.query(Obligation)
-        .filter(Obligation.contract_id == contract_id)
+        .filter(
+            Obligation.contract_id == contract_id
+        )
         .all()
     )
 
@@ -170,6 +182,53 @@ def get_contract_renewals(
 
     return renewals
 
+
+@router.get(
+    "/{contract_id}/compliance",
+    response_model=ComplianceResponse
+)
+def get_contract_compliance(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    contract = (
+        db.query(Contract)
+        .filter(
+            Contract.id == contract_id
+        )
+        .first()
+    )
+
+    if contract is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Contract not found"
+        )
+
+    if (
+        contract.owner_id != current_user.id
+        and contract.assigned_to != current_user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "You do not have permission to view "
+                "this contract's compliance"
+            )
+        )
+
+    compliance = calculate_contract_compliance(
+        contract_id,
+        db
+    )
+
+    return {
+        "contract_id": contract_id,
+        **compliance
+    }
+
+
 @router.get(
     "/{contract_id}",
     response_model=ContractResponse
@@ -202,7 +261,6 @@ def update_contract(
         db
     )
 
-    # Don't allow normal update API to change workflow status
     update_data = contract_data.model_dump(
         exclude_unset=True
     )
@@ -221,7 +279,6 @@ def update_contract(
         )
 
     return contract
-
 
 
 @router.patch(
@@ -301,7 +358,6 @@ def update_contract_status(
     return contract
 
 
-
 @router.post(
     "/{contract_id}/submit-review",
     response_model=ContractResponse
@@ -335,7 +391,6 @@ def submit_for_review(
     return contract
 
 
-
 @router.post(
     "/{contract_id}/approve",
     response_model=ContractResponse
@@ -345,7 +400,6 @@ def approve_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Only these roles can approve
     allowed_roles = {
         "ADMINISTRATOR",
         "LEGAL_MANAGER"
@@ -359,7 +413,9 @@ def approve_contract(
 
     contract = (
         db.query(Contract)
-        .filter(Contract.id == contract_id)
+        .filter(
+            Contract.id == contract_id
+        )
         .first()
     )
 
@@ -372,9 +428,7 @@ def approve_contract(
     if contract.status != "Under Review":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "Only contracts under review can be approved"
-            )
+            detail="Only contracts under review can be approved"
         )
 
     contract.status = "Approved"
@@ -404,9 +458,7 @@ def activate_contract(
     if contract.status != "Approved":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "Only approved contracts can be activated"
-            )
+            detail="Only approved contracts can be activated"
         )
 
     contract.status = "Active"
@@ -415,7 +467,6 @@ def activate_contract(
     db.refresh(contract)
 
     return contract
-
 
 
 @router.patch(
