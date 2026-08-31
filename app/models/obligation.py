@@ -96,4 +96,10 @@ class Obligation(Base):
         "Activity",
         back_populates="obligation"
     )
+
+        # Notifications related to this obligation
+    notifications = relationship(
+        "Notification",
+        back_populates="obligation"
+    )
     
