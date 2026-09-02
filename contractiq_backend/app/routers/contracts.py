@@ -24,6 +24,12 @@ from app.schemas.compliance import ComplianceResponse
 
 from app.services.compliance_service import calculate_contract_compliance
 
+from app.services.notification_service import (
+    notify_contract_submitted_for_review,
+    notify_contract_approved,
+    notify_contract_status_changed,
+)
+
 from app.core.dependencies import get_current_user
 
 
@@ -355,6 +361,14 @@ def update_contract_status(
     db.commit()
     db.refresh(contract)
 
+    if new_status not in {"Under Review", "Approved"}:
+        notify_contract_status_changed(
+            db=db,
+            contract=contract,
+            old_status=current_status,
+            new_status=new_status
+        )
+
     return contract
 
 
@@ -388,8 +402,12 @@ def submit_for_review(
     db.commit()
     db.refresh(contract)
 
-    return contract
+    notify_contract_submitted_for_review(
+        db=db,
+        contract=contract
+    )
 
+    return contract
 
 @router.post(
     "/{contract_id}/approve",
@@ -437,8 +455,12 @@ def approve_contract(
     db.commit()
     db.refresh(contract)
 
-    return contract
+    notify_contract_approved(
+        db=db,
+        contract=contract
+    )
 
+    return contract
 
 @router.post(
     "/{contract_id}/activate",
