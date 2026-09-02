@@ -6,6 +6,7 @@ from app.routers import contracts
 from app.routers import obligations
 from app.routers import renewals
 from app.routers import compliance
+from app.routers import notifications
 
 app = FastAPI(
     title="ContractIQ API",
@@ -18,6 +19,7 @@ app.include_router(contracts.router)
 app.include_router(obligations.router)
 app.include_router(renewals.router)
 app.include_router(compliance.router)
+app.include_router(notifications.router)
 
 @app.on_event("startup")
 def startup_event():

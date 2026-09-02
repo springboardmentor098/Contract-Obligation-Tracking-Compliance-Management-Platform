@@ -21,6 +21,7 @@ class User(Base):
     contracts = relationship("Contract", back_populates="creator", foreign_keys="[Contract.created_by]")
     obligations = relationship("Obligation", back_populates="assignee")
     renewals = relationship("Renewal", back_populates="assignee")
+    notifications = relationship("Notification", back_populates="user")
 
 # 3. CONTRACT VERSIONS TABLE
 class ContractVersion(Base):
@@ -72,17 +73,8 @@ class Obligation(Base):
     # Relationships (Make sure these match your User and Contract back_populates!)
     contract = relationship("Contract", back_populates="obligations")
     assignee = relationship("User", back_populates="obligations")
+    notifications = relationship("Notification", back_populates="obligation")
 
-
-
-# 6. NOTIFICATIONS TABLE
-class Notification(Base):
-    __tablename__ = "notifications"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    message = Column(Text, nullable=False)
-    is_read = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
 # 7. REPORTS TABLE
 class Report(Base):
@@ -179,3 +171,46 @@ class ComplianceRecord(Base):
 
     # Relationship back to the contract
     contract = relationship("Contract", back_populates="compliance_records")
+
+    # ==========================================
+# SPRINT 12: NOTIFICATION MODEL
+# ==========================================
+
+class NotificationTypeEnum(str, enum.Enum):
+    RENEWAL_REMINDER = "Renewal Reminder"
+    OBLIGATION_DUE = "Obligation Due Alert"
+    OBLIGATION_OVERDUE = "Obligation Overdue Alert"
+    COMPLIANCE_ALERT = "Compliance Alert"
+    CONTRACT_APPROVAL = "Contract Approval Alert"
+    CONTRACT_STATUS = "Contract Status Alert"
+
+class NotificationStatusEnum(str, enum.Enum):
+    UNREAD = "Unread"
+    READ = "Read"
+
+class Notification(Base):
+    __tablename__ = "notifications_new" # Temporary rename if Alembic gets stuck, but usually replacing the class is enough! Let's keep it as "notifications"
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
+    obligation_id = Column(Integer, ForeignKey("obligations.id"), nullable=True)
+    
+    # native_enum=False prevents PostgreSQL crashes 
+    notification_type = Column(Enum(NotificationTypeEnum, native_enum=False), nullable=False)
+    title = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+    status = Column(Enum(NotificationStatusEnum, native_enum=False), default=NotificationStatusEnum.UNREAD)
+    
+    scheduled_at = Column(DateTime, nullable=True)
+    sent_at = Column(DateTime, nullable=True)
+    read_at = Column(DateTime, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="notifications")
+    contract = relationship("Contract", back_populates="notifications")
+    obligation = relationship("Obligation", back_populates="notifications")
