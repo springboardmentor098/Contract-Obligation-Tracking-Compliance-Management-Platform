@@ -9,6 +9,7 @@ from app.routers.obligations import router as obligation_router
 from app.models.renewal import Renewal
 from app.routers.renewals import router as renewal_router
 from app.routers.notifications import router as notification_router
+from app.routers.reports import router as reports_router, dashboard_router
 app = FastAPI(
     title="ContractIQ API",
     version="1.0.0"
@@ -27,6 +28,8 @@ app.include_router(obligation_router)
 app.include_router(renewal_router)
 app.include_router(compliance_router)
 app.include_router(notification_router)
+app.include_router(reports_router)
+app.include_router(dashboard_router)
 
 @app.get("/")
 def root():
