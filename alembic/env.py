@@ -10,6 +10,7 @@ from app.models.notification import Notification
 from app.models.report import Report
 from app.models.audit_log import AuditLog
 from app.models.activity import Activity
+from app.models.compliance import Compliance
 
 from alembic import context
 from sqlalchemy import engine_from_config

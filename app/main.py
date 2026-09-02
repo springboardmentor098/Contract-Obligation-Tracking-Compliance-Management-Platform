@@ -9,6 +9,8 @@ from app.api.auth import router as auth_router
 from app.api.contract import router as contract_router
 from app.api.obligation import router as obligation_router
 from app.api.renewal import router as renewal_router
+from app.api.compliance import router as compliance_router
+from app.models.compliance import Compliance
 
 # Import all SQLAlchemy models
 # This ensures SQLAlchemy knows about all relationships.
@@ -52,6 +54,9 @@ app.include_router(obligation_router)
 
 # Renewal Management APIs
 app.include_router(renewal_router)
+
+# Compliance Management APIs
+app.include_router(compliance_router)
 
 
 # -------------------- ROOT --------------------

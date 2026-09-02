@@ -69,6 +69,7 @@ class Contract(Base):
 
     # ============================================================
     # CONTRACT STATUS
+    #
     # Draft
     # Under Review
     # Approved
@@ -220,6 +221,16 @@ class Contract(Base):
 
     activities = relationship(
         "Activity",
+        back_populates="contract",
+        cascade="all, delete-orphan"
+    )
+
+    # ============================================================
+    # COMPLIANCE RECORDS
+    # ============================================================
+
+    compliance_records = relationship(
+        "Compliance",
         back_populates="contract",
         cascade="all, delete-orphan"
     )
