@@ -45,7 +45,9 @@ from app.routers.activity import (
 from app.routers.compliance import (
     router as compliance_router
 )
-
+from app.routers.dashboard import (
+    router as dashboard_router
+)
 
 # =========================================================
 # FASTAPI APPLICATION
@@ -83,7 +85,7 @@ app.include_router(activities_router)
 
 app.include_router(compliance_router)
 
-
+app.include_router(dashboard_router)
 # =========================================================
 # STARTUP EVENT
 # =========================================================
