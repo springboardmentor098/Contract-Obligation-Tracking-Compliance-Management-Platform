@@ -20,6 +20,7 @@ class User(Base):
     # Relationships
     contracts = relationship("Contract", back_populates="creator", foreign_keys="[Contract.created_by]")
     obligations = relationship("Obligation", back_populates="assignee")
+    renewals = relationship("Renewal", back_populates="assignee")
 
 # 3. CONTRACT VERSIONS TABLE
 class ContractVersion(Base):
@@ -72,16 +73,7 @@ class Obligation(Base):
     contract = relationship("Contract", back_populates="obligations")
     assignee = relationship("User", back_populates="obligations")
 
-# 5. RENEWALS TABLE
-class Renewal(Base):
-    __tablename__ = "renewals"
-    id = Column(Integer, primary_key=True, index=True)
-    contract_id = Column(Integer, ForeignKey("contracts.id"), unique=True) # Unique for 1-to-1
-    renewal_date = Column(Date, nullable=False)
-    status = Column(String(50), nullable=False)
-    reminder_days = Column(Integer, nullable=False)
 
-    contract = relationship("Contract", back_populates="renewal")
 
 # 6. NOTIFICATIONS TABLE
 class Notification(Base):
@@ -119,3 +111,38 @@ class Activity(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     action_description = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+
+
+# RENEWAL MODEL
+
+
+class RenewalStatus(str, enum.Enum):
+    UPCOMING = "Upcoming"
+    IN_PROGRESS = "In Progress"
+    RENEWED = "Renewed"
+    EXPIRED = "Expired"
+    CANCELLED = "Cancelled"
+
+class Renewal(Base):
+    __tablename__ = "renewals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=False)
+    
+    renewal_date = Column(Date, nullable=False)
+    previous_expiry_date = Column(Date, nullable=False)
+    new_expiry_date = Column(Date, nullable=False)
+    
+    # native_enum=False prevents the PostgreSQL enum crash!
+    status = Column(Enum(RenewalStatus, native_enum=False), default=RenewalStatus.UPCOMING, nullable=False)
+    
+    assigned_to = Column(Integer, ForeignKey("users.id"), nullable=False)
+    notes = Column(String, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    contract = relationship("Contract", back_populates="renewals")
+    assignee = relationship("User", back_populates="renewals")

@@ -53,3 +53,4 @@ class Contract(Base):
 
     obligations = relationship("Obligation", back_populates="contract")
     renewal = relationship("Renewal", uselist=False, back_populates="contract")
+    renewals = relationship("Renewal", back_populates="contract")
