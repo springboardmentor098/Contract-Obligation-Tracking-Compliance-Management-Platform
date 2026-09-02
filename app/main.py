@@ -5,6 +5,7 @@ from app.database.database import test_database_connection
 from app.routers import contracts 
 from app.routers import obligations
 from app.routers import renewals
+from app.routers import compliance
 
 app = FastAPI(
     title="ContractIQ API",
@@ -16,6 +17,7 @@ app.include_router(auth.router) # Connected back to your authentication router!
 app.include_router(contracts.router)
 app.include_router(obligations.router)
 app.include_router(renewals.router)
+app.include_router(compliance.router)
 
 @app.on_event("startup")
 def startup_event():

@@ -112,10 +112,7 @@ class Activity(Base):
     action_description = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
-
-
 # RENEWAL MODEL
-
 
 class RenewalStatus(str, enum.Enum):
     UPCOMING = "Upcoming"
@@ -146,3 +143,39 @@ class Renewal(Base):
     # Relationships
     contract = relationship("Contract", back_populates="renewals")
     assignee = relationship("User", back_populates="renewals")
+
+    # ==========================================
+# SPRINT 11: COMPLIANCE MODEL
+# ==========================================
+
+class ComplianceStatusEnum(str, enum.Enum):
+    COMPLIANT = "Compliant"
+    PENDING = "Pending"
+    DELAYED = "Delayed"
+    NON_COMPLIANT = "Non-Compliant"
+    HIGH_RISK = "High Risk"
+
+class RiskLevelEnum(str, enum.Enum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+class ComplianceRecord(Base):
+    __tablename__ = "compliance_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=False)
+    
+    # native_enum=False saves us from PostgreSQL crashes!
+    status = Column(Enum(ComplianceStatusEnum, native_enum=False), nullable=False)
+    compliance_score = Column(Integer, nullable=False, default=0)
+    risk_level = Column(Enum(RiskLevelEnum, native_enum=False), nullable=False, default=RiskLevelEnum.LOW)
+    
+    evaluated_at = Column(DateTime, default=datetime.utcnow)
+    notes = Column(String, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship back to the contract
+    contract = relationship("Contract", back_populates="compliance_records")
