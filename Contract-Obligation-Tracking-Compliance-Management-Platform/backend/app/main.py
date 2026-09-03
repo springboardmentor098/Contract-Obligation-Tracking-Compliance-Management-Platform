@@ -19,6 +19,8 @@ from app.api.obligations import (
 from app.api.renewals import router as renewal_router
 from app.api.compliance import router as compliance_router
 from app.api.notifications import router as notification_router
+from app.api.reports import router as reports_router
+
 
 
 # ============================================================
@@ -78,3 +80,6 @@ app.include_router(compliance_router)
 
 # Sprint 12 - Notifications
 app.include_router(notification_router)
+# Sprint 13 - Reports
+app.include_router(reports_router)
+
