@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 def send_smtp_email(to_email: str, subject: str, body: str) -> bool:
     """
     Sends an SMTP email notification gracefully.
-    If SMTP server is unconfigured or unavailable, catches error safely.
+    If SMTP server or credentials are unconfigured, skips delivery safely.
     """
-    if not settings.SMTP_HOST or not to_email:
-        logger.info(f"[SMTP Simulator] Email to '{to_email}' skipped: SMTP host not configured.")
+    if not settings.SMTP_HOST or not settings.SMTP_USERNAME or not settings.SMTP_PASSWORD or not to_email:
+        logger.info(f"[SMTP Simulator] Email to '{to_email}' skipped: SMTP credentials not configured in environment.")
         return False
 
     try:
@@ -35,11 +35,13 @@ def send_smtp_email(to_email: str, subject: str, body: str) -> bool:
         text_part = MIMEText(body, "plain")
         msg.attach(text_part)
 
-        # Attempt connection
+        # Attempt connection with STARTTLS
         with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=5) as server:
-            if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
+            server.ehlo()
+            if settings.SMTP_PORT in [587, 25]:
                 server.starttls()
-                server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+                server.ehlo()
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
             server.sendmail(settings.SMTP_FROM_EMAIL, [to_email], msg.as_string())
         
         logger.info(f"[SMTP Success] Email sent to {to_email}")
@@ -47,6 +49,7 @@ def send_smtp_email(to_email: str, subject: str, body: str) -> bool:
     except Exception as e:
         logger.warning(f"[SMTP Delivery Handled] Could not send email to {to_email}: {e}")
         return False
+
 
 
 def create_notification(
