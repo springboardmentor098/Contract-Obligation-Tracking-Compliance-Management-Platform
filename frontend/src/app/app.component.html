@@ -1,0 +1,19 @@
+<main class="shell">
+  <header><div><h1>ContractIQ</h1><p>Contract Obligation Tracking & Compliance Management</p></div><div class="actions"><button (click)="download('contracts','excel')">Contracts Excel</button><button (click)="download('compliance','pdf')">Compliance PDF</button></div></header>
+  <p class="error" *ngIf="error">{{error}}</p>
+  <section *ngIf="data as d; else loading">
+    <div class="cards">
+      <article><span>Total Contracts</span><strong>{{d.contracts.total}}</strong><small>{{d.contracts.active}} active · {{d.contracts.expired}} expired</small></article>
+      <article><span>Obligations</span><strong>{{d.obligations.total}}</strong><small>{{d.obligations.completed}} completed · {{d.obligations.overdue}} overdue</small></article>
+      <article><span>Upcoming Renewals</span><strong>{{d.renewals.upcoming}}</strong><small>Next {{d.renewals.upcoming_days}} days</small></article>
+      <article><span>High Risk</span><strong>{{d.compliance.risk_indicators.high}}</strong><small>{{d.compliance.non_compliant}} non-compliant</small></article>
+    </div>
+    <div class="grid">
+      <article class="panel"><h2>Contract Status</h2><div class="bar" *ngFor="let x of ['active','draft','under_review','approved','expired','terminated']"><label>{{x.replace('_',' ')}} <b>{{d.contracts[x]}}</b></label><progress [value]="d.contracts[x]" [max]="d.contracts.total || 1"></progress></div></article>
+      <article class="panel"><h2>Compliance & Risk</h2><div class="risk"><div><b>{{d.compliance.compliant}}</b><span>Compliant</span></div><div><b>{{d.compliance.risk_indicators.medium}}</b><span>Medium risk</span></div><div><b>{{d.compliance.risk_indicators.high}}</b><span>High risk</span></div></div><h3>High-risk contracts</h3><ul><li *ngFor="let c of d.compliance.high_risk_contracts">{{c.contract_number}} — {{c.contract_title}} ({{c.compliance_score}}%)</li></ul></article>
+      <article class="panel"><h2>Upcoming Expiry</h2><ul><li *ngFor="let c of d.renewals.approaching_expiry">{{c.contract_number}} — {{c.days_remaining}} days</li></ul><p *ngIf="!d.renewals.approaching_expiry.length">No contracts expiring in the selected window.</p></article>
+      <article class="panel"><h2>Overdue Obligations</h2><p>Use <code>/dashboard/overdue-obligations</code> for the live list and ageing.</p><div class="exports"><button (click)="download('obligations','excel')">Excel</button><button (click)="download('obligations','pdf')">PDF</button><button (click)="download('renewals','excel')">Renewals Excel</button></div></article>
+    </div>
+  </section>
+  <ng-template #loading><p>Loading dashboard…</p></ng-template>
+</main>

@@ -9,7 +9,6 @@ from app.models.renewal import Renewal, RenewalStatus
 from app.models.compliance import ComplianceStatus, RiskLevel
 from app.services.compliance_service import evaluate_contract_compliance
 
-
 UPCOMING_RENEWAL_DAYS = 30
 
 
@@ -41,7 +40,6 @@ def contract_summary(db: Session) -> dict[str, Any]:
 
 def obligation_summary(db: Session) -> dict[str, Any]:
     obligations = db.query(Obligation).all()
-    # Treat past due non-completed obligations as overdue without mutating data.
     effective = []
     for obligation in obligations:
         status = obligation.status
@@ -59,19 +57,28 @@ def obligation_summary(db: Session) -> dict[str, Any]:
     }
 
 
+def overdue_obligations(db: Session) -> list[dict[str, Any]]:
+    today = date.today()
+    rows = []
+    for o in db.query(Obligation).filter(Obligation.status != ObligationStatus.COMPLETED).all():
+        if o.due_date < today:
+            rows.append({
+                "obligation_id": o.id,
+                "contract_id": o.contract_id,
+                "title": o.title,
+                "due_date": o.due_date,
+                "days_overdue": (today - o.due_date).days,
+                "status": ObligationStatus.OVERDUE.value,
+            })
+    return sorted(rows, key=lambda x: x["due_date"])
+
+
 def renewal_summary(db: Session, upcoming_days: int = UPCOMING_RENEWAL_DAYS) -> dict[str, Any]:
     renewals = db.query(Renewal).all()
     counts = _enum_counts((r.status for r in renewals), RenewalStatus)
     today = date.today()
     cutoff = today + timedelta(days=upcoming_days)
-
-    # A renewal is considered upcoming if its renewal date is within the window
-    # and it has not already been renewed/cancelled/expired.
-    upcoming = [
-        r for r in renewals
-        if r.status == RenewalStatus.UPCOMING and today <= r.renewal_date <= cutoff
-    ]
-
+    upcoming = [r for r in renewals if r.status == RenewalStatus.UPCOMING and today <= r.renewal_date <= cutoff]
     approaching = []
     for contract in db.query(Contract).all():
         if today <= contract.end_date <= cutoff:
@@ -83,7 +90,6 @@ def renewal_summary(db: Session, upcoming_days: int = UPCOMING_RENEWAL_DAYS) -> 
                 "days_remaining": (contract.end_date - today).days,
             })
     approaching.sort(key=lambda x: x["expiry_date"])
-
     return {
         "upcoming": len(upcoming),
         "in_progress": counts[RenewalStatus.IN_PROGRESS.value],
@@ -105,7 +111,6 @@ def compliance_summary(db: Session) -> dict[str, Any]:
         counts[result.compliance_status.value] += 1
         risk_counts[result.risk_level.value] += 1
         evaluations.append((contract, result))
-
     return {
         "total_contracts_evaluated": len(contracts),
         "compliant": counts[ComplianceStatus.COMPLIANT.value],
@@ -128,20 +133,23 @@ def compliance_summary(db: Session) -> dict[str, Any]:
                 "compliance_score": result.compliance_score,
                 "overdue_obligations": result.overdue_obligations,
             }
-            for contract, result in evaluations
-            if result.risk_level == RiskLevel.HIGH
+            for contract, result in evaluations if result.risk_level == RiskLevel.HIGH
         ],
     }
 
 
-def dashboard_summary(db: Session) -> dict[str, Any]:
-    contracts = contract_summary(db)
-    obligations = obligation_summary(db)
-    renewals = renewal_summary(db)
+def risk_summary(db: Session) -> dict[str, Any]:
     compliance = compliance_summary(db)
     return {
-        "contracts": contracts,
-        "obligations": obligations,
-        "renewals": renewals,
-        "compliance": compliance,
+        "risk_indicators": compliance["risk_indicators"],
+        "high_risk_contracts": compliance["high_risk_contracts"],
+    }
+
+
+def dashboard_summary(db: Session) -> dict[str, Any]:
+    return {
+        "contracts": contract_summary(db),
+        "obligations": obligation_summary(db),
+        "renewals": renewal_summary(db),
+        "compliance": compliance_summary(db),
     }

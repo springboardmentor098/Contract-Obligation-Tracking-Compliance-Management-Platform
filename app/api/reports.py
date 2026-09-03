@@ -24,7 +24,10 @@ from app.services.report_service import (
     obligation_summary,
     renewal_summary,
     compliance_summary,
+    overdue_obligations,
+    risk_summary,
 )
+from app.models.report import Report, ReportType, ReportFormat
 
 router = APIRouter(tags=["Reports & Dashboard"])
 
@@ -127,12 +130,22 @@ def get_renewal_report(
     return renewal_summary(db, upcoming_days)
 
 
+@router.get("/reports/risk")
+def get_risk_report(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    return risk_summary(db)
+
+
+@router.get("/dashboard/overdue-obligations")
+def get_overdue_obligations(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    return {"count": len(overdue_obligations(db)), "items": overdue_obligations(db)}
+
+
 @router.get("/reports/compliance/summary")
 def get_compliance_report(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     return compliance_summary(db)
 
 
-def _export(kind: str, fmt: str, db: Session):
+def _export(kind: str, fmt: str, db: Session, current_user: User):
     builders: dict[str, tuple[str, Callable]] = {
         "contracts": ("Contracts Report", _contract_rows),
         "obligations": ("Obligations Report", _obligation_rows),
@@ -145,9 +158,18 @@ def _export(kind: str, fmt: str, db: Session):
     rows = builder(db)
     extension = "xlsx" if fmt == "excel" else "pdf"
     filename = f"contractiq_{kind}_report.{extension}"
-    if fmt == "excel":
-        return _excel_response(title, rows, filename)
-    return _pdf_response(title, rows, filename)
+    db.add(Report(
+        report_type={
+            "contracts": ReportType.CONTRACT_REPORT,
+            "obligations": ReportType.OBLIGATION_REPORT,
+            "renewals": ReportType.RENEWAL_REPORT,
+            "compliance": ReportType.COMPLIANCE_REPORT,
+        }[kind],
+        report_format=ReportFormat.EXCEL if fmt == "excel" else ReportFormat.PDF,
+        generated_by=current_user.id,
+    ))
+    db.commit()
+    return _excel_response(title, rows, filename) if fmt == "excel" else _pdf_response(title, rows, filename)
 
 
 @router.get("/reports/{kind}/export/{fmt}")
@@ -159,4 +181,4 @@ def export_report(
 ):
     if fmt not in {"pdf", "excel"}:
         raise HTTPException(status_code=400, detail="Format must be pdf or excel")
-    return _export(kind, fmt, db)
+    return _export(kind, fmt, db, current_user)

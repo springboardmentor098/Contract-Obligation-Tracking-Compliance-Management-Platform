@@ -438,3 +438,56 @@ git push
 15. License
 MIT — see `LICENSE`.
 >>>>>>> 4eaec42803a8247b17c344438983b92f6c9f743f
+
+## Sprint 13 — Reports, Analytics & Dashboard
+
+Sprint 13 is included in this version. The backend exposes authenticated dashboard and analytics endpoints plus PDF/Excel exports:
+
+- `GET /dashboard/summary`
+- `GET /dashboard/overdue-obligations`
+- `GET /reports/contracts/summary`
+- `GET /reports/obligations/summary`
+- `GET /reports/renewals/summary?upcoming_days=30`
+- `GET /reports/compliance/summary`
+- `GET /reports/risk`
+- `GET /reports/{contracts|obligations|renewals|compliance}/export/{pdf|excel}`
+
+Exports use ReportLab and openpyxl. Every generated export records report metadata in the `reports` table.
+
+### Angular dashboard
+
+The `frontend/` directory contains the Angular dashboard application. It reads the authenticated API using the bearer token in `localStorage` under `contractiq_token`, displays contract/obligation/renewal/compliance KPIs, and provides report export buttons.
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+The API defaults to `http://localhost:8000`. Set `api` in `frontend/src/app/app.component.ts` when deploying elsewhere.
+
+### Clean database migration
+
+The repository now has one reproducible Alembic baseline (`20260903_initial`) matching the current SQLAlchemy models. This removes the previous conflicting migration heads. For a fresh database:
+
+```bash
+alembic upgrade head
+python seed.py
+```
+
+For an existing development database created by the old conflicting migrations, back up any required data and recreate the database before running the clean baseline.
+
+### Sprint coverage
+
+| Sprint | Module | Included |
+|---|---|---|
+| 3–4 | Database, PostgreSQL, SQLAlchemy, Alembic, ER design | Yes |
+| 5 | JWT authentication | Yes |
+| 6 | Six-role RBAC and protected APIs | Yes |
+| 7 | Contract repository | Yes |
+| 8 | Contract lifecycle and approval workflow | Yes |
+| 9 | Obligations and overdue handling | Yes |
+| 10 | Renewals and renewal history | Yes |
+| 11 | Compliance scoring and risk | Yes |
+| 12 | In-app notifications and optional SMTP | Yes |
+| 13 | Dashboard, analytics, PDF/Excel reports, Angular UI | Yes |
