@@ -15,7 +15,10 @@ from app.schemas.obligation_schema import (
     ObligationResponse,
 )
 from app.middleware.auth import require_roles
-
+from app.services.notification_service import (
+    generate_obligation_due_alerts,
+    generate_overdue_alerts,
+)
 
 router = APIRouter(
     prefix="/obligations",

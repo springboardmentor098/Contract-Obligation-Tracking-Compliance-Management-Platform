@@ -155,3 +155,13 @@ class Obligation(Base):
         "User",
         back_populates="obligations"
     )
+
+    # ============================================================
+    # NOTIFICATIONS
+    # ============================================================
+
+    notifications = relationship(
+        "Notification",
+        back_populates="obligation",
+        cascade="all, delete-orphan"
+    )

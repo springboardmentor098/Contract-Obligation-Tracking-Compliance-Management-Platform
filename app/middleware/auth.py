@@ -32,6 +32,7 @@ def get_current_user(
         )
 
     return {
+        "id": int(user_id),
         "user_id": int(user_id),
         "role": role
     }

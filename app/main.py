@@ -10,7 +10,7 @@ from app.api.contract import router as contract_router
 from app.api.obligation import router as obligation_router
 from app.api.renewal import router as renewal_router
 from app.api.compliance import router as compliance_router
-from app.models.compliance import Compliance
+from app.api.notifications import router as notification_router
 
 # Import all SQLAlchemy models
 # This ensures SQLAlchemy knows about all relationships.
@@ -23,6 +23,7 @@ from app.models.notification import Notification
 from app.models.report import Report
 from app.models.audit_log import AuditLog
 from app.models.activity import Activity
+from app.models.compliance import Compliance
 
 
 app = FastAPI(
@@ -31,14 +32,19 @@ app = FastAPI(
 )
 
 
-# -------------------- STARTUP --------------------
+# ============================================================
+# STARTUP
+# ============================================================
 
 @app.on_event("startup")
 def startup_event():
+
     test_database_connection()
 
 
-# -------------------- ROUTERS --------------------
+# ============================================================
+# ROUTERS
+# ============================================================
 
 # User Management APIs
 app.include_router(user_router)
@@ -58,11 +64,17 @@ app.include_router(renewal_router)
 # Compliance Management APIs
 app.include_router(compliance_router)
 
+# Notification Management APIs
+app.include_router(notification_router)
 
-# -------------------- ROOT --------------------
+
+# ============================================================
+# ROOT
+# ============================================================
 
 @app.get("/")
 def root():
+
     return {
         "message": "ContractIQ Backend is running successfully."
     }

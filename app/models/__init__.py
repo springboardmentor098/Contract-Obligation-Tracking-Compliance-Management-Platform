@@ -1,6 +1,7 @@
 from app.models.user import User
 from app.models.contract import Contract
 from app.models.contract_version import ContractVersion
+from app.models.compliance import Compliance
 from app.models.obligation import Obligation
 from app.models.renewal import Renewal
 from app.models.notification import Notification
