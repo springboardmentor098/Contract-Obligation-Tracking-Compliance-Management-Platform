@@ -1,10 +1,11 @@
-from datetime import date, datetime
+from datetime import date
+
 from pydantic import BaseModel
 
 
-# -----------------------------
-# Dashboard Summary
-# -----------------------------
+# =========================================================
+# DASHBOARD SUMMARY
+# =========================================================
 
 class ContractStatistics(BaseModel):
     total: int
@@ -50,37 +51,36 @@ class DashboardSummaryResponse(BaseModel):
     compliance: ComplianceStatistics
 
 
-# -----------------------------
-# Contract Report
-# -----------------------------
+# =========================================================
+# CONTRACT SUMMARY
+# =========================================================
 
 class ContractSummaryResponse(BaseModel):
     total_contracts: int
     active_contracts: int
-    draft_contracts: int
-    under_review_contracts: int
-    approved_contracts: int
     expired_contracts: int
-    terminated_contracts: int
+    pending_approval_contracts: int
+    contracts_by_status: dict[str, int]
     contracts_by_category: dict[str, int]
 
 
-# -----------------------------
-# Obligation Report
-# -----------------------------
+# =========================================================
+# OBLIGATION SUMMARY
+# =========================================================
 
 class ObligationSummaryResponse(BaseModel):
     total_obligations: int
     pending_obligations: int
-    in_progress_obligations: int
     completed_obligations: int
-    delayed_obligations: int
     overdue_obligations: int
+    in_progress_obligations: int
+    delayed_obligations: int
+    obligations_by_status: dict[str, int]
 
 
-# -----------------------------
-# Renewal Report
-# -----------------------------
+# =========================================================
+# RENEWAL SUMMARY
+# =========================================================
 
 class UpcomingRenewal(BaseModel):
     contract_id: int
@@ -96,11 +96,13 @@ class RenewalSummaryResponse(BaseModel):
     expired: int
     cancelled: int
     upcoming_contracts: list[UpcomingRenewal]
+    immediate_attention: list[UpcomingRenewal]
+    renewals_in_date_range: int
 
 
-# -----------------------------
-# Compliance Report
-# -----------------------------
+# =========================================================
+# COMPLIANCE SUMMARY
+# =========================================================
 
 class ComplianceSummaryResponse(BaseModel):
     total_contracts: int
@@ -112,9 +114,9 @@ class ComplianceSummaryResponse(BaseModel):
     average_score: float
 
 
-# -----------------------------
-# Risk Analysis
-# -----------------------------
+# =========================================================
+# RISK SUMMARY
+# =========================================================
 
 class RiskSummary(BaseModel):
     contract_id: int
@@ -124,9 +126,9 @@ class RiskSummary(BaseModel):
     compliance_score: float
 
 
-# -----------------------------
-# Department Performance
-# -----------------------------
+# =========================================================
+# DEPARTMENT PERFORMANCE
+# =========================================================
 
 class DepartmentPerformance(BaseModel):
     department: str

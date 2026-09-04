@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.database.database import test_database_connection
+
 from app.routers.users import router as user_router
 from app.routers.auth import router as auth_router
 from app.routers.contracts import router as contract_router
@@ -8,7 +9,12 @@ from app.routers.obligations import router as obligation_router
 from app.routers.renewals import router as renewal_router
 from app.routers.compliance import router as compliance_router
 from app.routers.notifications import router as notification_router
-from app.routers.reports import router as report_router
+
+from app.routers.reports import (
+    router as report_router,
+    dashboard_router
+)
+
 
 app = FastAPI(
     title="ContractIQ API",
@@ -16,10 +22,18 @@ app = FastAPI(
 )
 
 
+# =========================================================
+# DATABASE STARTUP
+# =========================================================
+
 @app.on_event("startup")
 def startup_event():
     test_database_connection()
 
+
+# =========================================================
+# ROOT
+# =========================================================
 
 @app.get("/")
 def root():
@@ -28,9 +42,9 @@ def root():
     }
 
 
-# =========================
+# =========================================================
 # ROUTERS
-# =========================
+# =========================================================
 
 app.include_router(user_router)
 app.include_router(auth_router)
@@ -39,4 +53,6 @@ app.include_router(obligation_router)
 app.include_router(renewal_router)
 app.include_router(compliance_router)
 app.include_router(notification_router)
+
 app.include_router(report_router)
+app.include_router(dashboard_router)
