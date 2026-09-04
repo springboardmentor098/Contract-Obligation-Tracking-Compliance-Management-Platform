@@ -1,71 +1,138 @@
-from typing import Dict, List, Optional
+from datetime import date
+from typing import Optional
 
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
 
+from app.database.database import get_db
+from app.core.security import get_current_user
 
-# ============================================================
-# Contract Reports
-# ============================================================
+from app.schemas.report import (
+    ContractSummaryResponse,
+    ObligationSummaryResponse,
+    RenewalSummaryResponse,
+    ComplianceSummaryResponse,
+    DashboardSummaryResponse,
+)
 
-class ContractSummaryResponse(BaseModel):
-    total_contracts: int
-    active_contracts: int
-    expired_contracts: int
-    pending_approval_contracts: int
-    contracts_by_status: Dict[str, int]
-
-
-# ============================================================
-# Obligation Reports
-# ============================================================
-
-class ObligationSummaryResponse(BaseModel):
-    total_obligations: int
-    pending_obligations: int
-    completed_obligations: int
-    overdue_obligations: int
-    obligations_by_status: Dict[str, int]
+from app.services.report_service import (
+    get_contract_summary,
+    get_obligation_summary,
+    get_renewal_summary,
+    get_compliance_summary,
+    get_dashboard_summary,
+)
 
 
-# ============================================================
-# Renewal Reports
-# ============================================================
-
-class UpcomingRenewalResponse(BaseModel):
-    renewal_id: int
-    contract_id: int
-    contract_title: str
-    contract_number: str
-    previous_expiry_date: str
-    renewal_date: Optional[str] = None
-    new_expiry_date: Optional[str] = None
-    status: str
-
-
-class RenewalSummaryResponse(BaseModel):
-    upcoming_renewals: List[UpcomingRenewalResponse]
-    expired_contracts: int
-    immediate_attention: List[UpcomingRenewalResponse]
+router = APIRouter(
+    prefix="/reports",
+    tags=["Reports & Analytics"],
+)
 
 
 # ============================================================
-# Compliance Reports
+# CONTRACT REPORT
 # ============================================================
 
-class ComplianceSummaryResponse(BaseModel):
-    total_contracts: int
-    compliant_contracts: int
-    non_compliant_contracts: int
-    high_risk_obligations: int
-    compliance_percentage: float
+@router.get(
+    "/contracts/summary",
+    response_model=ContractSummaryResponse,
+)
+def contract_summary(
+    status: Optional[str] = Query(
+        default=None,
+        description="Filter contracts by status",
+    ),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return get_contract_summary(
+        db=db,
+        status=status,
+    )
 
 
 # ============================================================
-# Dashboard
+# OBLIGATION REPORT
 # ============================================================
 
-class DashboardSummaryResponse(BaseModel):
-    contracts: ContractSummaryResponse
-    obligations: ObligationSummaryResponse
-    renewals: RenewalSummaryResponse
-    compliance: ComplianceSummaryResponse
+@router.get(
+    "/obligations/summary",
+    response_model=ObligationSummaryResponse,
+)
+def obligation_summary(
+    status: Optional[str] = Query(
+        default=None,
+        description="Filter obligations by status",
+    ),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return get_obligation_summary(
+        db=db,
+        status=status,
+    )
+
+
+# ============================================================
+# RENEWAL REPORT
+# ============================================================
+
+@router.get(
+    "/renewals/summary",
+    response_model=RenewalSummaryResponse,
+)
+def renewal_summary(
+    start_date: Optional[date] = Query(
+        default=None,
+        description="Start date for renewal filtering",
+    ),
+    end_date: Optional[date] = Query(
+        default=None,
+        description="End date for renewal filtering",
+    ),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+
+    if start_date and end_date and start_date > end_date:
+        raise HTTPException(
+            status_code=400,
+            detail="start_date cannot be after end_date",
+        )
+
+    return get_renewal_summary(
+        db=db,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+
+# ============================================================
+# COMPLIANCE REPORT
+# ============================================================
+
+@router.get(
+    "/compliance/summary",
+    response_model=ComplianceSummaryResponse,
+)
+def compliance_summary(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return get_compliance_summary(db)
+
+
+# ============================================================
+# DASHBOARD
+# ============================================================
+
+@router.get(
+    "/dashboard",
+    response_model=DashboardSummaryResponse,
+)
+def dashboard_summary(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return get_dashboard_summary(db)
