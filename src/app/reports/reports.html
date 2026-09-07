@@ -1,0 +1,553 @@
+<div class="reports-page">
+
+  <h1>Reports Dashboard</h1>
+
+  <p class="subtitle">
+    Generate and view ContractIQ reports
+  </p>
+
+
+  <!-- =====================================================
+       REPORT CARDS
+       ===================================================== -->
+
+  <div class="report-cards">
+
+
+    <!-- ===================================================
+         CONTRACT REPORT
+         =================================================== -->
+
+    <mat-card>
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Contract Reports
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <p>
+          View contract details and statistics.
+        </p>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="viewContractReport()">
+
+          View Report
+
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="downloadContractExcel()">
+
+          Excel
+
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- ===================================================
+         OBLIGATION REPORT
+         =================================================== -->
+
+    <mat-card>
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Obligation Reports
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <p>
+          View obligation status and deadlines.
+        </p>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="viewObligationReport()">
+
+          View Report
+
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="downloadObligationExcel()">
+
+          Excel
+
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- ===================================================
+         RENEWAL REPORT
+         =================================================== -->
+
+    <mat-card>
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Renewal Reports
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <p>
+          View upcoming and expired renewals.
+        </p>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="viewRenewalReport()">
+
+          View Report
+
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="downloadRenewalExcel()">
+
+          Excel
+
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- ===================================================
+         COMPLIANCE REPORT
+         =================================================== -->
+
+    <mat-card>
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Compliance Reports
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <p>
+          View compliance status and risks.
+        </p>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="viewComplianceReport()">
+
+          View Report
+
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="downloadComplianceExcel()">
+
+          Excel
+
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTRACT REPORT RESULT
+       ===================================================== -->
+
+  @if (loadingContracts) {
+
+    <div class="report-result">
+
+      <h2>
+        Loading Contract Report...
+      </h2>
+
+    </div>
+
+  }
+
+
+  @if (showContracts) {
+
+    <div class="report-result">
+
+      <h2>
+        Contract Report
+      </h2>
+
+      <p>
+        Total Contracts:
+        <strong>{{ contracts.length }}</strong>
+      </p>
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Contract Number</th>
+              <th>Contract Title</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Assigned User</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (
+              contract of contracts;
+              track contract.contract_number
+            ) {
+
+              <tr>
+
+                <td>
+                  {{ contract.contract_number }}
+                </td>
+
+                <td>
+                  {{ contract.contract_title }}
+                </td>
+
+                <td>
+                  {{ contract.category }}
+                </td>
+
+                <td>
+                  {{ contract.status }}
+                </td>
+
+                <td>
+                  {{ contract.start_date }}
+                </td>
+
+                <td>
+                  {{ contract.end_date }}
+                </td>
+
+                <td>
+                  {{ contract.assigned_user || 'Not Assigned' }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       OBLIGATION REPORT RESULT
+       ===================================================== -->
+
+  @if (loadingObligations) {
+
+    <div class="report-result">
+
+      <h2>
+        Loading Obligation Report...
+      </h2>
+
+    </div>
+
+  }
+
+
+  @if (showObligations) {
+
+    <div class="report-result">
+
+      <h2>
+        Obligation Report
+      </h2>
+
+      <p>
+        Total Obligations:
+        <strong>{{ obligations.length }}</strong>
+      </p>
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Title</th>
+              <th>Contract</th>
+              <th>Obligation Type</th>
+              <th>Due Date</th>
+              <th>Assigned To</th>
+              <th>Status</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (
+              obligation of obligations;
+              track obligation.id
+            ) {
+
+              <tr>
+
+                <td>
+                  {{ obligation.title }}
+                </td>
+
+                <td>
+                  {{ obligation.contract_number || obligation.contract_id }}
+                </td>
+
+                <td>
+                  {{ obligation.obligation_type }}
+                </td>
+
+                <td>
+                  {{ obligation.due_date }}
+                </td>
+
+                <td>
+                  {{ obligation.assigned_to || 'Not Assigned' }}
+                </td>
+
+                <td>
+                  {{ obligation.status }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       RENEWAL REPORT RESULT
+       ===================================================== -->
+
+  @if (loadingRenewals) {
+
+    <div class="report-result">
+
+      <h2>
+        Loading Renewal Report...
+      </h2>
+
+    </div>
+
+  }
+
+
+  @if (showRenewals) {
+
+    <div class="report-result">
+
+      <h2>
+        Renewal Report
+      </h2>
+
+      <p>
+        Total Renewals:
+        <strong>{{ renewals.length }}</strong>
+      </p>
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Contract</th>
+              <th>Renewal Date</th>
+              <th>Status</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (
+              renewal of renewals;
+              track renewal.id
+            ) {
+
+              <tr>
+
+                <td>
+                  {{ renewal.contract_number || renewal.contract_id }}
+                </td>
+
+                <td>
+                  {{ renewal.renewal_date || renewal.end_date }}
+                </td>
+
+                <td>
+                  {{ renewal.status }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       COMPLIANCE REPORT RESULT
+       ===================================================== -->
+
+  @if (loadingCompliance) {
+
+    <div class="report-result">
+
+      <h2>
+        Loading Compliance Report...
+      </h2>
+
+    </div>
+
+  }
+
+
+  @if (showCompliance) {
+
+    <div class="report-result">
+
+      <h2>
+        Compliance Report
+      </h2>
+
+      <p>
+        Total Records:
+        <strong>{{ compliance.length }}</strong>
+      </p>
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Contract</th>
+              <th>Status</th>
+              <th>Risk</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (
+              item of compliance;
+              track item.id
+            ) {
+
+              <tr>
+
+                <td>
+                  {{ item.contract_number || item.contract_id }}
+                </td>
+
+                <td>
+                  {{ item.status || item.compliance_status }}
+                </td>
+
+                <td>
+                  {{ item.risk || item.risk_level || 'N/A' }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
