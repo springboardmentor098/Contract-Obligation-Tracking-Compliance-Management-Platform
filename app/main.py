@@ -1,6 +1,7 @@
 # app/main.py
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.database import test_database_connection
 
@@ -45,9 +46,11 @@ from app.routers.activity import (
 from app.routers.compliance import (
     router as compliance_router
 )
+
 from app.routers.dashboard import (
     router as dashboard_router
 )
+
 
 # =========================================================
 # FASTAPI APPLICATION
@@ -56,6 +59,22 @@ from app.routers.dashboard import (
 app = FastAPI(
     title="ContractIQ API",
     version="1.0.0"
+)
+
+
+# =========================================================
+# CORS CONFIGURATION
+# =========================================================
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4200",
+        "http://localhost:52045",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -86,6 +105,8 @@ app.include_router(activities_router)
 app.include_router(compliance_router)
 
 app.include_router(dashboard_router)
+
+
 # =========================================================
 # STARTUP EVENT
 # =========================================================
