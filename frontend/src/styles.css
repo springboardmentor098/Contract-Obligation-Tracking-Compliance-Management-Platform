@@ -1,1 +1,177 @@
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f7fb;color:#172033}.shell{max-width:1200px;margin:0 auto;padding:28px}header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:24px}h1{margin:0;font-size:32px}header p{margin:6px 0;color:#667085}.actions,.exports{display:flex;gap:8px;flex-wrap:wrap}button{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;background:#172033;color:white}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.cards article,.panel{background:white;border:1px solid #e4e7ec;border-radius:12px;padding:20px;box-shadow:0 2px 8px #1018280a}.cards span,.cards small{display:block;color:#667085}.cards strong{display:block;font-size:32px;margin:10px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.panel h2{margin-top:0}.bar{margin:15px 0}.bar label{display:flex;justify-content:space-between;text-transform:capitalize}.bar progress{width:100%;height:10px}.risk{display:flex;gap:14px}.risk div{flex:1;padding:14px;border:1px solid #e4e7ec;border-radius:10px}.risk b{display:block;font-size:25px}.risk span{color:#667085}.error{padding:12px;border-radius:8px;background:#fff1f0}@media(max-width:800px){.cards,.grid{grid-template-columns:1fr 1fr}header{flex-direction:column;align-items:flex-start}}@media(max-width:520px){.cards,.grid{grid-template-columns:1fr}}
+/* ContractIQ — design tokens
+   Direction: a legal docket / case-ledger register, not a generic SaaS dashboard.
+   Deep ink sidebar, cool paper surface, hairline rules instead of shadows,
+   a muted seal-green for "in order" states, amber/rose for attention states,
+   monospace for reference numbers so they read like docket codes. */
+:root {
+  --ink: #16283F;
+  --ink-700: #1F3654;
+  --ink-soft: #5B6B7D;
+  --paper: #F3F4EF;
+  --surface: #FFFFFF;
+  --line: #DCDCD3;
+  --line-strong: #C4C5BA;
+  --seal: #2F6F5E;
+  --seal-soft: #E4EEEA;
+  --amber: #A9761F;
+  --amber-soft: #F4EAD4;
+  --rose: #A63C33;
+  --rose-soft: #F5E4E1;
+  --slate: #5B6B7D;
+  --slate-soft: #E8EAEA;
+
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+
+  --radius: 3px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: var(--ink);
+}
+
+a { color: inherit; }
+
+button, input, select, textarea { font-family: var(--font-body); font-size: 14px; }
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 9px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1;
+  transition: background .12s ease;
+}
+.btn:hover { background: var(--ink-700); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+}
+.btn-ghost:hover { background: var(--surface); border-color: var(--ink-soft); }
+
+.btn-danger { background: var(--rose); border-color: var(--rose); }
+.btn-danger:hover { background: #8a3129; }
+
+.btn-sm { padding: 6px 11px; font-size: 13px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field label { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+.field input, .field select, .field textarea {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.field textarea { resize: vertical; min-height: 70px; }
+.field-row { display: flex; gap: 14px; }
+.field-row .field { flex: 1; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.panel-head p { margin: 2px 0 0; color: var(--ink-soft); font-size: 13px; }
+
+.docket-num { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); letter-spacing: .02em; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.tag-seal { background: var(--seal-soft); color: var(--seal); }
+.tag-amber { background: var(--amber-soft); color: var(--amber); }
+.tag-rose { background: var(--rose-soft); color: var(--rose); }
+.tag-slate { background: var(--slate-soft); color: var(--slate); }
+
+table.ledger { width: 100%; border-collapse: collapse; }
+table.ledger th {
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+table.ledger td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  vertical-align: middle;
+}
+table.ledger tbody tr:hover { background: #FAFAF7; }
+table.ledger tbody tr:last-child td { border-bottom: none; }
+
+.empty-state {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.empty-state strong { display: block; color: var(--ink); margin-bottom: 4px; font-family: var(--font-display); font-size: 17px; }
+
+.error-banner {
+  background: var(--rose-soft);
+  color: var(--rose);
+  border: 1px solid #e3bcb7;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  margin-bottom: 14px;
+}
+
+.muted { color: var(--ink-soft); }
+
+.page-head h1 { font-size: 24px; }
+.page-head .docket-num { display: block; margin-bottom: 4px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 6px; }

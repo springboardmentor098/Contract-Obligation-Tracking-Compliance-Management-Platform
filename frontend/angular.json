@@ -8,7 +8,7 @@
       "sourceRoot": "src",
       "prefix": "app",
       "architect": {
-        "build": {"builder": "@angular-devkit/build-angular:application", "options": {"outputPath": "dist/contractiq-dashboard", "index": "src/index.html", "browser": "src/main.ts", "polyfills": ["zone.js"], "tsConfig": "tsconfig.app.json", "assets": [], "styles": ["src/styles.css"]}},
+        "build": {"builder": "@angular-devkit/build-angular:application", "options": {"outputPath": "dist/contractiq-dashboard", "index": "src/index.html", "browser": "src/main.ts", "polyfills": ["zone.js"], "tsConfig": "tsconfig.app.json", "assets": [], "styles": ["src/styles.css"], "optimization": {"fonts": false}}},
         "serve": {"builder": "@angular-devkit/build-angular:dev-server", "configurations": {"production": {"buildTarget": "contractiq-dashboard:build:production"}, "development": {"buildTarget": "contractiq-dashboard:build:development"}}, "defaultConfiguration": "development"}
       }
     }
