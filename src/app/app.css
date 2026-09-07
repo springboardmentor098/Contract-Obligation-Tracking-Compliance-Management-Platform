@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 230px;
+  padding: 25px 15px;
+  background: #f4f6f8;
+}
+
+.sidebar h2 {
+  margin-bottom: 30px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar a {
+  padding: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.sidebar a:hover {
+  background: #e0e4e8;
+}
+
+.main-content {
+  flex: 1;
+}

@@ -1,0 +1,215 @@
+<div class="dashboard">
+
+  <h1>ContractIQ Dashboard</h1>
+
+  <p class="subtitle">
+    Contract Obligation Tracking & Compliance Management
+  </p>
+
+  <!-- Error message -->
+  <div
+    *ngIf="errorMessage"
+    class="error"
+  >
+    {{ errorMessage }}
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- SUMMARY CARDS -->
+  <!-- ============================= -->
+
+  <div class="summary-grid">
+
+    <mat-card class="summary-card">
+
+      <mat-card-content>
+
+        <h3>Active Contracts</h3>
+
+        <div class="number">
+          {{ activeContracts }}
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <mat-card class="summary-card">
+
+      <mat-card-content>
+
+        <h3>Upcoming Renewals</h3>
+
+        <div class="number">
+          {{ upcomingRenewals }}
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <mat-card class="summary-card">
+
+      <mat-card-content>
+
+        <h3>Pending Obligations</h3>
+
+        <div class="number">
+          {{ pendingObligations }}
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <mat-card class="summary-card">
+
+      <mat-card-content>
+
+        <h3>Compliance Status</h3>
+
+        <div class="number">
+          {{ complianceStatus }}%
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- ANALYTICS CHARTS -->
+  <!-- ============================= -->
+
+  <div class="charts-grid">
+
+
+    <!-- CONTRACT CATEGORIES -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-content>
+
+        <h2>Contract Categories</h2>
+
+        <div class="chart-container">
+
+          <canvas
+            id="contractCategoryChart">
+          </canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- OBLIGATION STATUS -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-content>
+
+        <h2>Obligation Status</h2>
+
+        <div class="chart-container">
+
+          <canvas
+            id="obligationStatusChart">
+          </canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- RENEWAL STATUS -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-content>
+
+        <h2>Renewal Status</h2>
+
+        <div class="chart-container">
+
+          <canvas
+            id="renewalStatusChart">
+          </canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- COMPLIANCE STATUS -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-content>
+
+        <h2>Compliance Status</h2>
+
+        <div class="chart-container">
+
+          <canvas
+            id="complianceStatusChart">
+          </canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- RECENT ACTIVITIES -->
+  <!-- ============================= -->
+
+  <mat-card class="activities-card">
+
+    <mat-card-content>
+
+      <h2>Recent Activities</h2>
+
+      <ul>
+
+        <li>
+          Contract CON-2026-017 was updated
+        </li>
+
+        <li>
+          Obligation "Submit Monthly Service Report"
+          is overdue
+        </li>
+
+        <li>
+          Renewal review started for Contract
+          CON-2026-018
+        </li>
+
+        <li>
+          Compliance report generated successfully
+        </li>
+
+      </ul>
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>
