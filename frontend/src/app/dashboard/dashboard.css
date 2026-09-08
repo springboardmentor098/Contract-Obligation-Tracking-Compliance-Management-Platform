@@ -1,0 +1,187 @@
+.dashboard-container {
+  padding: 30px;
+}
+
+.dashboard-container h1 {
+  margin-bottom: 5px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.card {
+  padding: 20px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+  margin-bottom: 15px;
+}
+
+.card h2 {
+  font-size: 32px;
+}
+.upcoming-expiry-section {
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.upcoming-expiry-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.upcoming-expiry-section th,
+.upcoming-expiry-section td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.upcoming-expiry-section th {
+  font-weight: bold;
+}
+
+.upcoming-expiry-section h2 {
+  margin-bottom: 15px;
+}
+.upcoming-expiry-section {
+  margin-top: 30px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.upcoming-expiry-section table {
+  width: 100%;
+  min-width: 750px;
+  border-collapse: collapse;
+}
+
+.upcoming-expiry-section th,
+.upcoming-expiry-section td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.upcoming-expiry-section th {
+  font-weight: bold;
+}
+
+.upcoming-expiry-section h2 {
+  margin-bottom: 15px;
+}
+/* =============================== */
+/* REPORT DOWNLOAD SECTION */
+/* =============================== */
+
+.reports-section {
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.reports-section h2 {
+  margin-bottom: 20px;
+}
+
+.reports-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(220px, 1fr));
+
+  gap: 20px;
+}
+
+.report-card {
+  border: 1px solid #ddd;
+
+  padding: 20px;
+
+  border-radius: 8px;
+}
+
+.report-card h3 {
+  margin-bottom: 15px;
+}
+
+.report-card button {
+  margin-right: 10px;
+
+  margin-top: 10px;
+
+  padding: 10px 15px;
+
+  border: none;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+}
+
+.report-card button:hover {
+  opacity: 0.8;
+}
+/* =============================== */
+/* HIGH RISK CONTRACTS */
+/* =============================== */
+
+.high-risk-section {
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.high-risk-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.high-risk-section th,
+.high-risk-section td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.high-risk-section th {
+  font-weight: bold;
+}
+
+.high-risk-section h2 {
+  margin-bottom: 15px;
+}
+/* =============================== */
+/* OVERDUE OBLIGATIONS */
+/* =============================== */
+
+.overdue-obligations-section {
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.overdue-obligations-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.overdue-obligations-section th,
+.overdue-obligations-section td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.overdue-obligations-section th {
+  font-weight: bold;
+}
+
+.overdue-obligations-section h2 {
+  margin-bottom: 15px;
+}

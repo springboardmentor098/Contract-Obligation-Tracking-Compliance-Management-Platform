@@ -6,10 +6,22 @@ from backend.app.api import obligations
 from backend.app.api import renewals
 from backend.app.api import compliance
 from backend.app.api import notifications
+from backend.app.api import reports
+from backend.app.api import dashboard
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
     title="Contract Obligation Tracking Compliance Management Platform"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4200"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -43,6 +55,14 @@ app.include_router(
 )
 app.include_router(
     notifications.router
+)
+# Reports
+app.include_router(
+    reports.router
+)
+# Dashboard
+app.include_router(
+    dashboard.router
 )
 @app.get("/")
 def root():

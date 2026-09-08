@@ -1,0 +1,579 @@
+<div class="dashboard-container">
+
+  <h1>ContractIQ Dashboard</h1>
+
+  <p>
+    Overview of contracts, obligations, renewals and compliance.
+  </p>
+
+
+  <!-- ================================= -->
+  <!-- DASHBOARD STATISTICS CARDS -->
+  <!-- ================================= -->
+
+  <div class="stats-grid">
+
+    <!-- Total Contracts -->
+    <div class="card">
+      <h3>Total Contracts</h3>
+      <h2>{{ dashboardData.contracts.total }}</h2>
+    </div>
+
+
+    <!-- Active Contracts -->
+    <div class="card">
+      <h3>Active Contracts</h3>
+      <h2>{{ dashboardData.contracts.active }}</h2>
+    </div>
+
+
+    <!-- Draft Contracts -->
+    <div class="card">
+      <h3>Draft Contracts</h3>
+      <h2>{{ dashboardData.contracts.draft }}</h2>
+    </div>
+
+
+    <!-- Contracts Under Review -->
+    <div class="card">
+      <h3>Contracts Under Review</h3>
+      <h2>{{ dashboardData.contracts.under_review }}</h2>
+    </div>
+
+
+    <!-- Expired Contracts -->
+    <div class="card">
+      <h3>Expired Contracts</h3>
+      <h2>{{ dashboardData.contracts.expired }}</h2>
+    </div>
+
+
+    <!-- Pending Obligations -->
+    <div class="card">
+      <h3>Pending Obligations</h3>
+      <h2>{{ dashboardData.obligations.pending }}</h2>
+    </div>
+
+
+    <!-- Total Obligations -->
+    <div class="card">
+      <h3>Total Obligations</h3>
+      <h2>{{ dashboardData.obligations.total }}</h2>
+    </div>
+
+
+    <!-- Completed Obligations -->
+    <div class="card">
+      <h3>Completed Obligations</h3>
+      <h2>{{ dashboardData.obligations.completed }}</h2>
+    </div>
+
+
+    <!-- Overdue Obligations -->
+    <div class="card">
+      <h3>Overdue Obligations</h3>
+      <h2>{{ dashboardData.obligations.overdue }}</h2>
+    </div>
+
+
+    <!-- Upcoming Renewals -->
+    <div class="card">
+      <h3>Upcoming Renewals</h3>
+      <h2>{{ dashboardData.renewals.upcoming }}</h2>
+    </div>
+
+
+    <!-- High Risk Contracts -->
+    <div class="card">
+      <h3>High Risk Contracts</h3>
+      <h2>{{ dashboardData.compliance.high_risk }}</h2>
+    </div>
+
+
+    <!-- Compliant -->
+    <div class="card">
+      <h3>Compliant Contracts</h3>
+      <h2>{{ dashboardData.compliance.compliant }}</h2>
+    </div>
+
+
+    <!-- Compliance Pending -->
+    <div class="card">
+      <h3>Compliance Pending</h3>
+      <h2>{{ dashboardData.compliance.pending }}</h2>
+    </div>
+
+
+    <!-- Delayed Compliance -->
+    <div class="card">
+      <h3>Delayed Compliance</h3>
+      <h2>{{ dashboardData.compliance.delayed }}</h2>
+    </div>
+
+
+    <!-- Non-Compliant -->
+    <div class="card">
+      <h3>Non-Compliant Contracts</h3>
+      <h2>{{ dashboardData.compliance.non_compliant }}</h2>
+    </div>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- CONTRACT STATUS CHART -->
+  <!-- ================================= -->
+
+  <div class="chart-container">
+
+    <h2>Contract Status Chart</h2>
+
+    <canvas id="contractStatusChart"></canvas>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- OBLIGATION STATUS CHART -->
+  <!-- ================================= -->
+
+  <div class="chart-container">
+
+    <h2>Obligation Status Chart</h2>
+
+    <canvas id="obligationStatusChart"></canvas>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- COMPLIANCE STATUS CHART -->
+  <!-- ================================= -->
+
+  <div class="chart-container">
+
+    <h2>Compliance Status Chart</h2>
+
+    <canvas id="complianceStatusChart"></canvas>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- CONTRACT CATEGORY CHART -->
+  <!-- ================================= -->
+
+  <div class="chart-container">
+
+    <h2>Contract Category Chart</h2>
+
+    <canvas id="contractCategoryChart"></canvas>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- UPCOMING EXPIRY CONTRACTS -->
+  <!-- ================================= -->
+
+  <div class="upcoming-expiry-section">
+
+    <h2>Upcoming Expiry Contracts</h2>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Contract ID</th>
+
+          <th>Contract Number</th>
+
+          <th>Title</th>
+
+          <th>Expiry Date</th>
+
+          <th>Days Remaining</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody>
+
+        @for (
+          contract of upcomingExpiryContracts;
+          track contract.contract_id
+        ) {
+
+          <tr>
+
+            <td>
+              {{ contract.contract_id }}
+            </td>
+
+            <td>
+              {{ contract.contract_number }}
+            </td>
+
+            <td>
+              {{ contract.contract_title }}
+            </td>
+
+            <td>
+              {{ contract.expiry_date }}
+            </td>
+
+            <td>
+              {{ contract.days_remaining }}
+            </td>
+
+          </tr>
+
+        }
+
+
+        @if (upcomingExpiryContracts.length === 0) {
+
+          <tr>
+
+            <td colspan="5">
+
+              No upcoming expiry contracts found.
+
+            </td>
+
+          </tr>
+
+        }
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- DEPARTMENT PERFORMANCE -->
+  <!-- ================================= -->
+
+  <div class="department-performance-section">
+
+    <h2>Department Performance</h2>
+
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Department</th>
+
+          <th>Contracts</th>
+
+          <th>Obligations</th>
+
+          <th>Overdue</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody>
+
+        @for (
+          department of departmentPerformance;
+          track department.department
+        ) {
+
+          <tr>
+
+            <td>
+
+              {{ department.department }}
+
+            </td>
+
+
+            <td>
+
+              {{ department.contracts }}
+
+            </td>
+
+
+            <td>
+
+              {{ department.obligations }}
+
+            </td>
+
+
+            <td>
+
+              {{ department.overdue }}
+
+            </td>
+
+          </tr>
+
+        }
+
+
+        @if (departmentPerformance.length === 0) {
+
+          <tr>
+
+            <td colspan="4">
+
+              No department performance data found.
+
+            </td>
+
+          </tr>
+
+        }
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- DEPARTMENT PERFORMANCE CHART -->
+  <!-- ================================= -->
+
+  <div class="chart-container">
+
+    <h2>Department Performance Chart</h2>
+
+    <canvas id="departmentPerformanceChart"></canvas>
+    <!-- =============================== -->
+<!-- REPORT DOWNLOAD SECTION -->
+<!-- =============================== -->
+
+<div class="reports-section">
+
+  <h2>Download Reports</h2>
+
+  <div class="reports-grid">
+
+
+    <!-- CONTRACT REPORT -->
+
+    <div class="report-card">
+
+      <h3>Contract Report</h3>
+
+      <button
+        (click)="downloadContractPdf()">
+
+        Download PDF
+
+      </button>
+
+      <button
+        (click)="downloadContractExcel()">
+
+        Download Excel
+
+      </button>
+
+    </div>
+
+
+    <!-- OBLIGATION REPORT -->
+
+    <div class="report-card">
+
+      <h3>Obligation Report</h3>
+
+      <button
+        (click)="downloadObligationPdf()">
+
+        Download PDF
+
+      </button>
+
+      <button
+        (click)="downloadObligationExcel()">
+
+        Download Excel
+
+      </button>
+
+    </div>
+
+
+    <!-- RENEWAL REPORT -->
+
+    <div class="report-card">
+
+      <h3>Renewal Report</h3>
+
+      <button
+        (click)="downloadRenewalPdf()">
+
+        Download PDF
+
+      </button>
+
+      <button
+        (click)="downloadRenewalExcel()">
+
+        Download Excel
+
+      </button>
+
+    </div>
+
+
+    <!-- COMPLIANCE REPORT -->
+
+    <div class="report-card">
+
+      <h3>Compliance Report</h3>
+
+      <button
+        (click)="downloadCompliancePdf()">
+
+        Download PDF
+
+      </button>
+
+      <button
+        (click)="downloadComplianceExcel()">
+
+        Download Excel
+
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+<!-- =============================== -->
+<!-- HIGH RISK CONTRACTS -->
+<!-- =============================== -->
+
+<div class="high-risk-section">
+
+  <h2>⚠️ High Risk Contracts</h2>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Contract ID</th>
+        <th>Contract Number</th>
+        <th>Risk Level</th>
+        <th>Overdue Obligations</th>
+        <th>Compliance Score</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      @for (contract of highRiskContracts; track contract.contract_id) {
+
+        <tr>
+
+          <td>{{ contract.contract_id }}</td>
+
+          <td>{{ contract.contract_number }}</td>
+
+          <td>{{ contract.risk_level }}</td>
+
+          <td>{{ contract.overdue_obligations }}</td>
+
+          <td>{{ contract.compliance_score }}%</td>
+
+        </tr>
+
+      }
+
+      @if (highRiskContracts.length === 0) {
+
+        <tr>
+          <td colspan="5">
+            No High Risk Contracts Found.
+          </td>
+        </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+</div>
+<!-- =============================== -->
+<!-- OVERDUE OBLIGATIONS -->
+<!-- =============================== -->
+
+<div class="overdue-obligations-section">
+
+  <h2>🔴 Overdue Obligations</h2>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Contract ID</th>
+        <th>Obligation Title</th>
+        <th>Due Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      @for (obligation of overdueObligations; track obligation.id) {
+
+        <tr>
+
+          <td>{{ obligation.id }}</td>
+
+          <td>{{ obligation.contract_id }}</td>
+
+          <td>{{ obligation.title }}</td>
+
+          <td>{{ obligation.due_date }}</td>
+
+          <td>{{ obligation.status }}</td>
+
+        </tr>
+
+      }
+
+      @if (overdueObligations.length === 0) {
+
+        <tr>
+
+          <td colspan="5">
+            No Overdue Obligations Found.
+          </td>
+
+        </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+</div>
+  </div>
+
+
+</div>
