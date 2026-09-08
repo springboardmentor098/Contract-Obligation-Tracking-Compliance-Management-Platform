@@ -1,313 +1,142 @@
-from fastapi import APIRouter, Depends
-from fastapi.responses import StreamingResponse
+from datetime import date
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.models.user import User
 from app.core.security import get_current_user
 
-from app.schemas.reports import (
-    ContractReportResponse,
-    ObligationReportResponse,
-    RenewalReportResponse,
-    ComplianceReportResponse,
-    AuditReportResponse,
+from app.schemas.report import (
+    ContractSummaryResponse,
+    ObligationSummaryResponse,
+    RenewalSummaryResponse,
+    ComplianceSummaryResponse,
+    DashboardSummaryResponse,
 )
 
 from app.services.report_service import (
-    generate_contract_report,
-    generate_obligation_report,
-    generate_renewal_report,
-    generate_compliance_report,
-    generate_audit_report,
-    contract_pdf,
-    obligation_pdf,
-    renewal_pdf,
-    compliance_pdf,
-    audit_pdf,
-    contract_excel,
-    obligation_excel,
-    renewal_excel,
-    compliance_excel,
-    audit_excel,
+    get_contract_summary,
+    get_obligation_summary,
+    get_renewal_summary,
+    get_compliance_summary,
+    get_dashboard_summary,
 )
 
 
 router = APIRouter(
     prefix="/reports",
-    tags=["Reports"],
+    tags=["Reports & Analytics"],
 )
 
 
 # ============================================================
-# REPORT APIs
+# CONTRACT REPORT
+# GET /reports/contracts
 # ============================================================
 
 @router.get(
     "/contracts",
-    response_model=ContractReportResponse,
+    response_model=ContractSummaryResponse,
 )
-def contract_report(
+def contract_summary(
+    status: Optional[str] = Query(
+        default=None,
+        description="Filter contracts by status",
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    return generate_contract_report(db)
+    return get_contract_summary(
+        db=db,
+        status=status,
+    )
 
+
+# ============================================================
+# OBLIGATION REPORT
+# GET /reports/obligations
+# ============================================================
 
 @router.get(
     "/obligations",
-    response_model=ObligationReportResponse,
+    response_model=ObligationSummaryResponse,
 )
-def obligation_report(
+def obligation_summary(
+    status: Optional[str] = Query(
+        default=None,
+        description="Filter obligations by status",
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    return generate_obligation_report(db)
+    return get_obligation_summary(
+        db=db,
+        status=status,
+    )
 
+
+# ============================================================
+# RENEWAL REPORT
+# GET /reports/renewals
+# ============================================================
 
 @router.get(
     "/renewals",
-    response_model=RenewalReportResponse,
+    response_model=RenewalSummaryResponse,
 )
-def renewal_report(
+def renewal_summary(
+    start_date: Optional[date] = Query(
+        default=None,
+        description="Start date for renewal filtering",
+    ),
+    end_date: Optional[date] = Query(
+        default=None,
+        description="End date for renewal filtering",
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    return generate_renewal_report(db)
+    if start_date and end_date and start_date > end_date:
+        raise HTTPException(
+            status_code=400,
+            detail="start_date cannot be after end_date",
+        )
 
+    return get_renewal_summary(
+        db=db,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+
+# ============================================================
+# COMPLIANCE REPORT
+# GET /reports/compliance
+# ============================================================
 
 @router.get(
     "/compliance",
-    response_model=ComplianceReportResponse,
+    response_model=ComplianceSummaryResponse,
 )
-def compliance_report(
+def compliance_summary(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    return generate_compliance_report(db)
+    return get_compliance_summary(db)
 
+
+# ============================================================
+# DASHBOARD SUMMARY
+# GET /reports/dashboard
+# ============================================================
 
 @router.get(
-    "/audit",
-    response_model=AuditReportResponse,
+    "/dashboard",
+    response_model=DashboardSummaryResponse,
 )
-def audit_report(
+def dashboard_summary(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    return generate_audit_report(db)
-
-
-# ============================================================
-# CONTRACT EXPORT
-# ============================================================
-
-@router.get("/contracts/export/pdf")
-def export_contract_pdf(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = contract_pdf(db)
-
-    return StreamingResponse(
-        file,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition":
-                "attachment; filename=contract_report.pdf"
-        },
-    )
-
-
-@router.get("/contracts/export/excel")
-def export_contract_excel(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = contract_excel(db)
-
-    return StreamingResponse(
-        file,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument."
-            "spreadsheetml.sheet"
-        ),
-        headers={
-            "Content-Disposition":
-                "attachment; filename=contract_report.xlsx"
-        },
-    )
-
-
-# ============================================================
-# OBLIGATION EXPORT
-# ============================================================
-
-@router.get("/obligations/export/pdf")
-def export_obligation_pdf(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = obligation_pdf(db)
-
-    return StreamingResponse(
-        file,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition":
-                "attachment; filename=obligation_report.pdf"
-        },
-    )
-
-
-@router.get("/obligations/export/excel")
-def export_obligation_excel(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = obligation_excel(db)
-
-    return StreamingResponse(
-        file,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument."
-            "spreadsheetml.sheet"
-        ),
-        headers={
-            "Content-Disposition":
-                "attachment; filename=obligation_report.xlsx"
-        },
-    )
-
-
-# ============================================================
-# RENEWAL EXPORT
-# ============================================================
-
-@router.get("/renewals/export/pdf")
-def export_renewal_pdf(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = renewal_pdf(db)
-
-    return StreamingResponse(
-        file,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition":
-                "attachment; filename=renewal_report.pdf"
-        },
-    )
-
-
-@router.get("/renewals/export/excel")
-def export_renewal_excel(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = renewal_excel(db)
-
-    return StreamingResponse(
-        file,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument."
-            "spreadsheetml.sheet"
-        ),
-        headers={
-            "Content-Disposition":
-                "attachment; filename=renewal_report.xlsx"
-        },
-    )
-
-
-# ============================================================
-# COMPLIANCE EXPORT
-# ============================================================
-
-@router.get("/compliance/export/pdf")
-def export_compliance_pdf(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = compliance_pdf(db)
-
-    return StreamingResponse(
-        file,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition":
-                "attachment; filename=compliance_report.pdf"
-        },
-    )
-
-
-@router.get("/compliance/export/excel")
-def export_compliance_excel(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = compliance_excel(db)
-
-    return StreamingResponse(
-        file,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument."
-            "spreadsheetml.sheet"
-        ),
-        headers={
-            "Content-Disposition":
-                "attachment; filename=compliance_report.xlsx"
-        },
-    )
-
-
-# ============================================================
-# AUDIT EXPORT
-# ============================================================
-
-@router.get("/audit/export/pdf")
-def export_audit_pdf(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = audit_pdf(db)
-
-    return StreamingResponse(
-        file,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition":
-                "attachment; filename=audit_report.pdf"
-        },
-    )
-
-
-@router.get("/audit/export/excel")
-def export_audit_excel(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-
-    file = audit_excel(db)
-
-    return StreamingResponse(
-        file,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument."
-            "spreadsheetml.sheet"
-        ),
-        headers={
-            "Content-Disposition":
-                "attachment; filename=audit_report.xlsx"
-        },
-    )
+    return get_dashboard_summary(db)
