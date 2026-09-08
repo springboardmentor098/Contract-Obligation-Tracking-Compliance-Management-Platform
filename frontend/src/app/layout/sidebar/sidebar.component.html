@@ -1,0 +1,43 @@
+<aside class="sidebar">
+
+  <!-- User Role -->
+  <div class="role-section">
+    <mat-icon>account_circle</mat-icon>
+
+    <div class="role-info">
+      <span class="role-label">Role</span>
+      <strong>{{ currentRole }}</strong>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <mat-nav-list>
+
+    @for (item of navigationItems; track item.route) {
+
+      @if (isAllowed(item)) {
+
+        <a
+          mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        >
+
+          <mat-icon matListItemIcon>
+            {{ item.icon }}
+          </mat-icon>
+
+          <span matListItemTitle>
+            {{ item.label }}
+          </span>
+
+        </a>
+
+      }
+
+    }
+
+  </mat-nav-list>
+
+</aside>

@@ -1,0 +1,344 @@
+<div class="notifications-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+      <h1>Notifications</h1>
+      <p>View and manage your contract, obligation, and compliance notifications.</p>
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="toggleUnreadFilter()"
+      >
+        <mat-icon>
+          {{ showUnreadOnly ? 'notifications' : 'mark_email_unread' }}
+        </mat-icon>
+
+        {{ showUnreadOnly ? 'All Notifications' : 'Unread Only' }}
+      </button>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="markAllAsRead()"
+        [disabled]="unreadCount === 0"
+      >
+        <mat-icon>done_all</mat-icon>
+        Mark All Read
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Refresh notifications"
+        aria-label="Refresh notifications"
+        (click)="refresh()"
+        [disabled]="loading"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- Summary -->
+  <div class="notification-summary">
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+
+        <div class="summary-icon">
+          <mat-icon>notifications</mat-icon>
+        </div>
+
+        <div class="summary-info">
+          <span>Total Notifications</span>
+          <strong>{{ notifications.length }}</strong>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card unread-summary">
+      <mat-card-content>
+
+        <div class="summary-icon">
+          <mat-icon>mark_email_unread</mat-icon>
+        </div>
+
+        <div class="summary-info">
+          <span>Unread</span>
+          <strong>{{ unreadCount }}</strong>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card read-summary">
+      <mat-card-content>
+
+        <div class="summary-icon">
+          <mat-icon>drafts</mat-icon>
+        </div>
+
+        <div class="summary-info">
+          <span>Read</span>
+          <strong>
+            {{ notifications.length - unreadCount }}
+          </strong>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- Error -->
+  @if (error) {
+
+    <mat-card class="error-card">
+
+      <mat-card-content>
+
+        <mat-icon>error_outline</mat-icon>
+
+        <span>{{ error }}</span>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="refresh()"
+        >
+          Retry
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+  <!-- Loading -->
+  @if (loading) {
+
+    <mat-card class="loading-card">
+
+      <mat-card-content>
+
+        <mat-spinner diameter="45"></mat-spinner>
+
+        <p>Loading notifications...</p>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+  <!-- Empty -->
+  @else if (filteredNotifications.length === 0) {
+
+    <mat-card class="empty-card">
+
+      <mat-card-content>
+
+        @if (showUnreadOnly) {
+
+          <mat-icon>mark_email_read</mat-icon>
+
+          <h3>No Unread Notifications</h3>
+
+          <p>
+            You have no unread notifications at the moment.
+          </p>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="toggleUnreadFilter()"
+          >
+            View All Notifications
+          </button>
+
+        } @else {
+
+          <mat-icon>notifications_none</mat-icon>
+
+          <h3>No Notifications</h3>
+
+          <p>
+            You don't have any notifications at the moment.
+          </p>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+  <!-- Notification List -->
+  @else {
+
+    <section class="notification-list">
+
+      <div class="section-header">
+
+        <div>
+          <h2>
+            {{ showUnreadOnly ? 'Unread Notifications' : 'All Notifications' }}
+          </h2>
+
+          <p>
+            {{ filteredNotifications.length }}
+            notification{{ filteredNotifications.length === 1 ? '' : 's' }}
+          </p>
+        </div>
+
+      </div>
+
+      @for (
+        notification of filteredNotifications;
+        track notification.id
+      ) {
+
+        <mat-card
+          class="notification-card"
+          [class.unread]="isUnread(notification)"
+          [class.read]="!isUnread(notification)"
+        >
+
+          <mat-card-content>
+
+            <div class="notification-icon">
+
+              <mat-icon>
+                {{ getNotificationIcon(notification.notification_type) }}
+              </mat-icon>
+
+            </div>
+
+            <div class="notification-content">
+
+              <div class="notification-top">
+
+                <div>
+
+                  <span class="notification-type">
+                    {{ notification.notification_type }}
+                  </span>
+
+                  @if (isUnread(notification)) {
+                    <span class="unread-badge">
+                      Unread
+                    </span>
+                  }
+
+                </div>
+
+                <span class="notification-date">
+                  {{ formatDate(notification.created_at) }}
+                </span>
+
+              </div>
+
+              <h3>
+                {{ notification.title }}
+              </h3>
+
+              <p class="notification-message">
+                {{ notification.message }}
+              </p>
+
+              <div class="notification-meta">
+
+                @if (notification.contract_id) {
+
+                  <span>
+                    <mat-icon>description</mat-icon>
+                    Contract:
+                    {{ notification.contract_id }}
+                  </span>
+
+                }
+
+                @if (notification.obligation_id) {
+
+                  <span>
+                    <mat-icon>assignment</mat-icon>
+                    Obligation:
+                    {{ notification.obligation_id }}
+                  </span>
+
+                }
+
+                @if (notification.status) {
+
+                  <span>
+                    <mat-icon>info</mat-icon>
+                    Status:
+                    {{ notification.status }}
+                  </span>
+
+                }
+
+              </div>
+
+              <div class="notification-actions">
+
+                @if (isUnread(notification)) {
+
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="markAsRead(notification)"
+                  >
+                    <mat-icon>mark_email_read</mat-icon>
+                    Mark as Read
+                  </button>
+
+                } @else {
+
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="markAsUnread(notification)"
+                  >
+                    <mat-icon>mark_email_unread</mat-icon>
+                    Mark as Unread
+                  </button>
+
+                }
+
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Delete notification"
+                  aria-label="Delete notification"
+                  (click)="deleteNotification(notification)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+
+              </div>
+
+            </div>
+
+          </mat-card-content>
+
+        </mat-card>
+
+      }
+
+    </section>
+
+  }
+
+</div>

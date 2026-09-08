@@ -1,0 +1,408 @@
+.contracts-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* =========================
+   Page Header
+   ========================= */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #666;
+    font-size: 14px;
+  }
+
+  button {
+    white-space: nowrap;
+
+    mat-icon {
+      margin-right: 6px;
+    }
+  }
+}
+
+/* =========================
+   Create Contract Card
+   ========================= */
+
+.create-card {
+  margin-bottom: 24px;
+}
+
+.form-header {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.form-header mat-card-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.form-header mat-card-subtitle {
+  margin-top: 5px;
+}
+
+/* =========================
+   Form Error
+   ========================= */
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #d32f2f;
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 14px;
+  }
+}
+
+/* =========================
+   Contract Form
+   ========================= */
+
+.contract-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  padding-top: 20px;
+}
+
+.form-field {
+  width: 100%;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* =========================
+   Form Actions
+   ========================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 24px;
+
+  button {
+    min-width: 120px;
+  }
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+}
+
+/* =========================
+   Search / Filter
+   ========================= */
+
+.filter-card {
+  margin-bottom: 20px;
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px !important;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 250px;
+}
+
+/* =========================
+   Loading / Empty / Error
+   ========================= */
+
+.state-card {
+  margin-top: 20px;
+
+  mat-card-content {
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  mat-spinner {
+    margin-bottom: 16px;
+  }
+
+  mat-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 52px;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    margin: 4px 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0 0 20px;
+    color: #666;
+    max-width: 500px;
+  }
+}
+
+.error-state {
+  mat-card {
+    border-left: 4px solid #d32f2f;
+  }
+
+  mat-icon {
+    color: #d32f2f;
+  }
+}
+
+/* =========================
+   Contracts Table
+   ========================= */
+
+.table-card {
+  overflow: hidden;
+
+  mat-card-header {
+    padding: 20px 20px 16px;
+  }
+
+  mat-card-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  mat-card-subtitle {
+    margin-top: 4px;
+  }
+
+  mat-card-content {
+    padding: 0 !important;
+  }
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.contracts-table {
+  width: 100%;
+  min-width: 1050px;
+}
+
+.contracts-table th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.contracts-table td {
+  white-space: nowrap;
+}
+
+.contracts-table tr:hover {
+  background: #f8f9fa;
+}
+
+/* =========================
+   Status Badges
+   ========================= */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.draft {
+  background: #eeeeee;
+  color: #555;
+}
+
+.status-badge.under-review {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.approved {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* =========================
+   Action Buttons
+   ========================= */
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.action-buttons button {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+}
+
+/* =========================
+   Tablet
+   ========================= */
+
+@media (max-width: 900px) {
+  .contract-form {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+}
+
+/* =========================
+   Mobile
+   ========================= */
+
+@media (max-width: 768px) {
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 18px;
+
+    h1 {
+      font-size: 24px;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .form-header {
+    gap: 10px;
+  }
+
+  .contract-form {
+    gap: 4px;
+    padding-top: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .filter-content {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .search-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-content > button {
+    width: 100%;
+  }
+
+  .contracts-table {
+    min-width: 1000px;
+  }
+}
+
+/* =========================
+   Small Mobile
+   ========================= */
+
+@media (max-width: 500px) {
+  .page-header {
+    h1 {
+      font-size: 22px;
+    }
+
+    p {
+      font-size: 13px;
+    }
+  }
+
+  .create-card {
+    margin-bottom: 16px;
+  }
+
+  .filter-card {
+    margin-bottom: 16px;
+  }
+
+  .filter-content {
+    padding: 12px !important;
+  }
+
+  .state-card {
+    mat-card-content {
+      min-height: 200px;
+      padding: 30px 16px;
+    }
+  }
+
+  .status-badge {
+    min-width: 80px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

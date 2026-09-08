@@ -1,0 +1,869 @@
+<div class="reports-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Reports & Analytics</h1>
+      <p>Monitor contracts, obligations, renewals, and compliance performance.</p>
+    </div>
+
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="refresh()"
+      [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Error -->
+  <mat-card class="error-card" *ngIf="error">
+    <mat-icon>error_outline</mat-icon>
+
+    <div class="error-content">
+      <strong>Unable to load reports</strong>
+      <span>{{ error }}</span>
+    </div>
+
+    <button
+      mat-raised-button
+      type="button"
+      (click)="retry()">
+      Retry
+    </button>
+  </mat-card>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="45"></mat-spinner>
+    <p>Loading reports and analytics...</p>
+  </div>
+
+  <!-- Report Content -->
+  <div class="report-content" *ngIf="!loading && !error">
+
+    <!-- Contract Summary -->
+    <section class="report-section">
+
+      <div class="section-title">
+        <mat-icon>description</mat-icon>
+
+        <div>
+          <h2>Contract Summary</h2>
+          <p>Overview of the current contract portfolio.</p>
+        </div>
+      </div>
+
+      <div class="summary-grid" *ngIf="contractSummary">
+
+        <mat-card class="summary-card">
+          <div class="summary-icon">
+            <mat-icon>description</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ contractSummary.total_contracts }}
+          </div>
+
+          <div class="summary-label">
+            Total Contracts
+          </div>
+        </mat-card>
+
+        <mat-card class="summary-card">
+          <div class="summary-icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ contractSummary.active_contracts }}
+          </div>
+
+          <div class="summary-label">
+            Active Contracts
+          </div>
+        </mat-card>
+
+        <mat-card class="summary-card">
+          <div class="summary-icon">
+            <mat-icon>event_busy</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ contractSummary.expired_contracts }}
+          </div>
+
+          <div class="summary-label">
+            Expired Contracts
+          </div>
+        </mat-card>
+
+        <mat-card class="summary-card">
+          <div class="summary-icon">
+            <mat-icon>pending_actions</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ contractSummary.pending_approval }}
+          </div>
+
+          <div class="summary-label">
+            Pending Approval
+          </div>
+        </mat-card>
+
+      </div>
+
+      <mat-card class="table-card">
+
+        <div class="card-header">
+          <div>
+            <h3>Contract Status Distribution</h3>
+            <p>Contracts grouped by their current status.</p>
+          </div>
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="contractStatusDistribution.length === 0">
+
+          <mat-icon>bar_chart</mat-icon>
+          <p>No contract status data available.</p>
+        </div>
+
+        <div
+          class="table-wrapper"
+          *ngIf="contractStatusDistribution.length > 0">
+
+          <table
+            mat-table
+            [dataSource]="contractStatusDistribution">
+
+            <ng-container matColumnDef="status">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Status
+              </th>
+
+              <td mat-cell *matCellDef="let item">
+
+                <span
+                  class="status-badge"
+                  [ngClass]="getStatusClass(item.status)">
+
+                  {{ item.status }}
+
+                </span>
+
+              </td>
+
+            </ng-container>
+
+            <ng-container matColumnDef="count">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Count
+              </th>
+
+              <td mat-cell *matCellDef="let item">
+                {{ item.count }}
+              </td>
+
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="contractDisplayedColumns">
+            </tr>
+
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: contractDisplayedColumns;
+              ">
+            </tr>
+
+          </table>
+
+        </div>
+
+      </mat-card>
+
+    </section>
+
+
+    <!-- Obligation Summary -->
+    <section class="report-section">
+
+      <div class="section-title">
+
+        <mat-icon>assignment</mat-icon>
+
+        <div>
+          <h2>Obligation Summary</h2>
+          <p>Track obligation completion and overdue items.</p>
+        </div>
+
+      </div>
+
+      <div
+        class="summary-grid"
+        *ngIf="obligationSummary">
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>assignment</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ obligationSummary.total_obligations }}
+          </div>
+
+          <div class="summary-label">
+            Total Obligations
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>pending_actions</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ obligationSummary.pending_obligations }}
+          </div>
+
+          <div class="summary-label">
+            Pending
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>task_alt</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ obligationSummary.completed_obligations }}
+          </div>
+
+          <div class="summary-label">
+            Completed
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>warning</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ obligationSummary.overdue_obligations }}
+          </div>
+
+          <div class="summary-label">
+            Overdue
+          </div>
+
+        </mat-card>
+
+      </div>
+
+      <mat-card class="table-card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Obligation Status Distribution</h3>
+            <p>Obligations grouped by their current status.</p>
+          </div>
+
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="obligationStatusDistribution.length === 0">
+
+          <mat-icon>bar_chart</mat-icon>
+
+          <p>No obligation status data available.</p>
+
+        </div>
+
+        <div
+          class="table-wrapper"
+          *ngIf="obligationStatusDistribution.length > 0">
+
+          <table
+            mat-table
+            [dataSource]="obligationStatusDistribution">
+
+            <ng-container matColumnDef="status">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Status
+              </th>
+
+              <td mat-cell *matCellDef="let item">
+
+                <span
+                  class="status-badge"
+                  [ngClass]="getStatusClass(item.status)">
+
+                  {{ item.status }}
+
+                </span>
+
+              </td>
+
+            </ng-container>
+
+            <ng-container matColumnDef="count">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Count
+              </th>
+
+              <td mat-cell *matCellDef="let item">
+                {{ item.count }}
+              </td>
+
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="obligationDisplayedColumns">
+            </tr>
+
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: obligationDisplayedColumns;
+              ">
+            </tr>
+
+          </table>
+
+        </div>
+
+      </mat-card>
+
+    </section>
+
+
+    <!-- Compliance -->
+    <section class="report-section">
+
+      <div class="section-title">
+
+        <mat-icon>verified_user</mat-icon>
+
+        <div>
+          <h2>Compliance Summary</h2>
+          <p>Overall compliance and risk indicators.</p>
+        </div>
+
+      </div>
+
+      <div
+        class="summary-grid"
+        *ngIf="complianceSummary">
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>business</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ complianceSummary.total_contracts }}
+          </div>
+
+          <div class="summary-label">
+            Total Contracts
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>verified</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ complianceSummary.compliant_contracts }}
+          </div>
+
+          <div class="summary-label">
+            Compliant
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>gpp_bad</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ complianceSummary.non_compliant_contracts }}
+          </div>
+
+          <div class="summary-label">
+            Non-Compliant
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>warning</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ complianceSummary.high_risk_contracts }}
+          </div>
+
+          <div class="summary-label">
+            High Risk Contracts
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>priority_high</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ complianceSummary.high_risk_obligations }}
+          </div>
+
+          <div class="summary-label">
+            High Risk Obligations
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>score</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ formatScore(complianceSummary.average_compliance_score) }}
+          </div>
+
+          <div class="summary-label">
+            Average Compliance Score
+          </div>
+
+        </mat-card>
+
+      </div>
+
+      <mat-card
+        class="compliance-status-card"
+        *ngIf="complianceSummary">
+
+        <div class="compliance-status-content">
+
+          <mat-icon [ngClass]="getComplianceClass()">
+            verified_user
+          </mat-icon>
+
+          <div>
+
+            <strong>Compliance Overview</strong>
+
+            <p
+              *ngIf="
+                complianceSummary.non_compliant_contracts > 0
+              ">
+
+              There are
+              {{ complianceSummary.non_compliant_contracts }}
+              non-compliant contract(s) requiring attention.
+
+            </p>
+
+            <p
+              *ngIf="
+                complianceSummary.non_compliant_contracts === 0 &&
+                complianceSummary.high_risk_contracts === 0
+              ">
+
+              No non-compliant or high-risk contracts are currently reported.
+
+            </p>
+
+            <p
+              *ngIf="
+                complianceSummary.non_compliant_contracts === 0 &&
+                complianceSummary.high_risk_contracts > 0
+              ">
+
+              High-risk contracts require additional monitoring.
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </mat-card>
+
+    </section>
+
+
+    <!-- Renewals -->
+    <section class="report-section">
+
+      <div class="section-title">
+
+        <mat-icon>event_repeat</mat-icon>
+
+        <div>
+          <h2>Renewal Reports</h2>
+          <p>
+            Monitor upcoming, expired, and attention-required renewals.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="summary-grid">
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>event</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{ upcomingRenewals.length }}
+          </div>
+
+          <div class="summary-label">
+            Upcoming Renewals
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>event_busy</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{
+              renewalSummary?.expired_contracts ??
+              expiredRenewals.length
+            }}
+          </div>
+
+          <div class="summary-label">
+            Expired Contracts
+          </div>
+
+        </mat-card>
+
+        <mat-card class="summary-card">
+
+          <div class="summary-icon">
+            <mat-icon>priority_high</mat-icon>
+          </div>
+
+          <div class="summary-value">
+            {{
+              renewalSummary?.contracts_requiring_attention ??
+              attentionRenewals.length
+            }}
+          </div>
+
+          <div class="summary-label">
+            Requiring Attention
+          </div>
+
+        </mat-card>
+
+      </div>
+
+
+      <!-- Upcoming Renewals -->
+      <mat-card class="table-card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Upcoming Renewals</h3>
+            <p>
+              Renewals reported within the configured upcoming period.
+            </p>
+          </div>
+
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="upcomingRenewals.length === 0">
+
+          <mat-icon>event_available</mat-icon>
+
+          <p>No upcoming renewals found.</p>
+
+        </div>
+
+        <div
+          class="table-wrapper"
+          *ngIf="upcomingRenewals.length > 0">
+
+          <table
+            mat-table
+            [dataSource]="upcomingRenewals">
+
+            <ng-container matColumnDef="id">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Renewal ID
+              </th>
+
+              <td mat-cell *matCellDef="let renewal">
+                {{ renewal.id }}
+              </td>
+
+            </ng-container>
+
+            <ng-container matColumnDef="contract_id">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Contract ID
+              </th>
+
+              <td mat-cell *matCellDef="let renewal">
+                {{ renewal.contract_id }}
+              </td>
+
+            </ng-container>
+
+            <ng-container matColumnDef="renewal_date">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Renewal Date
+              </th>
+
+              <td mat-cell *matCellDef="let renewal">
+                {{ formatDate(renewal.renewal_date) }}
+              </td>
+
+            </ng-container>
+
+            <ng-container matColumnDef="previous_expiry_date">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Previous Expiry
+              </th>
+
+              <td mat-cell *matCellDef="let renewal">
+                {{ formatDate(renewal.previous_expiry_date) }}
+              </td>
+
+            </ng-container>
+
+            <ng-container matColumnDef="new_expiry_date">
+
+              <th mat-header-cell *matHeaderCellDef>
+                New Expiry
+              </th>
+
+              <td mat-cell *matCellDef="let renewal">
+                {{ formatDate(renewal.new_expiry_date) }}
+              </td>
+
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+
+              <th mat-header-cell *matHeaderCellDef>
+                Status
+              </th>
+
+              <td mat-cell *matCellDef="let renewal">
+
+                <span
+                  class="status-badge"
+                  [ngClass]="getRenewalStatusClass(renewal.status)">
+
+                  {{ renewal.status }}
+
+                </span>
+
+              </td>
+
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="renewalDisplayedColumns">
+            </tr>
+
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: renewalDisplayedColumns;
+              ">
+            </tr>
+
+          </table>
+
+        </div>
+
+      </mat-card>
+
+
+      <!-- Expired Renewals -->
+      <mat-card class="table-card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Expired Renewals</h3>
+            <p>
+              Renewal records associated with expired contracts.
+            </p>
+          </div>
+
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="expiredRenewals.length === 0">
+
+          <mat-icon>event_busy</mat-icon>
+
+          <p>No expired renewals found.</p>
+
+        </div>
+
+        <div
+          class="renewal-list"
+          *ngIf="expiredRenewals.length > 0">
+
+          <div
+            class="renewal-item"
+            *ngFor="let renewal of expiredRenewals">
+
+            <div>
+              <strong>Contract</strong>
+              <span>{{ renewal.contract_id }}</span>
+            </div>
+
+            <div>
+              <strong>Renewal Date</strong>
+              <span>
+                {{ formatDate(renewal.renewal_date) }}
+              </span>
+            </div>
+
+            <span
+              class="status-badge"
+              [ngClass]="getRenewalStatusClass(renewal.status)">
+
+              {{ renewal.status }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+      </mat-card>
+
+
+      <!-- Attention Renewals -->
+      <mat-card class="table-card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Renewals Requiring Attention</h3>
+            <p>
+              Renewals that need review or action.
+            </p>
+          </div>
+
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="attentionRenewals.length === 0">
+
+          <mat-icon>check_circle</mat-icon>
+
+          <p>No renewals currently require attention.</p>
+
+        </div>
+
+        <div
+          class="renewal-list"
+          *ngIf="attentionRenewals.length > 0">
+
+          <div
+            class="renewal-item"
+            *ngFor="let renewal of attentionRenewals">
+
+            <div>
+              <strong>Contract</strong>
+              <span>{{ renewal.contract_id }}</span>
+            </div>
+
+            <div>
+              <strong>Renewal Date</strong>
+              <span>
+                {{ formatDate(renewal.renewal_date) }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Expiry</strong>
+              <span>
+                {{ formatDate(renewal.previous_expiry_date) }}
+              </span>
+            </div>
+
+            <span
+              class="status-badge"
+              [ngClass]="getRenewalStatusClass(renewal.status)">
+
+              {{ renewal.status }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+      </mat-card>
+
+    </section>
+
+  </div>
+
+</div>

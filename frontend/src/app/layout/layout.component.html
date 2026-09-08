@@ -1,0 +1,33 @@
+<div class="app-layout">
+
+  <!-- Header -->
+  <app-header
+    (menuToggle)="toggleSidebar()"
+  ></app-header>
+
+  <div class="app-body">
+
+    <!-- Mobile Overlay -->
+    @if (sidebarOpen) {
+      <div
+        class="sidebar-overlay"
+        (click)="closeSidebar()"
+      ></div>
+    }
+
+    <!-- Sidebar -->
+    <div
+      class="sidebar-container"
+      [class.sidebar-open]="sidebarOpen"
+    >
+      <app-sidebar></app-sidebar>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

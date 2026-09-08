@@ -1,0 +1,45 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.menu-button {
+  display: none;
+  margin-right: 8px;
+}
+
+/* ============================================================
+   TABLET / MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  .menu-button {
+    display: inline-flex;
+  }
+
+  .brand {
+    font-size: 16px;
+  }
+}
+
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 500px) {
+
+  .brand {
+    font-size: 14px;
+  }
+}

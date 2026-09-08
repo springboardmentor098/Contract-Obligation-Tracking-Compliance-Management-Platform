@@ -1,0 +1,110 @@
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  height: 100%;
+  background: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  padding-top: 8px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* User Role */
+.role-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 16px;
+  margin-bottom: 8px;
+
+  border-bottom: 1px solid #eeeeee;
+  box-sizing: border-box;
+
+  mat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+    flex-shrink: 0;
+  }
+}
+
+.role-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+
+  .role-label {
+    font-size: 11px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  strong {
+    margin-top: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Navigation */
+mat-nav-list {
+  width: 100%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+a {
+  display: flex;
+  width: calc(100% - 16px);
+  max-width: calc(100% - 16px);
+  margin: 2px 8px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+a.active {
+  font-weight: 600;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 190px;
+    min-width: 190px;
+  }
+
+  .role-section {
+    padding: 12px;
+
+    mat-icon {
+      width: 30px;
+      height: 30px;
+      font-size: 30px;
+    }
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 500px) {
+  .sidebar {
+    width: 170px;
+    min-width: 170px;
+  }
+
+  .role-section {
+    gap: 8px;
+
+    strong {
+      font-size: 12px;
+    }
+  }
+}

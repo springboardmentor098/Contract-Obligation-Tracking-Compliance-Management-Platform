@@ -1,0 +1,40 @@
+<mat-toolbar class="header">
+
+  <!-- Mobile Menu Button -->
+  <button
+    mat-icon-button
+    class="menu-button"
+    matTooltip="Menu"
+    aria-label="Open navigation menu"
+    (click)="toggleMenu()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Application Name -->
+  <span class="brand">
+    Contract Compliance Platform
+  </span>
+
+  <span class="spacer"></span>
+
+  <!-- Notifications -->
+  <button
+    mat-icon-button
+    matTooltip="Notifications"
+    aria-label="Notifications"
+  >
+    <mat-icon>notifications</mat-icon>
+  </button>
+
+  <!-- Logout -->
+  <button
+    mat-icon-button
+    matTooltip="Logout"
+    aria-label="Logout"
+    (click)="logout()"
+  >
+    <mat-icon>logout</mat-icon>
+  </button>
+
+</mat-toolbar>

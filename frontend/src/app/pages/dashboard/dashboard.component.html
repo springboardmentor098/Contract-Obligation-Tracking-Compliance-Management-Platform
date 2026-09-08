@@ -1,0 +1,368 @@
+<div class="dashboard">
+
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Overview of your contract compliance management</p>
+    </div>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      (click)="loadDashboard()"
+      [disabled]="loading"
+    >
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="state-card">
+      <mat-card>
+        <mat-card-content>
+          <mat-spinner diameter="45"></mat-spinner>
+          <h3>Loading dashboard...</h3>
+          <p>Please wait while we fetch the latest data.</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+
+  <!-- Error State -->
+  @if (!loading && error) {
+    <div class="state-card error-state">
+      <mat-card>
+        <mat-card-content>
+          <mat-icon>error_outline</mat-icon>
+          <h3>Unable to load dashboard</h3>
+          <p>{{ error }}</p>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="loadDashboard()"
+          >
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+
+  <!-- Empty State -->
+  @if (!loading && !error && !hasData) {
+    <div class="state-card">
+      <mat-card>
+        <mat-card-content>
+          <mat-icon>inbox</mat-icon>
+          <h3>No dashboard data available</h3>
+          <p>
+            There is currently no contract, obligation, renewal,
+            or compliance data to display.
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+
+  <!-- Dashboard Data -->
+  @if (!loading && !error && hasData) {
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>description</mat-icon>
+          </div>
+
+          <div>
+            <p>Total Contracts</p>
+            <h2>{{ totalContracts }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+
+          <div>
+            <p>Active Contracts</p>
+            <h2>{{ activeContracts }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>cancel</mat-icon>
+          </div>
+
+          <div>
+            <p>Expired Contracts</p>
+            <h2>{{ expiredContracts }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>pending_actions</mat-icon>
+          </div>
+
+          <div>
+            <p>Pending Obligations</p>
+            <h2>{{ pendingObligations }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>warning</mat-icon>
+          </div>
+
+          <div>
+            <p>Overdue Obligations</p>
+            <h2>{{ overdueObligations }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>event</mat-icon>
+          </div>
+
+          <div>
+            <p>Upcoming Renewals</p>
+            <h2>{{ upcomingRenewals }}</h2>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+
+    <!-- Compliance Summary + System Status -->
+    <div class="dashboard-sections">
+
+      <!-- Compliance Summary -->
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Compliance Summary</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="compliance-summary">
+
+            <div class="compliance-item">
+              <span>Compliant</span>
+              <strong>{{ compliantCount }}</strong>
+            </div>
+
+            <div class="compliance-item">
+              <span>At Risk</span>
+              <strong>{{ atRiskCount }}</strong>
+            </div>
+
+            <div class="compliance-item">
+              <span>Non-Compliant</span>
+              <strong>{{ nonCompliantCount }}</strong>
+            </div>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+
+      <!-- System Status -->
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>System Status</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content class="system-status">
+
+          <div class="status-row">
+            <mat-icon>check_circle</mat-icon>
+            <span>Backend API connected</span>
+          </div>
+
+          <div class="status-row">
+            <mat-icon>storage</mat-icon>
+            <span>Dashboard data loaded successfully</span>
+          </div>
+
+          <div class="status-row">
+            <mat-icon>security</mat-icon>
+            <span>Authenticated session active</span>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+
+    <!-- Contract Status Distribution -->
+    <mat-card class="distribution-card">
+
+      <mat-card-header>
+        <mat-card-title>
+          Contract Status Distribution
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+
+        @if (contractStatusDistribution.length > 0) {
+
+          <div class="status-list">
+
+            @for (
+              item of contractStatusDistribution;
+              track item.status
+            ) {
+
+              <div class="status-item">
+
+                <div class="status-label">
+                  <span>{{ item.status }}</span>
+                  <strong>{{ item.count }}</strong>
+                </div>
+
+                <div class="progress-track">
+                  <div
+                    class="progress-bar"
+                    [style.width.%]="
+                      getStatusPercentage(
+                        item,
+                        contractStatusDistribution
+                      )
+                    "
+                  ></div>
+                </div>
+
+                <small>
+                  {{
+                    getStatusPercentage(
+                      item,
+                      contractStatusDistribution
+                    ) | number:'1.0-0'
+                  }}%
+                </small>
+
+              </div>
+
+            }
+
+          </div>
+
+        } @else {
+
+          <div class="no-distribution">
+            <mat-icon>bar_chart</mat-icon>
+            <p>No contract status data available.</p>
+          </div>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- Obligation Status Distribution -->
+    <mat-card class="distribution-card">
+
+      <mat-card-header>
+        <mat-card-title>
+          Obligation Status Distribution
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+
+        @if (obligationStatusDistribution.length > 0) {
+
+          <div class="status-list">
+
+            @for (
+              item of obligationStatusDistribution;
+              track item.status
+            ) {
+
+              <div class="status-item">
+
+                <div class="status-label">
+                  <span>{{ item.status }}</span>
+                  <strong>{{ item.count }}</strong>
+                </div>
+
+                <div class="progress-track">
+                  <div
+                    class="progress-bar"
+                    [style.width.%]="
+                      getStatusPercentage(
+                        item,
+                        obligationStatusDistribution
+                      )
+                    "
+                  ></div>
+                </div>
+
+                <small>
+                  {{
+                    getStatusPercentage(
+                      item,
+                      obligationStatusDistribution
+                    ) | number:'1.0-0'
+                  }}%
+                </small>
+
+              </div>
+
+            }
+
+          </div>
+
+        } @else {
+
+          <div class="no-distribution">
+            <mat-icon>bar_chart</mat-icon>
+            <p>No obligation status data available.</p>
+          </div>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+</div>

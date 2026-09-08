@@ -1,0 +1,415 @@
+<div class="audit-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1>Audit History</h1>
+      <p>Track system changes, user actions, and contract activity.</p>
+    </div>
+
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="refresh()"
+      [disabled]="loading"
+      matTooltip="Refresh audit history"
+    >
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filters
+      </mat-card-title>
+
+      <mat-card-subtitle>
+        Narrow the audit history by entity, action, user, or date.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="filter-grid">
+
+        <!-- Entity Type -->
+        <mat-form-field appearance="outline">
+          <mat-label>Entity Type</mat-label>
+
+          <mat-select [(ngModel)]="entityTypeFilter">
+            <mat-option value="">All Entities</mat-option>
+
+            <mat-option
+              *ngFor="let entity of entityTypes"
+              [value]="entity"
+            >
+              {{ entity | titlecase }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Action -->
+        <mat-form-field appearance="outline">
+          <mat-label>Action</mat-label>
+
+          <mat-select [(ngModel)]="actionFilter">
+            <mat-option value="">All Actions</mat-option>
+
+            <mat-option
+              *ngFor="let action of actions"
+              [value]="action"
+            >
+              {{ action }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- User ID -->
+        <mat-form-field appearance="outline">
+          <mat-label>User ID</mat-label>
+
+          <input
+            matInput
+            type="text"
+            [(ngModel)]="userIdFilter"
+            placeholder="Enter user UUID"
+          />
+
+          <mat-icon
+            matSuffix
+            matTooltip="Filter by the user's UUID"
+          >
+            person
+          </mat-icon>
+        </mat-form-field>
+
+        <!-- Date From -->
+        <mat-form-field appearance="outline">
+          <mat-label>Date From</mat-label>
+
+          <input
+            matInput
+            type="date"
+            [(ngModel)]="dateFromFilter"
+          />
+        </mat-form-field>
+
+        <!-- Date To -->
+        <mat-form-field appearance="outline">
+          <mat-label>Date To</mat-label>
+
+          <input
+            matInput
+            type="date"
+            [(ngModel)]="dateToFilter"
+          />
+        </mat-form-field>
+
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="filter-actions">
+
+        <button
+          mat-flat-button
+          type="button"
+          (click)="applyFilters()"
+          [disabled]="loading"
+        >
+          <mat-icon>search</mat-icon>
+          Apply Filters
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="clearFilters()"
+          [disabled]="loading"
+        >
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Summary -->
+  <div class="summary-card">
+    <mat-card>
+      <mat-card-content>
+        <div class="summary-content">
+
+          <div class="summary-icon">
+            <mat-icon>history</mat-icon>
+          </div>
+
+          <div>
+            <span class="summary-label">Total Audit Records</span>
+            <strong>{{ total }}</strong>
+          </div>
+
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="45"></mat-spinner>
+    <p>Loading audit history...</p>
+  </div>
+
+  <!-- Error -->
+  <mat-card
+    class="error-card"
+    *ngIf="!loading && error"
+  >
+    <mat-card-content>
+
+      <div class="error-content">
+
+        <mat-icon>error_outline</mat-icon>
+
+        <div>
+          <h3>Unable to load audit history</h3>
+
+          <p>{{ error }}</p>
+
+          <button
+            mat-flat-button
+            type="button"
+            (click)="retry()"
+          >
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+        </div>
+
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Empty State -->
+  <mat-card
+    class="empty-card"
+    *ngIf="!loading && !error && auditLogs.length === 0"
+  >
+    <mat-card-content>
+
+      <mat-icon>history</mat-icon>
+
+      <h3>No Audit Records</h3>
+
+      <p>
+        No audit activity matches the selected filters.
+      </p>
+
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Audit Table -->
+  <mat-card
+    class="table-card"
+    *ngIf="!loading && !error && auditLogs.length > 0"
+  >
+    <mat-card-header>
+      <mat-card-title>Activity Log</mat-card-title>
+
+      <mat-card-subtitle>
+        Showing {{ auditLogs.length }} of {{ total }} records
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <div class="table-container">
+
+        <table
+          mat-table
+          [dataSource]="auditLogs"
+          class="audit-table"
+        >
+
+          <!-- Action -->
+          <ng-container matColumnDef="action">
+
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Action
+            </th>
+
+            <td
+              mat-cell
+              *matCellDef="let log"
+            >
+              <span
+                class="action-badge"
+                [ngClass]="getActionClass(log.action)"
+              >
+                {{ log.action }}
+              </span>
+            </td>
+
+          </ng-container>
+
+          <!-- Entity Type -->
+          <ng-container matColumnDef="entity_type">
+
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Entity
+            </th>
+
+            <td
+              mat-cell
+              *matCellDef="let log"
+            >
+              <span
+                class="entity-badge"
+                [ngClass]="getEntityClass(log.entity_type)"
+              >
+                {{ log.entity_type }}
+              </span>
+            </td>
+
+          </ng-container>
+
+          <!-- Entity ID -->
+          <ng-container matColumnDef="entity_id">
+
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Entity ID
+            </th>
+
+            <td
+              mat-cell
+              *matCellDef="let log"
+            >
+              <span
+                class="id-value"
+                [matTooltip]="log.entity_id"
+              >
+                {{ truncateId(log.entity_id) }}
+              </span>
+            </td>
+
+          </ng-container>
+
+          <!-- User ID -->
+          <ng-container matColumnDef="user_id">
+
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              User ID
+            </th>
+
+            <td
+              mat-cell
+              *matCellDef="let log"
+            >
+              <span
+                class="id-value"
+                [matTooltip]="log.user_id"
+              >
+                {{ truncateId(log.user_id) }}
+              </span>
+            </td>
+
+          </ng-container>
+
+          <!-- Changes -->
+          <ng-container matColumnDef="changes">
+
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Changes
+            </th>
+
+            <td
+              mat-cell
+              *matCellDef="let log"
+            >
+              <span
+                class="changes-value"
+                [matTooltip]="formatChanges(log)"
+              >
+                {{ formatChanges(log) }}
+              </span>
+            </td>
+
+          </ng-container>
+
+          <!-- IP Address -->
+          <ng-container matColumnDef="ip_address">
+
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              IP Address
+            </th>
+
+            <td
+              mat-cell
+              *matCellDef="let log"
+            >
+              {{ log.ip_address || '—' }}
+            </td>
+
+          </ng-container>
+
+          <!-- Created At -->
+          <ng-container matColumnDef="created_at">
+
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Date & Time
+            </th>
+
+            <td
+              mat-cell
+              *matCellDef="let log"
+            >
+              {{ formatDate(log.created_at) }}
+            </td>
+
+          </ng-container>
+
+          <!-- Header -->
+          <tr
+            mat-header-row
+            *matHeaderRowDef="displayedColumns"
+          ></tr>
+
+          <!-- Rows -->
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns;"
+          ></tr>
+
+        </table>
+
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+</div>

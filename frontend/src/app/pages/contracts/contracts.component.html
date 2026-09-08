@@ -1,0 +1,858 @@
+<div class="contracts-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+      <h1>Contracts</h1>
+      <p>Manage and monitor your contracts</p>
+    </div>
+
+    @if (canManageContracts()) {
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="openCreateForm()"
+        [disabled]="loading || creating"
+      >
+        <mat-icon>add</mat-icon>
+        Create Contract
+      </button>
+    }
+
+  </div>
+
+
+  <!-- Create Contract Form -->
+  @if (showCreateForm) {
+
+    <mat-card class="create-card">
+
+      <mat-card-header>
+
+        <div class="form-header">
+
+          <div>
+            <mat-card-title>
+              Create New Contract
+            </mat-card-title>
+
+            <mat-card-subtitle>
+              Enter the contract details below
+            </mat-card-subtitle>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Close"
+            aria-label="Close create contract form"
+            (click)="closeCreateForm()"
+            [disabled]="creating"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+
+        </div>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <!-- Form Error -->
+        @if (createError) {
+
+          <div class="form-error">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ createError }}</span>
+          </div>
+
+        }
+
+
+        <div class="contract-form">
+
+          <!-- Title -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>Contract Title</mat-label>
+
+            <input
+              matInput
+              type="text"
+              name="title"
+              [(ngModel)]="contractForm.title"
+              placeholder="Enter contract title"
+              maxlength="150"
+              required
+            />
+
+            <mat-hint>
+              Required
+            </mat-hint>
+          </mat-form-field>
+
+
+          <!-- Contract Number -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>Contract Number</mat-label>
+
+            <input
+              matInput
+              type="text"
+              name="contract_number"
+              [(ngModel)]="contractForm.contract_number"
+              placeholder="e.g. CON-2026-005"
+              maxlength="100"
+              required
+            />
+
+            <mat-hint>
+              Required
+            </mat-hint>
+          </mat-form-field>
+
+
+          <!-- Category -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>Category</mat-label>
+
+            <input
+              matInput
+              type="text"
+              name="category"
+              [(ngModel)]="contractForm.category"
+              placeholder="e.g. Service Agreement"
+              required
+            />
+
+            <mat-hint>
+              Required
+            </mat-hint>
+          </mat-form-field>
+
+
+          <!-- Counterparty -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>Counterparty Name</mat-label>
+
+            <input
+              matInput
+              type="text"
+              name="counterparty_name"
+              [(ngModel)]="contractForm.counterparty_name"
+              placeholder="Company or organization name"
+            />
+          </mat-form-field>
+
+
+          <!-- Start Date -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>Start Date</mat-label>
+
+            <input
+              matInput
+              type="date"
+              name="start_date"
+              [(ngModel)]="contractForm.start_date"
+            />
+          </mat-form-field>
+
+
+          <!-- End Date -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>End Date</mat-label>
+
+            <input
+              matInput
+              type="date"
+              name="end_date"
+              [(ngModel)]="contractForm.end_date"
+            />
+          </mat-form-field>
+
+
+          <!-- Contract Value -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>Contract Value</mat-label>
+
+            <input
+              matInput
+              type="number"
+              name="contract_value"
+              [(ngModel)]="contractForm.contract_value"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+          </mat-form-field>
+
+
+          <!-- Currency -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field"
+          >
+            <mat-label>Currency</mat-label>
+
+            <input
+              matInput
+              type="text"
+              name="currency"
+              [(ngModel)]="contractForm.currency"
+              placeholder="INR"
+              maxlength="3"
+            />
+
+            <mat-hint>
+              3-letter currency code
+            </mat-hint>
+          </mat-form-field>
+
+
+          <!-- Assigned To -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field full-width"
+          >
+            <mat-label>Assigned User ID</mat-label>
+
+            <input
+              matInput
+              type="text"
+              name="assigned_to"
+              [(ngModel)]="contractForm.assigned_to"
+              placeholder="Optional UUID"
+            />
+
+            <mat-hint>
+              Leave empty if the contract is not assigned yet
+            </mat-hint>
+          </mat-form-field>
+
+
+          <!-- Description -->
+          <mat-form-field
+            appearance="outline"
+            class="form-field full-width"
+          >
+            <mat-label>Description</mat-label>
+
+            <textarea
+              matInput
+              name="description"
+              [(ngModel)]="contractForm.description"
+              placeholder="Enter contract description"
+              rows="4"
+            ></textarea>
+
+          </mat-form-field>
+
+        </div>
+
+      </mat-card-content>
+
+
+      <!-- Form Actions -->
+      <mat-card-actions class="form-actions">
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="closeCreateForm()"
+          [disabled]="creating"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="createContract()"
+          [disabled]="creating"
+        >
+
+          @if (creating) {
+
+            <mat-spinner
+              diameter="20"
+            ></mat-spinner>
+
+            <span>Creating...</span>
+
+          } @else {
+
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              <span>Create Contract</span>
+            </ng-container>
+
+          }
+
+        </button>
+
+      </mat-card-actions>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Search and Refresh -->
+  @if (!showCreateForm) {
+
+    <mat-card class="filter-card">
+
+      <mat-card-content class="filter-content">
+
+        <mat-form-field
+          appearance="outline"
+          class="search-field"
+        >
+
+          <mat-label>
+            Search contracts
+          </mat-label>
+
+          <input
+            matInput
+            type="text"
+            name="search"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="Search by number, title, category..."
+          />
+
+          @if (searchTerm) {
+
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              matTooltip="Clear search"
+              aria-label="Clear search"
+              (click)="clearSearch()"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+
+          } @else {
+
+            <mat-icon matSuffix>
+              search
+            </mat-icon>
+
+          }
+
+        </mat-form-field>
+
+
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          (click)="loadContracts()"
+          [disabled]="loading"
+        >
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Loading State -->
+  @if (loading && !showCreateForm) {
+
+    <div class="state-card">
+
+      <mat-card>
+
+        <mat-card-content>
+
+          <mat-spinner diameter="45"></mat-spinner>
+
+          <h3>
+            Loading contracts...
+          </h3>
+
+          <p>
+            Please wait while we fetch your contracts.
+          </p>
+
+        </mat-card-content>
+
+      </mat-card>
+
+    </div>
+
+  }
+
+
+  <!-- Error State -->
+  @if (!loading && error && !showCreateForm) {
+
+    <div class="state-card error-state">
+
+      <mat-card>
+
+        <mat-card-content>
+
+          <mat-icon>
+            error_outline
+          </mat-icon>
+
+          <h3>
+            Unable to load contracts
+          </h3>
+
+          <p>
+            {{ error }}
+          </p>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="loadContracts()"
+          >
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+
+        </mat-card-content>
+
+      </mat-card>
+
+    </div>
+
+  }
+
+
+  <!-- Empty State -->
+  @if (
+    !loading &&
+    !error &&
+    contracts.length === 0 &&
+    !showCreateForm
+  ) {
+
+    <div class="state-card">
+
+      <mat-card>
+
+        <mat-card-content>
+
+          <mat-icon>
+            description
+          </mat-icon>
+
+          <h3>
+            No contracts found
+          </h3>
+
+          <p>
+            There are currently no contracts available for your account.
+          </p>
+
+          @if (canManageContracts()) {
+
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              (click)="openCreateForm()"
+            >
+              <mat-icon>add</mat-icon>
+              Create First Contract
+            </button>
+
+          }
+
+        </mat-card-content>
+
+      </mat-card>
+
+    </div>
+
+  }
+
+
+  <!-- Search Empty State -->
+  @if (
+    !loading &&
+    !error &&
+    contracts.length > 0 &&
+    filteredContracts.length === 0 &&
+    !showCreateForm
+  ) {
+
+    <div class="state-card">
+
+      <mat-card>
+
+        <mat-card-content>
+
+          <mat-icon>
+            search_off
+          </mat-icon>
+
+          <h3>
+            No matching contracts
+          </h3>
+
+          <p>
+            Try changing your search criteria.
+          </p>
+
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="clearSearch()"
+          >
+            Clear Search
+          </button>
+
+        </mat-card-content>
+
+      </mat-card>
+
+    </div>
+
+  }
+
+
+  <!-- Contracts Table -->
+  @if (
+    !loading &&
+    !error &&
+    filteredContracts.length > 0 &&
+    !showCreateForm
+  ) {
+
+    <mat-card class="table-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Contract List
+        </mat-card-title>
+
+        <mat-card-subtitle>
+          {{ filteredContracts.length }}
+          contract(s) displayed
+        </mat-card-subtitle>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="table-container">
+
+          <table
+            mat-table
+            [dataSource]="filteredContracts"
+            class="contracts-table"
+          >
+
+            <!-- Contract Number -->
+            <ng-container matColumnDef="contract_number">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Contract Number
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+                <strong>
+                  {{ contract.contract_number }}
+                </strong>
+              </td>
+
+            </ng-container>
+
+
+            <!-- Title -->
+            <ng-container matColumnDef="title">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Title
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+                {{ contract.title }}
+              </td>
+
+            </ng-container>
+
+
+            <!-- Category -->
+            <ng-container matColumnDef="category">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Category
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+                {{ contract.category || '—' }}
+              </td>
+
+            </ng-container>
+
+
+            <!-- Counterparty -->
+            <ng-container matColumnDef="counterparty_name">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Counterparty
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+                {{ contract.counterparty_name || '—' }}
+              </td>
+
+            </ng-container>
+
+
+            <!-- Start Date -->
+            <ng-container matColumnDef="start_date">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Start Date
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+                {{ contract.start_date || '—' }}
+              </td>
+
+            </ng-container>
+
+
+            <!-- End Date -->
+            <ng-container matColumnDef="end_date">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                End Date
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+                {{ contract.end_date || '—' }}
+              </td>
+
+            </ng-container>
+
+
+            <!-- Status -->
+            <ng-container matColumnDef="status">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Status
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+
+                <span
+                  class="status-badge"
+                  [ngClass]="getStatusClass(contract.status)"
+                >
+                  {{ contract.status }}
+                </span>
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- Actions -->
+            <ng-container matColumnDef="actions">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Actions
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let contract"
+              >
+
+                <div class="action-buttons">
+
+                  <!-- Submit for Review -->
+                  @if (canSubmitForReview(contract)) {
+
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      matTooltip="Submit for Review"
+                      type="button"
+                      (click)="submitForReview(contract)"
+                    >
+                      <mat-icon>
+                        send
+                      </mat-icon>
+                    </button>
+
+                  }
+
+
+                  <!-- Approve -->
+                  @if (canApproveContract(contract)) {
+
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      matTooltip="Approve Contract"
+                      type="button"
+                      (click)="approveContract(contract)"
+                    >
+                      <mat-icon>
+                        check_circle
+                      </mat-icon>
+                    </button>
+
+                  }
+
+
+                  <!-- Activate -->
+                  @if (canActivateContract(contract)) {
+
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      matTooltip="Activate Contract"
+                      type="button"
+                      (click)="activateContract(contract)"
+                    >
+                      <mat-icon>
+                        play_circle
+                      </mat-icon>
+                    </button>
+
+                  }
+
+
+                  <!-- Delete -->
+                  @if (canDelete()) {
+
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      matTooltip="Delete Contract"
+                      type="button"
+                      (click)="deleteContract(contract)"
+                    >
+                      <mat-icon>
+                        delete
+                      </mat-icon>
+                    </button>
+
+                  }
+
+                </div>
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- Table Header -->
+            <tr
+              mat-header-row
+              *matHeaderRowDef="displayedColumns"
+            ></tr>
+
+
+            <!-- Table Rows -->
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: displayedColumns;
+              "
+            ></tr>
+
+          </table>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+</div>

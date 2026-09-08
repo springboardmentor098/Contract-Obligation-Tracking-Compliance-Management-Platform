@@ -1,0 +1,323 @@
+.dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #666;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+
+/* Loading / Error / Empty States */
+.state-card {
+  margin-bottom: 20px;
+
+  mat-card-content {
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+  }
+
+  h3 {
+    margin: 8px 0 0;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+  }
+
+  mat-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 42px;
+  }
+}
+
+.error-state {
+  mat-icon {
+    margin-bottom: 4px;
+  }
+}
+
+
+/* Statistics Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.stat-card {
+  min-height: 130px;
+
+  mat-card-content {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  p {
+    margin: 0 0 6px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+  }
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8eefc;
+
+  mat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+}
+
+
+/* Compliance + System Status */
+.dashboard-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.compliance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px 0;
+}
+
+.compliance-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  span {
+    color: #666;
+    font-size: 14px;
+  }
+
+  strong {
+    font-size: 24px;
+  }
+}
+
+
+/* System Status */
+.system-status {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 0;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+  }
+
+  span {
+    font-size: 14px;
+  }
+}
+
+
+/* Distribution Cards */
+.distribution-card {
+  margin-top: 20px;
+}
+
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.status-item {
+  display: grid;
+  grid-template-columns: 180px 1fr 50px;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  span {
+    font-size: 14px;
+    text-transform: capitalize;
+  }
+
+  strong {
+    font-size: 14px;
+  }
+}
+
+.progress-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #e5e7eb;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 10px;
+  background: #3f51b5;
+  transition: width 0.3s ease;
+}
+
+.status-item small {
+  color: #666;
+  text-align: right;
+}
+
+.no-distribution {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  text-align: center;
+
+  mat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+  }
+
+  p {
+    margin: 8px 0 0;
+  }
+}
+
+
+/* Tablet */
+@media (max-width: 1000px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .status-item {
+    grid-template-columns: 150px 1fr 45px;
+  }
+}
+
+
+/* Mobile */
+@media (max-width: 700px) {
+  .dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .compliance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .status-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .status-label {
+    justify-content: space-between;
+  }
+
+  .status-item small {
+    text-align: left;
+  }
+}
+
+
+/* Small Mobile */
+@media (max-width: 450px) {
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .stat-card {
+    min-height: 110px;
+  }
+
+  .stat-icon {
+    width: 46px;
+    height: 46px;
+
+    mat-icon {
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+    }
+  }
+
+  .stat-card h2 {
+    font-size: 24px;
+  }
+}
