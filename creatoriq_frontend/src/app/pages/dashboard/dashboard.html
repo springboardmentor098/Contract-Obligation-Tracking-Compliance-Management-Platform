@@ -1,0 +1,995 @@
+<div class="dashboard-container">
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading dashboard...</p>
+    </div>
+  }
+
+
+  <!-- Error -->
+  @if (!loading && errorMessage) {
+    <div class="error-state">
+      <strong>Unable to load dashboard</strong>
+      <p>{{ errorMessage }}</p>
+      <button class="refresh-btn" (click)="loadDashboard()">
+        Try Again
+      </button>
+    </div>
+  }
+
+
+  <!-- Dashboard -->
+  @if (!loading && !errorMessage && summary) {
+
+    <!-- Header -->
+    <header class="dashboard-header">
+
+      <div>
+        <h1>ContractIQ</h1>
+        <p>
+          Contract Obligation Tracking &amp; Compliance Management
+        </p>
+      </div>
+
+      <div class="header-actions">
+
+        <button
+          class="notification-btn"
+          title="Notifications">
+          🔔
+        </button>
+
+        <div class="user-profile">
+
+          <div class="avatar">
+            U
+          </div>
+
+          <div class="user-info">
+
+            <span class="user-name">
+              User
+            </span>
+
+            <span class="user-role">
+              Administrator
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- Page Heading -->
+    <section class="page-heading">
+
+      <div>
+
+        <h2>
+          Dashboard
+        </h2>
+
+        <p>
+          Overview of contracts, obligations, renewals and compliance.
+        </p>
+
+      </div>
+
+      <button
+        class="refresh-btn"
+        (click)="loadDashboard()">
+
+        ↻ Refresh
+
+      </button>
+
+    </section>
+
+
+    <!-- ==================== CONTRACTS ==================== -->
+    <section class="dashboard-section">
+
+      <div class="section-title">
+
+        <h3>
+          Contracts
+        </h3>
+
+        <span>
+          Contract Overview
+        </span>
+
+      </div>
+
+
+      <div class="card-grid">
+
+
+        <!-- Total Contracts -->
+        <div class="summary-card">
+
+          <div class="card-icon contract-icon">
+            📄
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Total Contracts
+            </span>
+
+            <strong>
+              {{ summary.contracts.total }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Active -->
+        <div class="summary-card">
+
+          <div class="card-icon active-icon">
+            ✓
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Active
+            </span>
+
+            <strong>
+              {{ summary.contracts.active }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Draft -->
+        <div class="summary-card">
+
+          <div class="card-icon draft-icon">
+            📝
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Draft
+            </span>
+
+            <strong>
+              {{ summary.contracts.draft }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Under Review -->
+        <div class="summary-card">
+
+          <div class="card-icon review-icon">
+            🔍
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Under Review
+            </span>
+
+            <strong>
+              {{ summary.contracts.under_review }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Approved -->
+        <div class="summary-card">
+
+          <div class="card-icon approved-icon">
+            ✓
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Approved
+            </span>
+
+            <strong>
+              {{ summary.contracts.approved }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Expired -->
+        <div class="summary-card">
+
+          <div class="card-icon expired-icon">
+            ⏰
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Expired
+            </span>
+
+            <strong>
+              {{ summary.contracts.expired }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Terminated -->
+        <div class="summary-card">
+
+          <div class="card-icon terminated-icon">
+            ✕
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Terminated
+            </span>
+
+            <strong>
+              {{ summary.contracts.terminated }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================== OBLIGATIONS ==================== -->
+    <section class="dashboard-section">
+
+      <div class="section-title">
+
+        <h3>
+          Obligations
+        </h3>
+
+        <span>
+          Obligation Status
+        </span>
+
+      </div>
+
+
+      <div class="card-grid">
+
+
+        <!-- Total Obligations -->
+        <div class="summary-card">
+
+          <div class="card-icon obligation-icon">
+            📌
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Total Obligations
+            </span>
+
+            <strong>
+              {{ summary.obligations.total }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Pending -->
+        <div class="summary-card">
+
+          <div class="card-icon pending-icon">
+            ⏳
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Pending
+            </span>
+
+            <strong>
+              {{ summary.obligations.pending }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- In Progress -->
+        <div class="summary-card">
+
+          <div class="card-icon progress-icon">
+            🔄
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              In Progress
+            </span>
+
+            <strong>
+              {{ summary.obligations.in_progress }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Completed -->
+        <div class="summary-card">
+
+          <div class="card-icon completed-icon">
+            ✓
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Completed
+            </span>
+
+            <strong>
+              {{ summary.obligations.completed }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Overdue -->
+        <div class="summary-card">
+
+          <div class="card-icon overdue-icon">
+            ⚠
+          </div>
+
+          <div class="card-content">
+
+            <span class="card-label">
+              Overdue
+            </span>
+
+            <strong>
+              {{ summary.obligations.overdue }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================== RENEWALS & COMPLIANCE ==================== -->
+    <section class="dashboard-section">
+
+      <div class="two-column">
+
+
+        <!-- Renewals -->
+        <div class="dashboard-panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <h3>
+                Renewals
+              </h3>
+
+              <span>
+                Renewal Status
+              </span>
+
+            </div>
+
+            <button class="view-btn">
+              View All
+            </button>
+
+          </div>
+
+
+          <div class="renewal-list">
+
+
+            <!-- Upcoming -->
+            <div class="renewal-item">
+
+              <span class="status-dot upcoming"></span>
+
+              <div>
+
+                <strong>
+                  Upcoming
+                </strong>
+
+                <span>
+                  Contracts approaching renewal
+                </span>
+
+              </div>
+
+              <strong class="item-count">
+                {{ summary.renewals.upcoming }}
+              </strong>
+
+            </div>
+
+
+            <!-- In Progress -->
+            <div class="renewal-item">
+
+              <span class="status-dot in-progress"></span>
+
+              <div>
+
+                <strong>
+                  In Progress
+                </strong>
+
+                <span>
+                  Renewals currently being processed
+                </span>
+
+              </div>
+
+              <strong class="item-count">
+                {{ summary.renewals.in_progress }}
+              </strong>
+
+            </div>
+
+
+            <!-- Renewed -->
+            <div class="renewal-item">
+
+              <span class="status-dot renewed"></span>
+
+              <div>
+
+                <strong>
+                  Renewed
+                </strong>
+
+                <span>
+                  Successfully renewed contracts
+                </span>
+
+              </div>
+
+              <strong class="item-count">
+                {{ summary.renewals.renewed }}
+              </strong>
+
+            </div>
+
+
+            <!-- Expired -->
+            <div class="renewal-item">
+
+              <span class="status-dot expired"></span>
+
+              <div>
+
+                <strong>
+                  Expired
+                </strong>
+
+                <span>
+                  Renewals that have expired
+                </span>
+
+              </div>
+
+              <strong class="item-count">
+                {{ summary.renewals.expired }}
+              </strong>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- Compliance -->
+        <div class="dashboard-panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <h3>
+                Compliance
+              </h3>
+
+              <span>
+                Compliance Overview
+              </span>
+
+            </div>
+
+            <button class="view-btn">
+              View All
+            </button>
+
+          </div>
+
+
+          <div class="compliance-list">
+
+
+            <!-- Compliant -->
+            <div class="compliance-item">
+
+              <div class="compliance-label">
+
+                <span>
+                  Compliant
+                </span>
+
+                <strong>
+                  {{ summary.compliance.compliant }}
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress compliant-progress"
+                  [style.width.%]="
+                    getCompliancePercentage(
+                      summary.compliance.compliant
+                    )
+                  ">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- Pending -->
+            <div class="compliance-item">
+
+              <div class="compliance-label">
+
+                <span>
+                  Pending
+                </span>
+
+                <strong>
+                  {{ summary.compliance.pending }}
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress pending-progress"
+                  [style.width.%]="
+                    getCompliancePercentage(
+                      summary.compliance.pending
+                    )
+                  ">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- Delayed -->
+            <div class="compliance-item">
+
+              <div class="compliance-label">
+
+                <span>
+                  Delayed
+                </span>
+
+                <strong>
+                  {{ summary.compliance.delayed }}
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress delayed-progress"
+                  [style.width.%]="
+                    getCompliancePercentage(
+                      summary.compliance.delayed
+                    )
+                  ">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- Non-Compliant -->
+            <div class="compliance-item">
+
+              <div class="compliance-label">
+
+                <span>
+                  Non-Compliant
+                </span>
+
+                <strong>
+                  {{ summary.compliance.non_compliant }}
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress non-compliant-progress"
+                  [style.width.%]="
+                    getCompliancePercentage(
+                      summary.compliance.non_compliant
+                    )
+                  ">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- High Risk -->
+            <div class="compliance-item">
+
+              <div class="compliance-label">
+
+                <span>
+                  High Risk
+                </span>
+
+                <strong>
+                  {{ summary.compliance.high_risk }}
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress high-risk-progress"
+                  [style.width.%]="
+                    getCompliancePercentage(
+                      summary.compliance.high_risk
+                    )
+                  ">
+                </div>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================== ANALYTICS CHARTS ==================== -->
+    <section class="dashboard-section analytics-section">
+
+      <div class="section-title">
+
+        <div>
+
+          <h3>
+            Analytics
+          </h3>
+
+          <span>
+            Visual overview of contracts, obligations and compliance
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="chart-grid">
+
+
+        <!-- Contract Status Chart -->
+        <div class="chart-card">
+
+          <div class="chart-header">
+
+            <div>
+
+              <h3>
+                Contract Status
+              </h3>
+
+              <span>
+                Current contract distribution
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="chart-container">
+
+            <canvas
+              id="contractStatusChart">
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+        <!-- Obligation Status Chart -->
+        <div class="chart-card">
+
+          <div class="chart-header">
+
+            <div>
+
+              <h3>
+                Obligation Status
+              </h3>
+
+              <span>
+                Current obligation distribution
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="chart-container">
+
+            <canvas
+              id="obligationStatusChart">
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+        <!-- Compliance Chart -->
+        <div class="chart-card">
+
+          <div class="chart-header">
+
+            <div>
+
+              <h3>
+                Compliance Overview
+              </h3>
+
+              <span>
+                Compliance evaluation status
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="chart-container">
+
+            <canvas
+              id="complianceChart">
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+        <!-- Contract Category Chart -->
+        <div class="chart-card">
+
+          <div class="chart-header">
+
+            <div>
+
+              <h3>
+                Contract Categories
+              </h3>
+
+              <span>
+                Contracts by category
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="chart-container">
+
+            <canvas
+              id="contractCategoryChart">
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================== QUICK ACTIONS ==================== -->
+    <section class="dashboard-section">
+
+      <div class="section-title">
+
+        <h3>
+          Quick Actions
+        </h3>
+
+        <span>
+          Frequently used features
+        </span>
+
+      </div>
+
+
+      <div class="quick-actions">
+
+
+        <!-- Contracts -->
+        <button class="action-card">
+
+          <span class="action-icon">
+            📄
+          </span>
+
+          <div>
+
+            <strong>
+              Contracts
+            </strong>
+
+            <span>
+              Manage contracts
+            </span>
+
+          </div>
+
+        </button>
+
+
+        <!-- Obligations -->
+        <button class="action-card">
+
+          <span class="action-icon">
+            📌
+          </span>
+
+          <div>
+
+            <strong>
+              Obligations
+            </strong>
+
+            <span>
+              Track obligations
+            </span>
+
+          </div>
+
+        </button>
+
+
+        <!-- Renewals -->
+        <button class="action-card">
+
+          <span class="action-icon">
+            🔄
+          </span>
+
+          <div>
+
+            <strong>
+              Renewals
+            </strong>
+
+            <span>
+              Manage renewals
+            </span>
+
+          </div>
+
+        </button>
+
+
+        <!-- Reports -->
+        <button class="action-card">
+
+          <span class="action-icon">
+            📊
+          </span>
+
+          <div>
+
+            <strong>
+              Reports
+            </strong>
+
+            <span>
+              View analytics and reports
+            </span>
+
+          </div>
+
+        </button>
+
+
+      </div>
+
+    </section>
+
+  }
+
+</div>
