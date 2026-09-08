@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Query
+from datetime import date
+from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -25,6 +26,10 @@ from backend.app.services.report_service import (
    get_department_performance,
    get_upcoming_renewals,
    get_overdue_obligations,
+   get_contracts_by_status,
+   get_obligations_by_status,
+   get_renewals_by_date_range,
+   get_renewals_requiring_attention,
 )
 
 
@@ -317,3 +322,84 @@ def overdue_obligations(
     current_user: dict = Depends(get_current_user)
 ):
     return get_overdue_obligations(db)
+# ============================================================
+# CONTRACT STATUS FILTER
+# ============================================================
+
+@router.get("/contracts/filter")
+def filter_contracts(
+    status: str | None = Query(
+        default=None,
+        description="Filter contracts by status"
+    ),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+
+    return get_contracts_by_status(
+        db,
+        status
+    )
+    # ============================================================
+# OBLIGATION STATUS FILTER
+# ============================================================
+
+@router.get("/obligations/filter")
+def filter_obligations(
+    status: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    return get_obligations_by_status(
+        db,
+        status
+    )
+# ============================================================
+# RENEWAL DATE RANGE FILTER
+# ============================================================
+
+@router.get("/renewals/date-range")
+def renewals_date_range(
+    start_date: date = Query(
+        ...,
+        description="Start date for renewal filter"
+    ),
+    end_date: date = Query(
+        ...,
+        description="End date for renewal filter"
+    ),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+
+    if start_date > end_date:
+        raise HTTPException(
+            status_code=400,
+            detail="Start date cannot be greater than end date"
+        )
+
+    return get_renewals_by_date_range(
+        db,
+        start_date,
+        end_date
+    )
+    # ============================================================
+# RENEWALS REQUIRING IMMEDIATE ATTENTION
+# ============================================================
+
+@router.get("/renewals/immediate-attention")
+def renewals_requiring_attention(
+    days: int = Query(
+        default=15,
+        ge=1,
+        le=365,
+        description="Number of days to check for renewals requiring attention"
+    ),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+
+    return get_renewals_requiring_attention(
+        db,
+        days
+    )

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -1053,6 +1053,186 @@ def get_overdue_obligations(db: Session):
             "title": obligation.title,
             "due_date": obligation.due_date,
             "status": obligation.status
+        })
+
+    return results
+# ============================================================
+# CONTRACT STATUS FILTER
+# ============================================================
+
+def get_contracts_by_status(
+    db: Session,
+    status: str | None = None
+):
+
+    query = db.query(Contract)
+
+    if status:
+        query = query.filter(
+            Contract.status == status
+        )
+
+    contracts = query.all()
+
+    results = []
+
+    for contract in contracts:
+
+        results.append({
+            "contract_id": contract.id,
+            "contract_number": contract.contract_number,
+            "title": contract.title,
+            "category": contract.category,
+            "status": contract.status,
+            "start_date": contract.start_date,
+            "end_date": contract.end_date
+        })
+
+    return results
+def get_upcoming_expiry_contracts(db: Session, days: int = 30):
+
+    today = date.today()
+
+    contracts = db.query(Contract).filter(
+        Contract.end_date >= today
+    ).all()
+
+    results = []
+
+    for contract in contracts:
+
+        days_remaining = (
+            contract.end_date - today
+        ).days
+
+        if days_remaining <= days:
+
+            results.append({
+                "contract_id": contract.id,
+                "contract_number": contract.contract_number,
+                "contract_title": contract.title,
+                "expiry_date": contract.end_date,
+                "days_remaining": days_remaining
+            })
+
+    return results
+# ============================================================
+# OBLIGATION STATUS FILTER
+# ============================================================
+
+def get_obligations_by_status(
+    db: Session,
+    status: str | None = None
+):
+
+    query = db.query(Obligation)
+
+    if status:
+        query = query.filter(
+            Obligation.status == status
+        )
+
+    obligations = query.all()
+
+    results = []
+
+    for obligation in obligations:
+
+        results.append({
+            "obligation_id": obligation.id,
+            "contract_id": obligation.contract_id,
+            "title": obligation.title,
+            "obligation_type": obligation.obligation_type,
+            "due_date": obligation.due_date,
+            "status": obligation.status
+        })
+
+    return results
+# ============================================================
+# RENEWAL DATE RANGE FILTER
+# ============================================================
+
+def get_renewals_by_date_range(
+    db: Session,
+    start_date: date,
+    end_date: date
+):
+
+    if start_date > end_date:
+        return None
+
+    renewals = db.query(Renewal).filter(
+        Renewal.renewal_date >= start_date,
+        Renewal.renewal_date <= end_date,
+        Renewal.status == "Upcoming"
+    ).all()
+
+    results = []
+
+    for renewal in renewals:
+
+        contract = db.query(Contract).filter(
+            Contract.id == renewal.contract_id
+        ).first()
+
+        results.append({
+            "renewal_id": renewal.id,
+            "contract_id": renewal.contract_id,
+            "contract_number": (
+                contract.contract_number if contract else None
+            ),
+            "contract_title": (
+                contract.title if contract else None
+            ),
+            "renewal_date": renewal.renewal_date,
+            "status": renewal.status
+        })
+
+    return results
+# ============================================================
+# RENEWALS REQUIRING IMMEDIATE ATTENTION
+# ============================================================
+
+def get_renewals_requiring_attention(
+    db: Session,
+    days: int = 15
+):
+
+    today = date.today()
+
+    end_date = today + timedelta(days=days)
+
+    renewals = db.query(Renewal).filter(
+        Renewal.renewal_date >= today,
+        Renewal.renewal_date <= end_date,
+        Renewal.status == "Upcoming"
+        
+    ).all()
+
+    results = []
+
+    for renewal in renewals:
+
+        contract = db.query(Contract).filter(
+            Contract.id == renewal.contract_id
+        ).first()
+
+        days_remaining = (
+            renewal.renewal_date - today
+        ).days
+
+        results.append({
+            "renewal_id": renewal.id,
+            "contract_id": renewal.contract_id,
+            "contract_number": (
+                contract.contract_number if contract else None
+            ),
+            "contract_title": (
+                contract.title if contract else None
+            ),
+            "renewal_date": renewal.renewal_date,
+            "status": renewal.status,
+            "days_remaining": days_remaining
         })
 
     return results
