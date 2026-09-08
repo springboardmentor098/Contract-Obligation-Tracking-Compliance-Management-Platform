@@ -6,210 +6,148 @@
     Contract Obligation Tracking & Compliance Management
   </p>
 
-  <!-- Error message -->
-  <div
-    *ngIf="errorMessage"
-    class="error"
-  >
-    {{ errorMessage }}
-  </div>
+  @if (loading) {
 
+    <div class="status-message">
+      Loading dashboard data...
+    </div>
 
-  <!-- ============================= -->
-  <!-- SUMMARY CARDS -->
-  <!-- ============================= -->
+  }
 
-  <div class="summary-grid">
+  @if (!loading && errorMessage) {
 
-    <mat-card class="summary-card">
+    <div class="error">
+      {{ errorMessage }}
+    </div>
 
+  }
+
+  @if (!loading && !errorMessage) {
+
+    <div class="summary-grid">
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <h3>Total Contracts</h3>
+          <div class="number">{{ totalContracts }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <h3>Active Contracts</h3>
+          <div class="number">{{ activeContracts }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <h3>Expired Contracts</h3>
+          <div class="number">{{ expiredContracts }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <h3>Pending Obligations</h3>
+          <div class="number">{{ pendingObligations }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <h3>Overdue Obligations</h3>
+          <div class="number">{{ overdueObligations }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <h3>Upcoming Renewals</h3>
+          <div class="number">{{ upcomingRenewals }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <h3>Compliance Summary</h3>
+          <div class="number">{{ complianceStatus }}%</div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <div class="charts-grid">
+
+      <mat-card class="chart-card">
+        <mat-card-content>
+          <h2>Contract Categories</h2>
+          <div class="chart-container">
+            <canvas id="contractCategoryChart"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-content>
+          <h2>Obligation Status</h2>
+          <div class="chart-container">
+            <canvas id="obligationStatusChart"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-content>
+          <h2>Renewal Status</h2>
+          <div class="chart-container">
+            <canvas id="renewalStatusChart"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-content>
+          <h2>Compliance Status</h2>
+          <div class="chart-container">
+            <canvas id="complianceStatusChart"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    @if (
+      totalContracts === 0 &&
+      activeContracts === 0 &&
+      expiredContracts === 0 &&
+      pendingObligations === 0 &&
+      overdueObligations === 0 &&
+      upcomingRenewals === 0 &&
+      complianceStatus === 0
+    ) {
+
+      <mat-card class="empty-card">
+        <mat-card-content>
+          <h2>No dashboard data available</h2>
+          <p>
+            The backend did not return any dashboard statistics.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+    }
+
+    <mat-card class="activities-card">
       <mat-card-content>
-
-        <h3>Active Contracts</h3>
-
-        <div class="number">
-          {{ activeContracts }}
-        </div>
-
+        <h2>Recent Activities</h2>
+        <p>
+          Recent activity information will be displayed here
+          when provided by the backend.
+        </p>
       </mat-card-content>
-
     </mat-card>
 
-
-    <mat-card class="summary-card">
-
-      <mat-card-content>
-
-        <h3>Upcoming Renewals</h3>
-
-        <div class="number">
-          {{ upcomingRenewals }}
-        </div>
-
-      </mat-card-content>
-
-    </mat-card>
-
-
-    <mat-card class="summary-card">
-
-      <mat-card-content>
-
-        <h3>Pending Obligations</h3>
-
-        <div class="number">
-          {{ pendingObligations }}
-        </div>
-
-      </mat-card-content>
-
-    </mat-card>
-
-
-    <mat-card class="summary-card">
-
-      <mat-card-content>
-
-        <h3>Compliance Status</h3>
-
-        <div class="number">
-          {{ complianceStatus }}%
-        </div>
-
-      </mat-card-content>
-
-    </mat-card>
-
-  </div>
-
-
-  <!-- ============================= -->
-  <!-- ANALYTICS CHARTS -->
-  <!-- ============================= -->
-
-  <div class="charts-grid">
-
-
-    <!-- CONTRACT CATEGORIES -->
-
-    <mat-card class="chart-card">
-
-      <mat-card-content>
-
-        <h2>Contract Categories</h2>
-
-        <div class="chart-container">
-
-          <canvas
-            id="contractCategoryChart">
-          </canvas>
-
-        </div>
-
-      </mat-card-content>
-
-    </mat-card>
-
-
-    <!-- OBLIGATION STATUS -->
-
-    <mat-card class="chart-card">
-
-      <mat-card-content>
-
-        <h2>Obligation Status</h2>
-
-        <div class="chart-container">
-
-          <canvas
-            id="obligationStatusChart">
-          </canvas>
-
-        </div>
-
-      </mat-card-content>
-
-    </mat-card>
-
-
-    <!-- RENEWAL STATUS -->
-
-    <mat-card class="chart-card">
-
-      <mat-card-content>
-
-        <h2>Renewal Status</h2>
-
-        <div class="chart-container">
-
-          <canvas
-            id="renewalStatusChart">
-          </canvas>
-
-        </div>
-
-      </mat-card-content>
-
-    </mat-card>
-
-
-    <!-- COMPLIANCE STATUS -->
-
-    <mat-card class="chart-card">
-
-      <mat-card-content>
-
-        <h2>Compliance Status</h2>
-
-        <div class="chart-container">
-
-          <canvas
-            id="complianceStatusChart">
-          </canvas>
-
-        </div>
-
-      </mat-card-content>
-
-    </mat-card>
-
-  </div>
-
-
-  <!-- ============================= -->
-  <!-- RECENT ACTIVITIES -->
-  <!-- ============================= -->
-
-  <mat-card class="activities-card">
-
-    <mat-card-content>
-
-      <h2>Recent Activities</h2>
-
-      <ul>
-
-        <li>
-          Contract CON-2026-017 was updated
-        </li>
-
-        <li>
-          Obligation "Submit Monthly Service Report"
-          is overdue
-        </li>
-
-        <li>
-          Renewal review started for Contract
-          CON-2026-018
-        </li>
-
-        <li>
-          Compliance report generated successfully
-        </li>
-
-      </ul>
-
-    </mat-card-content>
-
-  </mat-card>
+  }
 
 </div>

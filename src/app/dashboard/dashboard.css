@@ -7,144 +7,98 @@
 }
 
 .subtitle {
-  color: #666;
   margin-bottom: 30px;
 }
 
-
-/* ============================= */
-/* SUMMARY CARDS */
-/* ============================= */
-
 .summary-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(4, 1fr);
-
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-
   margin-bottom: 30px;
 }
 
 .summary-card {
-  padding: 10px;
+  min-height: 130px;
 }
 
 .summary-card h3 {
-  margin-bottom: 15px;
+  margin-top: 0;
 }
 
 .number {
   font-size: 32px;
   font-weight: bold;
+  margin-top: 15px;
 }
-
-
-/* ============================= */
-/* CHART GRID */
-/* ============================= */
 
 .charts-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(2, 1fr);
-
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-
-  margin-bottom: 30px;
 }
 
-
-/* ============================= */
-/* CHART CARDS */
-/* ============================= */
-
 .chart-card {
-  padding: 10px;
-
   min-height: 350px;
 }
 
-.chart-card h2 {
-  margin-bottom: 20px;
-}
-
-
-/* ============================= */
-/* CHART CONTAINER */
-/* ============================= */
-
 .chart-container {
   position: relative;
-
-  width: 100%;
-
   height: 280px;
 }
-
-
-/* ============================= */
-/* ACTIVITIES */
-/* ============================= */
 
 .activities-card {
   margin-top: 20px;
 }
 
-.activities-card h2 {
-  margin-bottom: 15px;
+.status-message {
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background: #f4f6f8;
 }
-
-.activities-card li {
-  margin-bottom: 12px;
-}
-
-
-/* ============================= */
-/* ERROR */
-/* ============================= */
 
 .error {
   padding: 15px;
-
   margin-bottom: 20px;
-
-  border-radius: 5px;
-
-  background: #ffe5e5;
+  border-radius: 8px;
+  background: #ffebee;
+  color: #b00020;
 }
 
+.empty-card {
+  margin-top: 20px;
+}
 
-/* ============================= */
-/* RESPONSIVE */
-/* ============================= */
-
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
 
   .summary-grid {
-    grid-template-columns:
-      repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .charts-grid {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
-
 }
 
-
 @media (max-width: 600px) {
-
-  .summary-grid {
-    grid-template-columns:
-      1fr;
-  }
 
   .dashboard {
     padding: 15px;
   }
 
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    min-height: 300px;
+  }
+
+  .chart-container {
+    height: 240px;
+  }
+
+  .number {
+    font-size: 28px;
+  }
 }

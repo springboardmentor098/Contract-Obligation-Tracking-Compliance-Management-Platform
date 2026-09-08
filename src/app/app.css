@@ -2,8 +2,14 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
   font-family: Arial, sans-serif;
 }
 
@@ -14,23 +20,26 @@ body {
 
 .sidebar {
   width: 230px;
+  min-width: 230px;
   padding: 25px 15px;
   background: #f4f6f8;
 }
 
 .sidebar h2 {
-  margin-bottom: 30px;
+  margin: 0 0 30px 0;
 }
 
 .sidebar nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .sidebar a {
+  display: block;
   padding: 12px;
   text-decoration: none;
+  color: #222;
   cursor: pointer;
   border-radius: 6px;
 }
@@ -41,4 +50,57 @@ body {
 
 .main-content {
   flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.logout-button {
+  width: 100%;
+  margin-top: 25px;
+  padding: 11px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  background: #e8e8e8;
+}
+
+.logout-button:hover {
+  background: #d8d8d8;
+}
+
+@media (max-width: 768px) {
+
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    padding: 15px;
+  }
+
+  .sidebar h2 {
+    margin-bottom: 15px;
+  }
+
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .sidebar a {
+    padding: 10px;
+    text-align: center;
+  }
+
+  .logout-button {
+    margin-top: 15px;
+  }
+
+  .main-content {
+    width: 100%;
+  }
 }

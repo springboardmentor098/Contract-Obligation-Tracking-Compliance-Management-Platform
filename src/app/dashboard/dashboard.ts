@@ -14,6 +14,7 @@ import { DashboardService } from '../services/dashboard';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   imports: [
     CommonModule,
     MatCardModule
@@ -23,15 +24,23 @@ import { DashboardService } from '../services/dashboard';
 })
 export class Dashboard implements OnInit, AfterViewInit {
 
+  totalContracts = 0;
   activeContracts = 0;
-  upcomingRenewals = 0;
+  expiredContracts = 0;
+
   pendingObligations = 0;
+  overdueObligations = 0;
+
+  upcomingRenewals = 0;
+
   complianceStatus = 0;
 
   loading = true;
   errorMessage = '';
 
   private dashboardData: any = null;
+
+  private chartsCreated = false;
 
   constructor(
     private dashboardService: DashboardService,
@@ -43,8 +52,6 @@ export class Dashboard implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-
-    // Charts will be created after API data arrives.
     if (this.dashboardData) {
       this.createCharts();
     }
@@ -61,25 +68,27 @@ export class Dashboard implements OnInit, AfterViewInit {
 
         next: (data) => {
 
-          console.log(
-            'Dashboard API response:',
-            data
-          );
+          console.log('Dashboard API response:', data);
 
           this.dashboardData = data;
 
-          // ==============================
-          // SUMMARY CARDS
-          // ==============================
+          this.totalContracts =
+            data.contracts?.total ?? 0;
 
           this.activeContracts =
             data.contracts?.active ?? 0;
 
-          this.upcomingRenewals =
-            data.renewals?.upcoming ?? 0;
+          this.expiredContracts =
+            data.contracts?.expired ?? 0;
 
           this.pendingObligations =
             data.obligations?.pending ?? 0;
+
+          this.overdueObligations =
+            data.obligations?.overdue ?? 0;
+
+          this.upcomingRenewals =
+            data.renewals?.upcoming ?? 0;
 
           this.complianceStatus =
             data.compliance?.average_score ?? 0;
@@ -88,24 +97,19 @@ export class Dashboard implements OnInit, AfterViewInit {
 
           this.cdr.detectChanges();
 
-          // Create charts after Angular renders canvas elements.
           setTimeout(() => {
             this.createCharts();
           }, 100);
-
         },
 
         error: (error) => {
 
-          console.error(
-            'Dashboard API error:',
-            error
-          );
-
-          this.errorMessage =
-            'Unable to load dashboard data.';
+          console.error('Dashboard API error:', error);
 
           this.loading = false;
+
+          this.errorMessage =
+            'Unable to load dashboard data. Please try again.';
 
           this.cdr.detectChanges();
         }
@@ -115,22 +119,17 @@ export class Dashboard implements OnInit, AfterViewInit {
 
   createCharts(): void {
 
-    if (!this.dashboardData) {
+    if (!this.dashboardData || this.chartsCreated) {
       return;
     }
 
     this.createContractCategoryChart();
-
     this.createObligationStatusChart();
-
     this.createRenewalStatusChart();
-
     this.createComplianceStatusChart();
-  }
 
-  // =====================================================
-  // CONTRACT CATEGORY CHART
-  // =====================================================
+    this.chartsCreated = true;
+  }
 
   createContractCategoryChart(): void {
 
@@ -144,21 +143,16 @@ export class Dashboard implements OnInit, AfterViewInit {
     }
 
     const categories =
-      this.dashboardData.contracts.by_category;
+      this.dashboardData.contracts?.by_category ?? {};
 
-    const labels =
-      Object.keys(categories);
-
-    const values =
-      Object.values(categories) as number[];
+    const labels = Object.keys(categories);
+    const values = Object.values(categories) as number[];
 
     new Chart(canvas, {
-
       type: 'bar',
 
       data: {
-
-        labels: labels,
+        labels,
 
         datasets: [
           {
@@ -166,13 +160,10 @@ export class Dashboard implements OnInit, AfterViewInit {
             data: values
           }
         ]
-
       },
 
       options: {
-
         responsive: true,
-
         maintainAspectRatio: false,
 
         plugins: {
@@ -180,15 +171,9 @@ export class Dashboard implements OnInit, AfterViewInit {
             display: false
           }
         }
-
       }
-
     });
   }
-
-  // =====================================================
-  // OBLIGATION STATUS CHART
-  // =====================================================
 
   createObligationStatusChart(): void {
 
@@ -202,10 +187,9 @@ export class Dashboard implements OnInit, AfterViewInit {
     }
 
     const obligations =
-      this.dashboardData.obligations;
+      this.dashboardData.obligations ?? {};
 
     new Chart(canvas, {
-
       type: 'doughnut',
 
       data: {
@@ -221,31 +205,22 @@ export class Dashboard implements OnInit, AfterViewInit {
         datasets: [
           {
             data: [
-              obligations.pending,
-              obligations.in_progress,
-              obligations.completed,
-              obligations.delayed,
-              obligations.overdue
+              obligations.pending ?? 0,
+              obligations.in_progress ?? 0,
+              obligations.completed ?? 0,
+              obligations.delayed ?? 0,
+              obligations.overdue ?? 0
             ]
           }
         ]
-
       },
 
       options: {
-
         responsive: true,
-
         maintainAspectRatio: false
-
       }
-
     });
   }
-
-  // =====================================================
-  // RENEWAL STATUS CHART
-  // =====================================================
 
   createRenewalStatusChart(): void {
 
@@ -259,10 +234,9 @@ export class Dashboard implements OnInit, AfterViewInit {
     }
 
     const renewals =
-      this.dashboardData.renewals;
+      this.dashboardData.renewals ?? {};
 
     new Chart(canvas, {
-
       type: 'pie',
 
       data: {
@@ -278,31 +252,22 @@ export class Dashboard implements OnInit, AfterViewInit {
         datasets: [
           {
             data: [
-              renewals.upcoming,
-              renewals.in_progress,
-              renewals.renewed,
-              renewals.expired,
-              renewals.cancelled
+              renewals.upcoming ?? 0,
+              renewals.in_progress ?? 0,
+              renewals.renewed ?? 0,
+              renewals.expired ?? 0,
+              renewals.cancelled ?? 0
             ]
           }
         ]
-
       },
 
       options: {
-
         responsive: true,
-
         maintainAspectRatio: false
-
       }
-
     });
   }
-
-  // =====================================================
-  // COMPLIANCE STATUS CHART
-  // =====================================================
 
   createComplianceStatusChart(): void {
 
@@ -316,10 +281,9 @@ export class Dashboard implements OnInit, AfterViewInit {
     }
 
     const compliance =
-      this.dashboardData.compliance;
+      this.dashboardData.compliance ?? {};
 
     new Chart(canvas, {
-
       type: 'doughnut',
 
       data: {
@@ -335,26 +299,20 @@ export class Dashboard implements OnInit, AfterViewInit {
         datasets: [
           {
             data: [
-              compliance.compliant,
-              compliance.pending,
-              compliance.delayed,
-              compliance.non_compliant,
-              compliance.high_risk
+              compliance.compliant ?? 0,
+              compliance.pending ?? 0,
+              compliance.delayed ?? 0,
+              compliance.non_compliant ?? 0,
+              compliance.high_risk ?? 0
             ]
           }
         ]
-
       },
 
       options: {
-
         responsive: true,
-
         maintainAspectRatio: false
-
       }
-
     });
   }
-
 }

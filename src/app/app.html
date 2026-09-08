@@ -1,25 +1,66 @@
-<div class="layout">
+@if (isLoggedIn) {
 
-  <aside class="sidebar">
+  <div class="layout">
 
-    <h2>ContractIQ</h2>
+    <aside class="sidebar">
 
-    <nav>
-      <a routerLink="/dashboard">Dashboard</a>
-      <a>Contracts</a>
-      <a>Obligations</a>
-      <a>Renewals</a>
-      <a>Compliance</a>
-      <a routerLink="/reports">Reports</a>
-      <a>Notifications</a>
-    </nav>
+      <h2>ContractIQ</h2>
 
-  </aside>
+      <nav>
 
-  <main class="main-content">
+        <a routerLink="/dashboard">
+          Dashboard
+        </a>
 
-    <router-outlet></router-outlet>
+        <a routerLink="/contracts">
+          Contracts
+        </a>
 
-  </main>
+        <a routerLink="/obligations">
+          Obligations
+        </a>
 
-</div>
+        <a routerLink="/renewals">
+          Renewals
+        </a>
+
+        <a routerLink="/compliance">
+          Compliance
+        </a>
+
+        <a routerLink="/notifications">
+          Notifications
+        </a>
+
+        <a routerLink="/reports">
+          Reports
+        </a>
+
+        <a routerLink="/audit-history">
+          Audit History
+        </a>
+
+      </nav>
+
+      <button
+        class="logout-button"
+        (click)="logout()"
+      >
+        Logout
+      </button>
+
+    </aside>
+
+    <main class="main-content">
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </div>
+
+} @else {
+
+  <router-outlet></router-outlet>
+
+}
