@@ -1,0 +1,183 @@
+<div class="login-page">
+
+  <!-- Left Branding Section -->
+  <div class="login-brand-section">
+
+    <div class="brand-content">
+
+      <div class="brand-logo">
+        CQ
+      </div>
+
+      <h1>ContractIQ</h1>
+
+      <h2>
+        Contract Management
+        <br />
+        & Compliance
+      </h2>
+
+      <p>
+        Manage contracts, track obligations,
+        monitor renewals and maintain compliance
+        from one powerful platform.
+      </p>
+
+      <div class="brand-features">
+
+        <div class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Smart Contract Management</span>
+        </div>
+
+        <div class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Obligation Tracking</span>
+        </div>
+
+        <div class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Compliance Monitoring</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Right Login Section -->
+  <div class="login-section">
+
+    <mat-card class="login-card">
+
+      <!-- Login Header -->
+
+      <div class="login-header">
+
+        <div class="mobile-logo">
+          CQ
+        </div>
+
+        <h1>
+          Welcome Back
+        </h1>
+
+        <p>
+          Sign in to your ContractIQ account
+        </p>
+
+      </div>
+
+
+      <!-- Login Form -->
+
+      <form
+        (ngSubmit)="login()"
+        #loginForm="ngForm"
+      >
+
+        <!-- Email -->
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
+
+          <mat-label>Email Address</mat-label>
+
+          <input
+            matInput
+            type="email"
+            [(ngModel)]="username"
+            name="username"
+            placeholder="Enter your email"
+            autocomplete="email"
+            required
+          />
+
+        </mat-form-field>
+
+
+        <!-- Password -->
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
+
+          <mat-label>Password</mat-label>
+
+          <input
+            matInput
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+
+        </mat-form-field>
+
+
+        <!-- Error -->
+
+        @if (errorMessage) {
+
+          <div class="error-message">
+
+            <span class="error-icon">
+              !
+            </span>
+
+            <span>
+              {{ errorMessage }}
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- Login Button -->
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="login-button"
+          [disabled]="!loginForm.valid"
+        >
+
+          Sign In
+
+        </button>
+
+
+      </form>
+
+
+      <!-- Footer -->
+
+      <div class="login-footer">
+
+        <span>
+          Secure Contract Management
+        </span>
+
+        <span class="footer-dot">
+          •
+        </span>
+
+        <span>
+          ContractIQ
+        </span>
+
+      </div>
+
+    </mat-card>
+
+  </div>
+
+</div>

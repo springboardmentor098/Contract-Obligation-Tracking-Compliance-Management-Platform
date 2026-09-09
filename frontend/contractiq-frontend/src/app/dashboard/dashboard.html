@@ -1,0 +1,399 @@
+<!-- ================================
+     TOP NAVIGATION BAR
+================================ -->
+
+<nav class="dashboard-navbar">
+
+  <div class="navbar-brand">
+
+    <div class="brand-logo">
+      CQ
+    </div>
+
+    <div class="brand-text">
+      <div class="brand-name">
+        ContractIQ
+      </div>
+
+      <div class="brand-subtitle">
+        Contract Management & Compliance
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="navbar-right">
+
+    <div class="user-info">
+
+      <div class="user-avatar">
+        U
+      </div>
+
+      <div class="user-details">
+        <span class="user-name">
+          User
+        </span>
+
+        <span class="user-role">
+          Dashboard
+        </span>
+      </div>
+
+    </div>
+
+
+    <button
+      mat-stroked-button
+      class="logout-button"
+      (click)="logout()">
+
+      Logout
+
+    </button>
+
+  </div>
+
+</nav>
+
+
+<!-- ================================
+     DASHBOARD
+================================ -->
+
+<div class="dashboard-container">
+
+
+  <!-- Dashboard Header -->
+
+  <div class="dashboard-header">
+
+    <div>
+
+      <h1>
+        Dashboard Overview
+      </h1>
+
+      <p>
+        Overview of contracts, obligations, renewals and compliance
+      </p>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ================================
+       SUMMARY CARDS
+  ================================= -->
+
+  <div class="stats-grid">
+
+
+    <!-- Total Contracts -->
+
+    <mat-card class="stat-card total-card">
+
+      <mat-card-content>
+
+        <div class="stat-icon">
+          📄
+        </div>
+
+        <div class="stat-label">
+          TOTAL CONTRACTS
+        </div>
+
+        <div class="stat-value">
+          {{ totalContracts }}
+        </div>
+
+        <div class="stat-description">
+          All contracts
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- Active Contracts -->
+
+    <mat-card class="stat-card active-card">
+
+      <mat-card-content>
+
+        <div class="stat-icon">
+          ✓
+        </div>
+
+        <div class="stat-label">
+          ACTIVE CONTRACTS
+        </div>
+
+        <div class="stat-value">
+          {{ activeContracts }}
+        </div>
+
+        <div class="stat-description">
+          Currently active
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- Pending Obligations -->
+
+    <mat-card class="stat-card pending-card">
+
+      <mat-card-content>
+
+        <div class="stat-icon">
+          ⏳
+        </div>
+
+        <div class="stat-label">
+          PENDING OBLIGATIONS
+        </div>
+
+        <div class="stat-value">
+          {{ pendingObligations }}
+        </div>
+
+        <div class="stat-description">
+          Need attention
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- Overdue Obligations -->
+
+    <mat-card class="stat-card overdue-card">
+
+      <mat-card-content>
+
+        <div class="stat-icon">
+          !
+        </div>
+
+        <div class="stat-label">
+          OVERDUE OBLIGATIONS
+        </div>
+
+        <div class="stat-value">
+          {{ overdueObligations }}
+        </div>
+
+        <div class="stat-description">
+          Past due date
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- Upcoming Renewals -->
+
+    <mat-card class="stat-card renewal-card">
+
+      <mat-card-content>
+
+        <div class="stat-icon">
+          ↻
+        </div>
+
+        <div class="stat-label">
+          UPCOMING RENEWALS
+        </div>
+
+        <div class="stat-value">
+          {{ upcomingRenewals }}
+        </div>
+
+        <div class="stat-description">
+          Upcoming renewals
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- High Risk -->
+
+    <mat-card class="stat-card risk-card">
+
+      <mat-card-content>
+
+        <div class="stat-icon">
+          ⚠
+        </div>
+
+        <div class="stat-label">
+          HIGH RISK CONTRACTS
+        </div>
+
+        <div class="stat-value">
+          {{ highRiskContracts }}
+        </div>
+
+        <div class="stat-description">
+          Requires attention
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+  </div>
+
+
+
+  <!-- ================================
+       CHARTS
+  ================================= -->
+
+  <div class="charts-grid">
+
+
+    <!-- Contract Status -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Contract Status
+        </mat-card-title>
+
+        <mat-card-subtitle>
+          Contracts by current status
+        </mat-card-subtitle>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="chart-container">
+
+          <canvas id="contractStatusChart"></canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- Obligation Status -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Obligation Status
+        </mat-card-title>
+
+        <mat-card-subtitle>
+          Current obligation tracking
+        </mat-card-subtitle>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="chart-container">
+
+          <canvas id="obligationStatusChart"></canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- Compliance -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Compliance Overview
+        </mat-card-title>
+
+        <mat-card-subtitle>
+          Overall compliance distribution
+        </mat-card-subtitle>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="chart-container">
+
+          <canvas id="complianceChart"></canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+
+    <!-- Categories -->
+
+    <mat-card class="chart-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Contract Categories
+        </mat-card-title>
+
+        <mat-card-subtitle>
+          Contracts by category
+        </mat-card-subtitle>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="chart-container">
+
+          <canvas id="categoryChart"></canvas>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+  </div>
+
+
+</div>

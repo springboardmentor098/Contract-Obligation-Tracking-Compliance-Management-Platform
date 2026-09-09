@@ -1,0 +1,747 @@
+/* =========================================
+   GLOBAL DASHBOARD
+========================================= */
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+
+/* =========================================
+   NAVBAR
+========================================= */
+
+.dashboard-navbar {
+
+  height: 72px;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 36px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+
+  position: sticky;
+  top: 0;
+
+  z-index: 1000;
+}
+
+
+/* =========================================
+   BRAND
+========================================= */
+
+.navbar-brand {
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+}
+
+
+/* Logo */
+
+.brand-logo {
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #4f46e5
+  );
+
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  letter-spacing: 0.5px;
+
+  box-shadow:
+    0 5px 12px rgba(37, 99, 235, 0.25);
+}
+
+
+/* Brand Text */
+
+.brand-text {
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+
+.brand-name {
+
+  font-size: 21px;
+
+  font-weight: 750;
+
+  color: #0f172a;
+
+  line-height: 1.2;
+
+  letter-spacing: -0.3px;
+}
+
+
+.brand-subtitle {
+
+  margin-top: 3px;
+
+  font-size: 11px;
+
+  color: #64748b;
+
+  line-height: 1.2;
+}
+
+
+/* =========================================
+   NAVBAR RIGHT
+========================================= */
+
+.navbar-right {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 20px;
+}
+
+
+/* =========================================
+   USER
+========================================= */
+
+.user-info {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.user-avatar {
+
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  border: 1px solid #dbeafe;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+
+.user-details {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.user-name {
+
+  font-size: 13px;
+
+  font-weight: 650;
+
+  color: #1e293b;
+}
+
+
+.user-role {
+
+  margin-top: 2px;
+
+  font-size: 11px;
+
+  color: #64748b;
+}
+
+
+/* =========================================
+   LOGOUT
+========================================= */
+
+.logout-button {
+
+  min-width: 88px;
+
+  height: 38px;
+
+  border-radius: 8px !important;
+
+  border: 1px solid #cbd5e1 !important;
+
+  color: #334155 !important;
+
+  background: #ffffff;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  transition: all 0.2s ease;
+}
+
+
+.logout-button:hover {
+
+  background: #fef2f2 !important;
+
+  border-color: #fecaca !important;
+
+  color: #dc2626 !important;
+
+  box-shadow:
+    0 3px 8px rgba(220, 38, 38, 0.08);
+}
+
+
+/* =========================================
+   DASHBOARD CONTAINER
+========================================= */
+
+.dashboard-container {
+
+  min-height: calc(100vh - 72px);
+
+  padding: 36px;
+
+  background: #f4f7fb;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   DASHBOARD HEADER
+========================================= */
+
+.dashboard-header {
+
+  margin-bottom: 30px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+
+.dashboard-header h1 {
+
+  margin: 0;
+
+  font-size: 30px;
+
+  font-weight: 750;
+
+  color: #0f172a;
+
+  letter-spacing: -0.5px;
+}
+
+
+.dashboard-header p {
+
+  margin: 8px 0 0;
+
+  color: #64748b;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================
+   STAT CARDS
+========================================= */
+
+.stats-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 20px;
+
+  margin-bottom: 30px;
+}
+
+
+.stat-card {
+
+  min-height: 150px;
+
+  border-radius: 15px !important;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 18px rgba(15, 23, 42, 0.07);
+
+  border: 1px solid #e2e8f0;
+
+  overflow: hidden;
+
+  position: relative;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.stat-card:hover {
+
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.11);
+}
+
+
+/* Card top borders */
+
+.total-card {
+  border-top: 4px solid #2563eb;
+}
+
+.active-card {
+  border-top: 4px solid #16a34a;
+}
+
+.pending-card {
+  border-top: 4px solid #f59e0b;
+}
+
+.overdue-card {
+  border-top: 4px solid #dc2626;
+}
+
+.renewal-card {
+  border-top: 4px solid #7c3aed;
+}
+
+.risk-card {
+  border-top: 4px solid #ea580c;
+}
+
+
+/* Card Content */
+
+.stat-card mat-card-content {
+
+  padding: 22px 24px;
+
+  position: relative;
+}
+
+
+/* Icon */
+
+.stat-icon {
+
+  position: absolute;
+
+  right: 22px;
+
+  top: 20px;
+
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  font-size: 19px;
+
+  font-weight: 700;
+
+  background: #f1f5f9;
+}
+
+
+/* Individual icon backgrounds */
+
+.total-card .stat-icon {
+
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.active-card .stat-icon {
+
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+.pending-card .stat-icon {
+
+  color: #f59e0b;
+  background: #fffbeb;
+}
+
+.overdue-card .stat-icon {
+
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.renewal-card .stat-icon {
+
+  color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.risk-card .stat-icon {
+
+  color: #ea580c;
+  background: #fff7ed;
+}
+
+
+/* Label */
+
+.stat-label {
+
+  margin-bottom: 10px;
+
+  color: #64748b;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.7px;
+}
+
+
+/* Number */
+
+.stat-value {
+
+  font-size: 34px;
+
+  line-height: 1;
+
+  font-weight: 750;
+
+  margin-bottom: 10px;
+}
+
+
+/* Number colors */
+
+.total-card .stat-value {
+  color: #2563eb;
+}
+
+.active-card .stat-value {
+  color: #16a34a;
+}
+
+.pending-card .stat-value {
+  color: #f59e0b;
+}
+
+.overdue-card .stat-value {
+  color: #dc2626;
+}
+
+.renewal-card .stat-value {
+  color: #7c3aed;
+}
+
+.risk-card .stat-value {
+  color: #ea580c;
+}
+
+
+/* Description */
+
+.stat-description {
+
+  color: #94a3b8;
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   CHART GRID
+========================================= */
+
+.charts-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 24px;
+}
+
+
+/* =========================================
+   CHART CARD
+========================================= */
+
+.chart-card {
+
+  min-height: 390px;
+
+  border-radius: 15px !important;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 4px 18px rgba(15, 23, 42, 0.06);
+
+  overflow: hidden;
+}
+
+
+/* Chart Header */
+
+.chart-card mat-card-header {
+
+  padding: 22px 24px 8px;
+}
+
+
+.chart-card mat-card-title {
+
+  font-size: 18px !important;
+
+  font-weight: 700 !important;
+
+  color: #0f172a;
+
+  margin-bottom: 5px;
+}
+
+
+.chart-card mat-card-subtitle {
+
+  font-size: 12px !important;
+
+  color: #94a3b8;
+}
+
+
+/* Chart Content */
+
+.chart-card mat-card-content {
+
+  padding: 10px 22px 22px;
+
+  height: 300px;
+
+  box-sizing: border-box;
+
+  position: relative;
+}
+
+
+/* Chart Container */
+
+.chart-container {
+
+  width: 100%;
+
+  height: 100%;
+
+  position: relative;
+}
+
+
+/* Canvas */
+
+.chart-container canvas {
+
+  width: 100% !important;
+
+  height: 100% !important;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+
+  .stats-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .charts-grid {
+
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .dashboard-navbar {
+
+    height: 64px;
+
+    padding: 0 16px;
+  }
+
+
+  .dashboard-container {
+
+    padding: 24px 16px;
+  }
+
+
+  .brand-subtitle {
+
+    display: none;
+  }
+
+
+  .brand-name {
+
+    font-size: 18px;
+  }
+
+
+  .user-details {
+
+    display: none;
+  }
+
+
+  .navbar-right {
+
+    gap: 10px;
+  }
+
+
+  .stats-grid {
+
+    grid-template-columns: 1fr;
+  }
+
+
+  .dashboard-header h1 {
+
+    font-size: 25px;
+  }
+
+
+  .chart-card {
+
+    min-height: 360px;
+  }
+
+
+  .chart-card mat-card-content {
+
+    height: 270px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .dashboard-navbar {
+
+    padding: 0 12px;
+  }
+
+
+  .brand-logo {
+
+    width: 36px;
+
+    height: 36px;
+
+    border-radius: 9px;
+  }
+
+
+  .brand-name {
+
+    font-size: 17px;
+  }
+
+
+  .user-avatar {
+
+    display: none;
+  }
+
+
+  .logout-button {
+
+    min-width: 75px;
+  }
+
+
+  .stat-card {
+
+    min-height: 140px;
+  }
+
+}
