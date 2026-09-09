@@ -5,14 +5,15 @@
   border-right: 1px solid #ddd;
   box-sizing: border-box;
   padding: 20px 0;
-}
 
-.sidebar nav {
   display: flex;
   flex-direction: column;
 }
 
 .sidebar a {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   padding: 14px 24px;
   color: #333;
   text-decoration: none;

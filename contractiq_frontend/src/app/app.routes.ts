@@ -11,11 +11,16 @@ import { Reports } from './reports/reports';
 import { AuditHistory } from './audit-history/audit-history';
 import { Login } from './auth/login/login';
 import { authGuard } from './guards/auth-guard';
+import { ForgotPassword } from './auth/forgot-password/forgot-password';
 
 export const routes: Routes = [
   {
     path: 'login',
     component: Login
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPassword
   },
   {
     path: '',
