@@ -1,0 +1,39 @@
+.app-header {
+  height: 64px;
+  background: #1976d2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.page-title {
+  font-size: 16px;
+}
+
+.header-user {
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .page-title {
+    display: none;
+  }
+
+  .app-header {
+    padding: 0 16px;
+  }
+}

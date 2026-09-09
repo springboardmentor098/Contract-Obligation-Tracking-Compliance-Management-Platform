@@ -1,0 +1,17 @@
+.app-body {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  overflow-x: auto;
+}
+
+@media (max-width: 700px) {
+  .app-body {
+    min-height: calc(100vh - 64px);
+  }
+}

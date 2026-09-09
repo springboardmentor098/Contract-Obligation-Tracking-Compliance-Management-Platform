@@ -1,0 +1,40 @@
+.sidebar {
+  width: 230px;
+  min-height: calc(100vh - 64px);
+  background: #f5f7fa;
+  border-right: 1px solid #ddd;
+  box-sizing: border-box;
+  padding: 20px 0;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar a {
+  padding: 14px 24px;
+  color: #333;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.sidebar a:hover {
+  background: #e3f2fd;
+}
+
+.sidebar a.active {
+  background: #1976d2;
+  color: white;
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .sidebar {
+    width: 180px;
+  }
+
+  .sidebar a {
+    padding: 12px 16px;
+  }
+}
