@@ -244,6 +244,34 @@ def get_overdue_obligations(
 # GET OBLIGATION BY ID
 # ============================================================
 
+# ============================================================
+# TRIGGER OVERDUE ALERTS
+# Smallest Swagger-accessible trigger for the existing generator.
+# ============================================================
+
+@router.post(
+    "/overdue/check",
+    status_code=status.HTTP_200_OK,
+)
+def trigger_overdue_notifications(
+    current_user: dict = Depends(
+        require_roles(*VIEW_ROLES)
+    ),
+    db: Session = Depends(get_db)
+):
+    """
+    Reuse the existing overdue notification generator so the
+    overdue obligation alert can be tested in Swagger.
+    """
+
+    notifications = generate_overdue_alerts(db)
+
+    return {
+        "message": "Overdue obligation notifications processed",
+        "generated_count": len(notifications)
+    }
+
+
 @router.get(
     "/{obligation_id}",
     response_model=ObligationResponse,

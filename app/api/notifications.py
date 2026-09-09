@@ -62,6 +62,9 @@ def get_notifications(
 
     user_id = int(current_user["user_id"])
 
+    print("GET /notifications called")
+    print("Fetching notifications for user:", user_id)
+
     notifications = (
         db.query(Notification)
         .filter(
@@ -72,6 +75,8 @@ def get_notifications(
         )
         .all()
     )
+
+    print("Notifications found:", len(notifications))
 
     return notifications
 
@@ -139,6 +144,20 @@ def create_new_notification(
     db: Session = Depends(get_db)
 ):
 
+    # --------------------------------------------------------
+    # DEBUG
+    # --------------------------------------------------------
+    print("Notification API called")
+    print("========================================")
+   
+    print("Current user:", current_user)
+    print("Notification data:", notification_data)
+    print("========================================")
+
+    # --------------------------------------------------------
+    # CREATE NOTIFICATION
+    # --------------------------------------------------------
+
     notification = create_notification(
         db=db,
         user_id=notification_data.user_id,
@@ -150,11 +169,28 @@ def create_new_notification(
         scheduled_at=notification_data.scheduled_at,
     )
 
+    # --------------------------------------------------------
+    # CHECK RESULT
+    # --------------------------------------------------------
+
     if notification is None:
+
+        print("Notification creation failed: User not found")
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
+
+    # --------------------------------------------------------
+    # DEBUG SUCCESS
+    # --------------------------------------------------------
+
+    print("Notification created successfully")
+    print("Notification ID:", notification.id)
+    print("Notification User ID:", notification.user_id)
+    print("Notification Type:", notification.notification_type)
+    print("========================================")
 
     return notification
 
