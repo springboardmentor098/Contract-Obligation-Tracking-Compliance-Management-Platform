@@ -1,0 +1,5 @@
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+@Component({ selector: 'app-placeholder', standalone: true, template: `<section class="placeholder"><p class="eyebrow">ContractIQ workspace</p><h1>{{ title }}</h1><p>This workspace is ready for the connected {{ title.toLowerCase() }} workflow.</p><span>API integration coming next</span></section>`, styles: [`.placeholder{min-height:380px;display:grid;align-content:center;justify-items:start}.eyebrow{color:#d55b3d;font:700 10px monospace;text-transform:uppercase}.placeholder h1{margin:0 0 16px;font:500 52px Georgia,serif}.placeholder p{color:#768174;font-size:16px}.placeholder span{margin-top:28px;color:#d55b3d;font:11px monospace;text-transform:uppercase}`] })
+export class PlaceholderComponent { readonly title = inject(ActivatedRoute).snapshot.data['title'] as string; }
