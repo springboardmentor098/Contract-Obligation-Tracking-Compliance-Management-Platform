@@ -79,6 +79,7 @@ def create_contract(
         description=contract_data.description,
         counterparty=contract_data.counterparty,
         category=contract_data.category,
+        department=contract_data.department,
         status="Draft",
         risk_level=contract_data.risk_level,
         start_date=contract_data.start_date,

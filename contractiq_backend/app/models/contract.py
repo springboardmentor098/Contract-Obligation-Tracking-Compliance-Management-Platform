@@ -53,6 +53,12 @@ class Contract(Base):
         nullable=False
     )
 
+    department = Column(
+        String(100),
+        nullable=True,
+        index=True
+    )
+
     status = Column(
         String(50),
         nullable=False,
