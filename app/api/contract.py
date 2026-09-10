@@ -14,6 +14,10 @@ from app.schemas.contract_schema import (
     ContractResponse,
 )
 from app.middleware.auth import require_roles
+from app.services.notification_service import (
+    generate_approval_notification,
+    generate_status_notification,
+)
 
 
 router = APIRouter(
@@ -267,6 +271,8 @@ def update_contract_status(
     db.commit()
     db.refresh(contract)
 
+    generate_status_notification(db, contract.id, new_status)
+
     return contract
 
 
@@ -317,6 +323,8 @@ def submit_for_review(
 
     db.commit()
     db.refresh(contract)
+
+    generate_status_notification(db, contract.id, "Under Review")
 
     return contract
 
@@ -369,6 +377,13 @@ def approve_contract(
 
     db.commit()
     db.refresh(contract)
+
+    generate_approval_notification(
+        db,
+        contract.id,
+        approved_by_user_id=current_user["user_id"],
+    )
+    generate_status_notification(db, contract.id, "Approved")
 
     return contract
 

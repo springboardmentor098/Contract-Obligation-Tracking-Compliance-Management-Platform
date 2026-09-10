@@ -76,6 +76,16 @@ def create_notification(
     if not user:
         return None
 
+    if contract_id is not None and not db.query(Contract).filter(
+        Contract.id == contract_id
+    ).first():
+        return None
+
+    if obligation_id is not None and not db.query(Obligation).filter(
+        Obligation.id == obligation_id
+    ).first():
+        return None
+
     # --------------------------------------------------------
     # Create notification
     # --------------------------------------------------------
@@ -94,6 +104,15 @@ def create_notification(
     db.add(notification)
     db.commit()
     db.refresh(notification)
+
+    # Email is optional. A delivery failure must never roll back the
+    # in-app notification or fail the main business operation.
+    if not scheduled_at or scheduled_at <= datetime.utcnow():
+        if send_email_notification(user.email, title, message):
+            notification.sent_at = datetime.utcnow()
+            notification.updated_at = datetime.utcnow()
+            db.commit()
+            db.refresh(notification)
 
     return notification
 
@@ -179,17 +198,16 @@ def notification_exists(
         )
     )
 
-    if contract_id is not None:
-
-        query = query.filter(
-            Notification.contract_id == contract_id
-        )
-
-    if obligation_id is not None:
-
-        query = query.filter(
-            Notification.obligation_id == obligation_id
-        )
+    query = query.filter(
+        Notification.contract_id == contract_id
+        if contract_id is not None
+        else Notification.contract_id.is_(None)
+    )
+    query = query.filter(
+        Notification.obligation_id == obligation_id
+        if obligation_id is not None
+        else Notification.obligation_id.is_(None)
+    )
 
     return query.first() is not None
 

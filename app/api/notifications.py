@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -13,7 +11,12 @@ from app.services.notification_service import (
     create_notification,
     mark_notification_as_read,
     mark_all_notifications_as_read,
+    generate_renewal_reminders,
+    generate_obligation_due_alerts,
+    generate_overdue_alerts,
+    generate_compliance_alert,
 )
+from app.services.compliance_service import calculate_all_contract_compliance
 from app.middleware.auth import require_roles
 
 
@@ -62,9 +65,6 @@ def get_notifications(
 
     user_id = int(current_user["user_id"])
 
-    print("GET /notifications called")
-    print("Fetching notifications for user:", user_id)
-
     notifications = (
         db.query(Notification)
         .filter(
@@ -75,8 +75,6 @@ def get_notifications(
         )
         .all()
     )
-
-    print("Notifications found:", len(notifications))
 
     return notifications
 
@@ -144,15 +142,14 @@ def create_new_notification(
     db: Session = Depends(get_db)
 ):
 
-    # --------------------------------------------------------
-    # DEBUG
-    # --------------------------------------------------------
-    print("Notification API called")
-    print("========================================")
-   
-    print("Current user:", current_user)
-    print("Notification data:", notification_data)
-    print("========================================")
+    if (
+        current_user["role"] != "Administrator"
+        and notification_data.user_id != current_user["user_id"]
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You may only create notifications for yourself",
+        )
 
     # --------------------------------------------------------
     # CREATE NOTIFICATION
@@ -169,30 +166,39 @@ def create_new_notification(
         scheduled_at=notification_data.scheduled_at,
     )
 
-    # --------------------------------------------------------
-    # CHECK RESULT
-    # --------------------------------------------------------
-
     if notification is None:
-
-        print("Notification creation failed: User not found")
-
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="User or related contract/obligation not found",
         )
 
-    # --------------------------------------------------------
-    # DEBUG SUCCESS
-    # --------------------------------------------------------
-
-    print("Notification created successfully")
-    print("Notification ID:", notification.id)
-    print("Notification User ID:", notification.user_id)
-    print("Notification Type:", notification.notification_type)
-    print("========================================")
-
     return notification
+
+
+@router.post(
+    "/process",
+    status_code=status.HTTP_200_OK,
+)
+def process_alerts(
+    current_user: dict = Depends(require_roles(*CREATE_ROLES)),
+    db: Session = Depends(get_db),
+):
+    """Run the idempotent daily renewal, obligation, and compliance checks."""
+    generated = []
+    generated.extend(generate_renewal_reminders(db))
+    generated.extend(generate_obligation_due_alerts(db))
+    generated.extend(generate_overdue_alerts(db))
+
+    for result in calculate_all_contract_compliance(db):
+        generated.extend(generate_compliance_alert(
+            db=db,
+            contract_id=result["contract_id"],
+            compliance_status=result["compliance_status"],
+            risk_level=result["risk_level"],
+            overdue_obligations=result["overdue_obligations"],
+        ))
+
+    return {"message": "Notification checks processed", "generated_count": len(generated)}
 
 
 # ============================================================
