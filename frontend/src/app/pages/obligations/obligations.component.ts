@@ -15,7 +15,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   Obligation,
   ObligationCreate,
-  ObligationService
+  ObligationService,
+  ObligationUpdate
 } from '../../services/obligation.service';
 
 import {
@@ -54,10 +55,21 @@ export class ObligationsComponent implements OnInit {
   error = '';
 
   searchTerm = '';
+  statusFilter = '';
+  priorityFilter = '';
+  typeFilter = '';
 
   showCreateForm = false;
+  showEditForm = false;
+  showDetails = false;
+
   creating = false;
+  updating = false;
+
   createError = '';
+  editError = '';
+
+  selectedObligation: Obligation | null = null;
 
   readonly UserRole = UserRole;
 
@@ -78,6 +90,15 @@ export class ObligationsComponent implements OnInit {
     obligation_type: '',
     due_date: null,
     status: 'Pending',
+    priority: 'Medium'
+  };
+
+  editForm: ObligationUpdate = {
+    assigned_to: '',
+    title: '',
+    description: '',
+    obligation_type: '',
+    due_date: null,
     priority: 'Medium'
   };
 
@@ -116,60 +137,76 @@ export class ObligationsComponent implements OnInit {
     this.obligationService.getObligations().subscribe({
       next: (obligations) => {
         this.obligations = obligations;
-        this.filteredObligations = [...obligations];
         this.loading = false;
+        this.applyFilters();
       },
       error: (error) => {
         console.error('Obligations API error:', error);
 
         this.loading = false;
-
-        if (error.status === 401) {
-          this.error =
-            'Your session has expired. Please log in again.';
-        } else if (error.status === 403) {
-          this.error =
-            'You do not have permission to view these obligations.';
-        } else if (error.status === 0) {
-          this.error =
-            'Unable to connect to the backend. Please make sure FastAPI is running.';
-        } else {
-          this.error =
-            error.error?.detail ||
-            'Unable to load obligations. Please try again.';
-        }
+        this.error = this.getErrorMessage(
+          error,
+          'Unable to load obligations. Please try again.'
+        );
       }
     });
   }
 
-  onSearch(): void {
+  applyFilters(): void {
     const search = this.searchTerm.trim().toLowerCase();
 
-    if (!search) {
-      this.filteredObligations = [...this.obligations];
-      return;
-    }
-
     this.filteredObligations = this.obligations.filter(
-      (obligation) =>
-        [
-          obligation.title,
-          obligation.description,
-          obligation.obligation_type,
-          obligation.priority,
-          obligation.status,
-          obligation.due_date
-        ]
-          .filter(Boolean)
-          .some((value) =>
-            String(value).toLowerCase().includes(search)
-          )
+      (obligation) => {
+
+        const matchesSearch =
+          !search ||
+          [
+            obligation.title,
+            obligation.description,
+            obligation.obligation_type,
+            obligation.priority,
+            obligation.status,
+            obligation.due_date,
+            obligation.contract_id
+          ]
+            .filter(Boolean)
+            .some((value) =>
+              String(value).toLowerCase().includes(search)
+            );
+
+        const matchesStatus =
+          !this.statusFilter ||
+          obligation.status === this.statusFilter;
+
+        const matchesPriority =
+          !this.priorityFilter ||
+          obligation.priority === this.priorityFilter;
+
+        const matchesType =
+          !this.typeFilter ||
+          obligation.obligation_type === this.typeFilter;
+
+        return (
+          matchesSearch &&
+          matchesStatus &&
+          matchesPriority &&
+          matchesType
+        );
+      }
     );
   }
 
-  clearSearch(): void {
+  onSearch(): void {
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
     this.searchTerm = '';
-    this.filteredObligations = [...this.obligations];
+    this.statusFilter = '';
+    this.priorityFilter = '';
+    this.typeFilter = '';
+
+    this.applyFilters();
   }
 
   openCreateForm(): void {
@@ -216,97 +253,286 @@ export class ObligationsComponent implements OnInit {
       return;
     }
 
+    if (
+      this.obligationForm.due_date &&
+      !this.isValidDate(this.obligationForm.due_date)
+    ) {
+      this.createError = 'Please enter a valid due date.';
+      return;
+    }
+
     this.creating = true;
 
     const obligation: ObligationCreate = {
-      contract_id: this.obligationForm.contract_id.trim(),
-      assigned_to: this.obligationForm.assigned_to.trim(),
-      title: this.obligationForm.title.trim(),
+      contract_id:
+        this.obligationForm.contract_id.trim(),
+
+      assigned_to:
+        this.obligationForm.assigned_to.trim(),
+
+      title:
+        this.obligationForm.title.trim(),
+
       description:
         this.obligationForm.description?.trim() || null,
+
       obligation_type:
         this.obligationForm.obligation_type?.trim() || null,
+
       due_date:
         this.obligationForm.due_date || null,
+
       status:
         this.obligationForm.status || 'Pending',
+
       priority:
         this.obligationForm.priority || 'Medium'
     };
 
-    this.obligationService.createObligation(obligation).subscribe({
-      next: () => {
-        this.creating = false;
-        this.showCreateForm = false;
-        this.createError = '';
-        this.loadObligations();
-      },
-      error: (error) => {
-        console.error('Create obligation error:', error);
+    this.obligationService
+      .createObligation(obligation)
+      .subscribe({
+        next: () => {
+          this.creating = false;
+          this.showCreateForm = false;
+          this.createError = '';
+          this.loadObligations();
+        },
 
-        this.creating = false;
+        error: (error) => {
+          console.error(
+            'Create obligation error:',
+            error
+          );
 
-        if (error.status === 400) {
-          this.createError =
-            error.error?.detail ||
-            'Invalid obligation information.';
-        } else if (error.status === 401) {
-          this.createError =
-            'Your session has expired. Please log in again.';
-        } else if (error.status === 403) {
-          this.createError =
-            'You do not have permission to create this obligation.';
-        } else if (error.status === 404) {
-          this.createError =
-            error.error?.detail ||
-            'Contract or assigned user was not found.';
-        } else if (error.status === 422) {
-          this.createError =
-            'Please check the required obligation information.';
-        } else if (error.status === 0) {
-          this.createError =
-            'Unable to connect to the backend.';
-        } else {
-          this.createError =
-            error.error?.detail ||
-            'Unable to create obligation. Please try again.';
+          this.creating = false;
+
+          this.createError = this.getErrorMessage(
+            error,
+            'Unable to create obligation. Please try again.'
+          );
         }
-      }
-    });
+      });
+  }
+
+  viewObligation(obligation: Obligation): void {
+    this.selectedObligation = obligation;
+    this.showDetails = true;
+    this.error = '';
+  }
+
+  closeDetails(): void {
+    this.showDetails = false;
+    this.selectedObligation = null;
+  }
+
+  openEditForm(obligation: Obligation): void {
+    this.editError = '';
+
+    this.obligationService
+      .getObligation(obligation.id)
+      .subscribe({
+        next: (fullObligation) => {
+          this.selectedObligation = fullObligation;
+
+          this.editForm = {
+            assigned_to:
+              fullObligation.assigned_to,
+
+            title:
+              fullObligation.title,
+
+            description:
+              fullObligation.description,
+
+            obligation_type:
+              fullObligation.obligation_type,
+
+            due_date:
+              fullObligation.due_date,
+
+            priority:
+              fullObligation.priority || 'Medium'
+          };
+
+          this.showEditForm = true;
+        },
+
+        error: (error) => {
+          console.error(
+            'Get obligation error:',
+            error
+          );
+
+          this.error = this.getErrorMessage(
+            error,
+            'Unable to load obligation details.'
+          );
+        }
+      });
+  }
+
+  closeEditForm(): void {
+    if (this.updating) {
+      return;
+    }
+
+    this.showEditForm = false;
+    this.editError = '';
+  }
+
+  updateObligation(): void {
+    this.editError = '';
+
+    if (!this.selectedObligation) {
+      return;
+    }
+
+    if (!this.editForm.title?.trim()) {
+      this.editError =
+        'Obligation title is required.';
+      return;
+    }
+
+    if (
+      this.editForm.due_date &&
+      !this.isValidDate(this.editForm.due_date)
+    ) {
+      this.editError =
+        'Please enter a valid due date.';
+      return;
+    }
+
+    this.updating = true;
+
+    const update: ObligationUpdate = {
+      assigned_to:
+        this.editForm.assigned_to?.trim() || null,
+
+      title:
+        this.editForm.title?.trim() || null,
+
+      description:
+        this.editForm.description?.trim() || null,
+
+      obligation_type:
+        this.editForm.obligation_type?.trim() || null,
+
+      due_date:
+        this.editForm.due_date || null,
+
+      priority:
+        this.editForm.priority || null
+    };
+
+    this.obligationService
+      .updateObligation(
+        this.selectedObligation.id,
+        update
+      )
+      .subscribe({
+        next: () => {
+          this.updating = false;
+          this.showEditForm = false;
+          this.editError = '';
+          this.selectedObligation = null;
+          this.loadObligations();
+        },
+
+        error: (error) => {
+          console.error(
+            'Update obligation error:',
+            error
+          );
+
+          this.updating = false;
+
+          this.editError = this.getErrorMessage(
+            error,
+            'Unable to update obligation. Please try again.'
+          );
+        }
+      });
   }
 
   updateStatus(
     obligation: Obligation,
     status: string
   ): void {
-    if (!status || obligation.status === status) {
+
+    if (
+      !status ||
+      obligation.status === status
+    ) {
       return;
     }
 
+    this.error = '';
+
     this.obligationService
-      .updateStatus(obligation.id, status)
+      .updateStatus(
+        obligation.id,
+        status
+      )
       .subscribe({
         next: () => {
           this.loadObligations();
         },
+
         error: (error) => {
           console.error(
             'Update obligation status error:',
             error
           );
 
-          this.error =
-            error.error?.detail ||
-            'Unable to update obligation status.';
+          this.error = this.getErrorMessage(
+            error,
+            'Unable to update obligation status.'
+          );
         }
       });
   }
 
-  completeObligation(obligation: Obligation): void {
-    this.updateStatus(obligation, 'Completed');
+  startObligation(
+    obligation: Obligation
+  ): void {
+    this.updateStatus(
+      obligation,
+      'In Progress'
+    );
   }
 
-  deleteObligation(obligation: Obligation): void {
+  completeObligation(
+    obligation: Obligation
+  ): void {
+    this.updateStatus(
+      obligation,
+      'Completed'
+    );
+  }
+
+  markDelayed(
+    obligation: Obligation
+  ): void {
+    this.updateStatus(
+      obligation,
+      'Delayed'
+    );
+  }
+
+  markOverdue(
+    obligation: Obligation
+  ): void {
+    this.updateStatus(
+      obligation,
+      'Overdue'
+    );
+  }
+
+  deleteObligation(
+    obligation: Obligation
+  ): void {
+
     const confirmed = window.confirm(
       `Are you sure you want to delete obligation "${obligation.title}"?`
     );
@@ -315,21 +541,25 @@ export class ObligationsComponent implements OnInit {
       return;
     }
 
+    this.error = '';
+
     this.obligationService
       .deleteObligation(obligation.id)
       .subscribe({
         next: () => {
           this.loadObligations();
         },
+
         error: (error) => {
           console.error(
             'Delete obligation error:',
             error
           );
 
-          this.error =
-            error.error?.detail ||
-            'Unable to delete obligation.';
+          this.error = this.getErrorMessage(
+            error,
+            'Unable to delete obligation.'
+          );
         }
       });
   }
@@ -360,7 +590,14 @@ export class ObligationsComponent implements OnInit {
     ]);
   }
 
-  getStatusClass(status: string | null): string {
+  canChangeStatus(): boolean {
+    return this.canUpdate();
+  }
+
+  getStatusClass(
+    status: string | null
+  ): string {
+
     if (!status) {
       return 'unknown';
     }
@@ -370,11 +607,119 @@ export class ObligationsComponent implements OnInit {
       .replace(/\s+/g, '-');
   }
 
-  formatDate(date: string | null): string {
+  formatDate(
+    date: string | null
+  ): string {
+
     if (!date) {
-      return '—';
+      return 'N/A';
     }
 
-    return date;
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString(
+      'en-IN',
+      {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }
+    );
+  }
+
+  formatDateTime(
+    date: string | null
+  ): string {
+
+    if (!date) {
+      return 'N/A';
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleString(
+      'en-IN',
+      {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }
+    );
+  }
+
+  private isValidDate(
+    date: string
+  ): boolean {
+
+    return !Number.isNaN(
+      new Date(date).getTime()
+    );
+  }
+
+  private getErrorMessage(
+    error: any,
+    fallback: string
+  ): string {
+
+    switch (error?.status) {
+
+      case 400:
+        return (
+          error.error?.detail ||
+          'Invalid obligation information.'
+        );
+
+      case 401:
+        return 'Your session has expired. Please log in again.';
+
+      case 403:
+        return (
+          error.error?.detail ||
+          'You do not have permission to perform this action.'
+        );
+
+      case 404:
+        return (
+          error.error?.detail ||
+          'The requested obligation or related contract/user was not found.'
+        );
+
+      case 409:
+        return (
+          error.error?.detail ||
+          'This operation conflicts with the current obligation state.'
+        );
+
+      case 422:
+        return (
+          error.error?.detail ||
+          'Please check the entered obligation information.'
+        );
+
+      case 500:
+        return (
+          error.error?.detail ||
+          'A server error occurred. Please try again later.'
+        );
+
+      case 0:
+        return 'Unable to connect to the FastAPI backend. Please make sure the backend is running.';
+
+      default:
+        return (
+          error?.error?.detail ||
+          fallback
+        );
+    }
   }
 }

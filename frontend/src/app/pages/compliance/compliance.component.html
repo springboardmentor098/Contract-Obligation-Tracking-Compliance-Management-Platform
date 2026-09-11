@@ -23,7 +23,6 @@
     <mat-card class="error-card">
       <mat-card-content>
         <mat-icon>error_outline</mat-icon>
-
         <span>{{ error }}</span>
 
         <button
@@ -32,6 +31,24 @@
           (click)="retry()"
         >
           Retry
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Evaluation Error -->
+  @if (evaluationError) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon>warning</mat-icon>
+        <span>{{ evaluationError }}</span>
+
+        <button
+          mat-button
+          type="button"
+          (click)="evaluationError = ''"
+        >
+          Dismiss
         </button>
       </mat-card-content>
     </mat-card>
@@ -76,36 +93,6 @@
           </mat-card-content>
         </mat-card>
 
-        <mat-card class="summary-card pending">
-          <mat-card-content>
-            <div class="summary-icon">
-              <mat-icon>pending</mat-icon>
-            </div>
-
-            <div class="summary-info">
-              <span>Pending</span>
-              <strong>
-                {{ formatValue(summary.pending_contracts) }}
-              </strong>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="summary-card delayed">
-          <mat-card-content>
-            <div class="summary-icon">
-              <mat-icon>schedule</mat-icon>
-            </div>
-
-            <div class="summary-info">
-              <span>Delayed</span>
-              <strong>
-                {{ formatValue(summary.delayed_contracts) }}
-              </strong>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
         <mat-card class="summary-card non-compliant">
           <mat-card-content>
             <div class="summary-icon">
@@ -136,6 +123,21 @@
           </mat-card-content>
         </mat-card>
 
+        <mat-card class="summary-card score-summary">
+          <mat-card-content>
+            <div class="summary-icon">
+              <mat-icon>analytics</mat-icon>
+            </div>
+
+            <div class="summary-info">
+              <span>Average Compliance Score</span>
+              <strong>
+                {{ formatScore(summary.average_compliance_score) }}
+              </strong>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
       </div>
 
     } @else {
@@ -144,9 +146,7 @@
         <mat-card-content>
           <mat-icon>analytics</mat-icon>
           <h3>No Summary Available</h3>
-          <p>
-            Compliance summary information is not available.
-          </p>
+          <p>Compliance summary information is not available.</p>
         </mat-card-content>
       </mat-card>
 
@@ -160,9 +160,7 @@
     <div class="section-header">
       <div>
         <h2>Contract Compliance</h2>
-        <p>
-          Detailed compliance information for accessible contracts.
-        </p>
+        <p>Detailed compliance information for accessible contracts.</p>
       </div>
     </div>
 
@@ -181,9 +179,7 @@
         <mat-card-content>
           <mat-icon>fact_check</mat-icon>
           <h3>No Compliance Records</h3>
-          <p>
-            No compliance records are currently available.
-          </p>
+          <p>No compliance records are currently available.</p>
         </mat-card-content>
       </mat-card>
 
@@ -198,60 +194,34 @@
             [dataSource]="complianceRecords"
           >
 
-            <!-- Contract ID -->
             <ng-container matColumnDef="contract_id">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Contract ID
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 {{ record.contract_id }}
               </td>
-
             </ng-container>
 
-            <!-- Contract Number -->
             <ng-container matColumnDef="contract_number">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Contract Number
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 <strong>
-                  {{ record.contract_number || 'N/A' }}
+                  {{ getContractNumber(record.contract_id, record.contract_number) }}
                 </strong>
               </td>
-
             </ng-container>
 
-            <!-- Compliance Status -->
             <ng-container matColumnDef="compliance_status">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Compliance Status
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 <span
                   class="status-badge"
                   [class]="getStatusClass(record.compliance_status)"
@@ -259,24 +229,14 @@
                   {{ record.compliance_status || 'Unknown' }}
                 </span>
               </td>
-
             </ng-container>
 
-            <!-- Compliance Score -->
             <ng-container matColumnDef="compliance_score">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Score
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
-
+              <td mat-cell *matCellDef="let record">
                 <div class="score-cell">
 
                   <strong>
@@ -284,97 +244,58 @@
                   </strong>
 
                   @if (record.compliance_score !== null) {
-
                     <div class="score-bar">
                       <div
                         class="score-fill"
                         [style.width.%]="record.compliance_score"
                       ></div>
                     </div>
-
                   }
 
                 </div>
-
               </td>
-
             </ng-container>
 
-            <!-- Total Obligations -->
             <ng-container matColumnDef="total_obligations">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Total
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 {{ formatValue(record.total_obligations) }}
               </td>
-
             </ng-container>
 
-            <!-- Completed Obligations -->
             <ng-container matColumnDef="completed_obligations">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Completed
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 <span class="completed-count">
                   {{ formatValue(record.completed_obligations) }}
                 </span>
               </td>
-
             </ng-container>
 
-            <!-- Pending Obligations -->
             <ng-container matColumnDef="pending_obligations">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Pending
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 <span class="pending-count">
                   {{ formatValue(record.pending_obligations) }}
                 </span>
               </td>
-
             </ng-container>
 
-            <!-- Overdue Obligations -->
             <ng-container matColumnDef="overdue_obligations">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Overdue
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 <span
                   class="overdue-count"
                   [class.has-overdue]="record.overdue_obligations > 0"
@@ -382,23 +303,14 @@
                   {{ formatValue(record.overdue_obligations) }}
                 </span>
               </td>
-
             </ng-container>
 
-            <!-- Risk Level -->
             <ng-container matColumnDef="risk_level">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Risk Level
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let record"
-              >
+              <td mat-cell *matCellDef="let record">
                 <span
                   class="risk-badge"
                   [class]="getRiskClass(record.risk_level)"
@@ -406,10 +318,44 @@
                   {{ record.risk_level || 'Unknown' }}
                 </span>
               </td>
-
             </ng-container>
 
-            <!-- Header / Rows -->
+            <!-- Actions -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>
+                Actions
+              </th>
+
+              <td mat-cell *matCellDef="let record">
+                <div class="action-buttons">
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Evaluate compliance"
+                    [disabled]="isEvaluating(record.contract_id)"
+                    (click)="evaluateContract(record.contract_id)"
+                  >
+                    @if (isEvaluating(record.contract_id)) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      <mat-icon>fact_check</mat-icon>
+                    }
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="View compliance history"
+                    (click)="viewHistory(record.contract_id)"
+                  >
+                    <mat-icon>history</mat-icon>
+                  </button>
+
+                </div>
+              </td>
+            </ng-container>
+
             <tr
               mat-header-row
               *matHeaderRowDef="displayedColumns"
@@ -439,9 +385,7 @@
     <div class="section-header">
       <div>
         <h2>Non-Compliant Contracts</h2>
-        <p>
-          Contracts requiring compliance attention.
-        </p>
+        <p>Contracts requiring compliance attention.</p>
       </div>
     </div>
 
@@ -451,9 +395,7 @@
         <mat-card-content>
           <mat-icon>check_circle</mat-icon>
           <h3>No Non-Compliant Contracts</h3>
-          <p>
-            No non-compliant contracts were found.
-          </p>
+          <p>No non-compliant contracts were found.</p>
         </mat-card-content>
       </mat-card>
 
@@ -469,64 +411,43 @@
           >
 
             <ng-container matColumnDef="contract">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Contract
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let contract"
-              >
+              <td mat-cell *matCellDef="let contract">
+
                 <div class="contract-cell">
                   <strong>
-                    {{ contract.contract_number || 'N/A' }}
+                    {{ getContractNumber(contract.contract_id, contract.contract_number) }}
                   </strong>
 
                   <span>
                     ID: {{ contract.contract_id }}
                   </span>
                 </div>
-              </td>
 
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="status">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Status
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let contract"
-              >
+              <td mat-cell *matCellDef="let contract">
                 <span class="status-badge non-compliant-status">
                   {{ contract.compliance_status || 'Unknown' }}
                 </span>
               </td>
-
             </ng-container>
 
             <ng-container matColumnDef="overdue">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Overdue Obligations
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let contract"
-              >
+              <td mat-cell *matCellDef="let contract">
                 <span
                   class="overdue-count"
                   [class.has-overdue]="contract.overdue_obligations > 0"
@@ -534,7 +455,6 @@
                   {{ contract.overdue_obligations }}
                 </span>
               </td>
-
             </ng-container>
 
             <tr
@@ -566,9 +486,7 @@
     <div class="section-header">
       <div>
         <h2>High-Risk Contracts</h2>
-        <p>
-          Contracts with elevated compliance risk.
-        </p>
+        <p>Contracts with elevated compliance risk.</p>
       </div>
     </div>
 
@@ -578,9 +496,7 @@
         <mat-card-content>
           <mat-icon>verified</mat-icon>
           <h3>No High-Risk Contracts</h3>
-          <p>
-            No high-risk contracts were found.
-          </p>
+          <p>No high-risk contracts were found.</p>
         </mat-card-content>
       </mat-card>
 
@@ -596,44 +512,31 @@
           >
 
             <ng-container matColumnDef="contract">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Contract
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let contract"
-              >
+              <td mat-cell *matCellDef="let contract">
+
                 <div class="contract-cell">
                   <strong>
-                    {{ contract.contract_number || 'N/A' }}
+                    {{ getContractNumber(contract.contract_id, contract.contract_number) }}
                   </strong>
 
                   <span>
                     ID: {{ contract.contract_id }}
                   </span>
                 </div>
-              </td>
 
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="risk">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Risk Level
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let contract"
-              >
+              <td mat-cell *matCellDef="let contract">
                 <span
                   class="risk-badge"
                   [class]="getRiskClass(contract.risk_level)"
@@ -641,22 +544,14 @@
                   {{ contract.risk_level || 'Unknown' }}
                 </span>
               </td>
-
             </ng-container>
 
             <ng-container matColumnDef="overdue">
-
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-              >
+              <th mat-header-cell *matHeaderCellDef>
                 Overdue Obligations
               </th>
 
-              <td
-                mat-cell
-                *matCellDef="let contract"
-              >
+              <td mat-cell *matCellDef="let contract">
                 <span
                   class="overdue-count"
                   [class.has-overdue]="contract.overdue_obligations > 0"
@@ -664,7 +559,6 @@
                   {{ contract.overdue_obligations }}
                 </span>
               </td>
-
             </ng-container>
 
             <tr
@@ -689,5 +583,161 @@
     }
 
   </section>
+
+  <!-- Compliance History -->
+  @if (showHistory) {
+
+    <div class="modal-backdrop" (click)="closeHistory()">
+
+      <mat-card
+        class="history-modal"
+        (click)="$event.stopPropagation()"
+      >
+
+        <div class="modal-header">
+          <div>
+            <h2>Compliance History</h2>
+            <p>
+              Contract:
+              <strong>{{ selectedHistoryContractNumber }}</strong>
+            </p>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Close history"
+            [disabled]="historyLoading"
+            (click)="closeHistory()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        @if (historyLoading) {
+
+          <div class="history-loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading compliance history...</p>
+          </div>
+
+        } @else if (historyError) {
+
+          <div class="history-error">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ historyError }}</p>
+
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="
+                selectedHistoryContractId !== null &&
+                viewHistory(selectedHistoryContractId)
+              "
+            >
+              Retry
+            </button>
+          </div>
+
+        } @else if (complianceHistory.length === 0) {
+
+          <div class="history-empty">
+            <mat-icon>history</mat-icon>
+            <h3>No History Available</h3>
+            <p>No compliance evaluations have been recorded yet.</p>
+          </div>
+
+        } @else {
+
+          <div class="history-list">
+
+            @for (item of complianceHistory; track item.id) {
+
+              <div class="history-item">
+
+                <div class="history-item-header">
+                  <span
+                    class="status-badge"
+                    [class]="getStatusClass(item.compliance_status)"
+                  >
+                    {{ item.compliance_status || 'Unknown' }}
+                  </span>
+
+                  <span class="history-date">
+                    {{ formatDateTime(item.evaluated_at) }}
+                  </span>
+                </div>
+
+                <div class="history-grid">
+
+                  <div>
+                    <span>Score</span>
+                    <strong>
+                      {{ formatScore(item.compliance_score) }}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Risk</span>
+                    <strong>
+                      {{ item.risk_level || 'Unknown' }}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Total</span>
+                    <strong>
+                      {{ formatValue(item.total_obligations) }}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Completed</span>
+                    <strong>
+                      {{ formatValue(item.completed_obligations) }}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Pending</span>
+                    <strong>
+                      {{ formatValue(item.pending_obligations) }}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Overdue</span>
+                    <strong>
+                      {{ formatValue(item.overdue_obligations) }}
+                    </strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        }
+
+        <div class="modal-footer">
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="closeHistory()"
+          >
+            Close
+          </button>
+
+        </div>
+
+      </mat-card>
+
+    </div>
+
+  }
 
 </div>

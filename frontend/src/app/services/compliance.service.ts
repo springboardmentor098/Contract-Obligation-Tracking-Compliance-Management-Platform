@@ -17,10 +17,9 @@ export interface ComplianceRecord {
 export interface ComplianceSummary {
   total_contracts: number;
   compliant_contracts: number;
-  pending_contracts: number;
-  delayed_contracts: number;
   non_compliant_contracts: number;
   high_risk_contracts: number;
+  average_compliance_score: number;
 }
 
 export interface NonCompliantContract {
@@ -37,6 +36,19 @@ export interface HighRiskContract {
   overdue_obligations: number;
 }
 
+export interface ComplianceHistory {
+  id: string;
+  contract_id: string | number;
+  compliance_status: string | null;
+  compliance_score: number | null;
+  risk_level: string | null;
+  total_obligations: number;
+  completed_obligations: number;
+  pending_obligations: number;
+  overdue_obligations: number;
+  evaluated_at: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -47,18 +59,28 @@ export class ComplianceService {
   private readonly apiUrl =
     'http://127.0.0.1:8000/compliance';
 
+  /**
+   * Get all compliance records available
+   * to the logged-in user.
+   */
   getAllCompliance(): Observable<ComplianceRecord[]> {
     return this.http.get<ComplianceRecord[]>(
       this.apiUrl
     );
   }
 
+  /**
+   * Get compliance summary.
+   */
   getSummary(): Observable<ComplianceSummary> {
     return this.http.get<ComplianceSummary>(
       `${this.apiUrl}/summary`
     );
   }
 
+  /**
+   * Get non-compliant contracts.
+   */
   getNonCompliantContracts():
     Observable<NonCompliantContract[]> {
 
@@ -67,6 +89,9 @@ export class ComplianceService {
     );
   }
 
+  /**
+   * Get high-risk contracts.
+   */
   getHighRiskContracts():
     Observable<HighRiskContract[]> {
 
@@ -75,12 +100,40 @@ export class ComplianceService {
     );
   }
 
+  /**
+   * Get compliance information for one contract.
+   */
   getContractCompliance(
     contractId: string
   ): Observable<ComplianceRecord> {
 
     return this.http.get<ComplianceRecord>(
-      `http://127.0.0.1:8000/contracts/${contractId}/compliance`
+      `${this.apiUrl}/contracts/${contractId}`
+    );
+  }
+
+  /**
+   * Evaluate/recalculate compliance for a contract.
+   */
+  evaluateContract(
+    contractId: string
+  ): Observable<ComplianceRecord> {
+
+    return this.http.post<ComplianceRecord>(
+      `${this.apiUrl}/contracts/${contractId}/evaluate`,
+      {}
+    );
+  }
+
+  /**
+   * Get compliance evaluation history for a contract.
+   */
+  getComplianceHistory(
+    contractId: string
+  ): Observable<ComplianceHistory[]> {
+
+    return this.http.get<ComplianceHistory[]>(
+      `${this.apiUrl}/contracts/${contractId}/history`
     );
   }
 }

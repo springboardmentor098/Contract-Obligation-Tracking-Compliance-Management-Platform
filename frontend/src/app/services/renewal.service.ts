@@ -50,18 +50,28 @@ export class RenewalService {
   private readonly apiUrl =
     'http://127.0.0.1:8000/renewals';
 
+  /**
+   * Get all renewals available to the
+   * logged-in user.
+   */
   getRenewals(): Observable<Renewal[]> {
     return this.http.get<Renewal[]>(
       this.apiUrl
     );
   }
 
+  /**
+   * Get a single renewal by ID.
+   */
   getRenewal(id: string): Observable<Renewal> {
     return this.http.get<Renewal>(
       `${this.apiUrl}/${id}`
     );
   }
 
+  /**
+   * Create a new renewal.
+   */
   createRenewal(
     renewal: RenewalCreate
   ): Observable<Renewal> {
@@ -71,6 +81,9 @@ export class RenewalService {
     );
   }
 
+  /**
+   * Update an existing renewal.
+   */
   updateRenewal(
     id: string,
     renewal: RenewalUpdate
@@ -81,10 +94,14 @@ export class RenewalService {
     );
   }
 
+  /**
+   * Update renewal status.
+   */
   updateStatus(
     id: string,
     status: string
   ): Observable<Renewal> {
+
     const data: RenewalStatusUpdate = {
       status
     };
@@ -95,10 +112,17 @@ export class RenewalService {
     );
   }
 
+  /**
+   * Complete a renewal.
+   *
+   * Backend changes the renewal status to
+   * Renewed and updates the contract expiry date.
+   */
   completeRenewal(
     id: string,
     newExpiryDate: string
   ): Observable<Renewal> {
+
     const data: RenewalComplete = {
       new_expiry_date: newExpiryDate
     };
@@ -109,9 +133,14 @@ export class RenewalService {
     );
   }
 
+  /**
+   * Get renewals coming up within the
+   * specified number of days.
+   */
   getUpcomingRenewals(
     days: number = 90
   ): Observable<Renewal[]> {
+
     return this.http.get<Renewal[]>(
       `${this.apiUrl}/upcoming/list`,
       {
@@ -122,23 +151,24 @@ export class RenewalService {
     );
   }
 
+  /**
+   * Get expired renewals.
+   */
   getExpiredRenewals(): Observable<Renewal[]> {
     return this.http.get<Renewal[]>(
       `${this.apiUrl}/expired/list`
     );
   }
 
+  /**
+   * Get renewals belonging to a specific contract.
+   */
   getContractRenewals(
     contractId: string
   ): Observable<Renewal[]> {
+
     return this.http.get<Renewal[]>(
       `${this.apiUrl}/contracts/${contractId}/renewals`
-    );
-  }
-
-  deleteRenewal(id: string): Observable<void> {
-    return this.http.delete<void>(
-      `${this.apiUrl}/${id}`
     );
   }
 }
