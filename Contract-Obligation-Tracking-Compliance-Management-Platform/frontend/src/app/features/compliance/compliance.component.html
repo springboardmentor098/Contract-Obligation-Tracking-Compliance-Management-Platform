@@ -1,0 +1,144 @@
+<cq-page-header
+  eyebrow="COMPLIANCE & RISK"
+  title="Compliance Control Center"
+  subtitle="Identify compliant, delayed, non-compliant and high-risk records from the backend."
+/>
+
+@if (error) {
+  <div class="alert">
+    {{ error }}
+  </div>
+}
+
+<div class="risk-cards">
+
+  <div>
+    <span>Compliant</span>
+    <b>{{ compliantCount }}</b>
+  </div>
+
+  <div>
+    <span>Pending</span>
+    <b>{{ pendingCount }}</b>
+  </div>
+
+  <div>
+    <span>Delayed</span>
+    <b>{{ delayedCount }}</b>
+  </div>
+
+  <div class="danger">
+    <span>High risk / Non-compliant</span>
+    <b>{{ highRiskCount }}</b>
+  </div>
+
+</div>
+
+<div class="toolbar">
+
+  <select
+    [(ngModel)]="status"
+    (change)="apply()"
+  >
+    <option value="">All compliance levels</option>
+
+    @for (s of statuses; track s) {
+      <option [value]="s">
+        {{ s }}
+      </option>
+    }
+  </select>
+
+  <button
+    class="secondary"
+    (click)="load()"
+  >
+    Refresh
+  </button>
+
+</div>
+
+<div class="table-card">
+
+  @if (loading) {
+
+    <div class="loading">
+      Loading compliance intelligence…
+    </div>
+
+  } @else {
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Record</th>
+          <th>Contract</th>
+          <th>Obligation</th>
+          <th>Status</th>
+          <th>Risk</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        @for (x of filtered; track x.id) {
+
+          <tr>
+
+            <td>
+              <b>Compliance #{{ x.id }}</b>
+
+              <small>
+                {{ x.description || 'Compliance monitoring record' }}
+              </small>
+            </td>
+
+            <td>
+              {{ x.contract_id || '—' }}
+            </td>
+
+            <td>
+              {{ x.obligation_id || '—' }}
+            </td>
+
+            <td>
+              <cq-status [label]="x.status"></cq-status>
+            </td>
+
+            <td>
+              {{ x.risk_level || '—' }}
+            </td>
+
+            <td>
+              {{ x.updated_at | date:'dd MMM yyyy' }}
+            </td>
+
+          </tr>
+
+        } @empty {
+
+          <tr>
+
+            <td colspan="6">
+
+              <cq-empty
+                title="No compliance records"
+                message="No records were returned by the compliance API."
+                icon="verified_user"
+              ></cq-empty>
+
+            </td>
+
+          </tr>
+
+        }
+
+      </tbody>
+
+    </table>
+
+  }
+
+</div>
