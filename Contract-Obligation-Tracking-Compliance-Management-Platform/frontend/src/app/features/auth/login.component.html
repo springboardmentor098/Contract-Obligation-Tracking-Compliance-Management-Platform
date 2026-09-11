@@ -1,0 +1,47 @@
+<div class="login-shell">
+  <div class="visual">
+    <div class="visual-content">
+      <div class="logo"><span> C </span> ContractIQ</div>
+      <div class="hero">
+        <div class="eyebrow">ENTERPRISE CONTRACT INTELLIGENCE</div>
+        <h1>Control every obligation.<br><em>Protect every agreement.</em></h1>
+        <p>A unified workspace for contracts, obligations, renewals, compliance and audit intelligence.</p>
+      </div>
+      <div class="metric-row">
+        <div><b>100%</b><span>Centralized</span></div>
+        <div><b>24/7</b><span>Monitoring</span></div>
+        <div><b>RBAC</b><span>Secure access</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="form-side">
+    <div class="form-box">
+      <div class="mobile-logo"><span>C</span> ContractIQ</div>
+      <div class="eyebrow">SECURE WORKSPACE</div>
+      <h2>Welcome back</h2>
+      <p class="intro">Sign in to continue to your ContractIQ workspace.</p>
+
+      @if (error) { <div class="error"><span class="material-icons-round">error_outline</span>{{ error }}</div> }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <label>Work email</label>
+        <div class="input-wrap">
+          <span class="material-icons-round">mail_outline</span>
+          <input type="email" formControlName="email" placeholder="name@company.com">
+        </div>
+        @if (form.controls.email.touched && form.controls.email.invalid) { <small class="field-error">Enter a valid email address.</small> }
+
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="material-icons-round">lock_outline</span>
+          <input type="password" formControlName="password" placeholder="Enter your password">
+        </div>
+        @if (form.controls.password.touched && form.controls.password.invalid) { <small class="field-error">Password is required.</small> }
+
+        <div class="form-meta"><label class="check"><input type="checkbox"> Remember this device</label><a>Forgot password?</a></div>
+        <button class="login-btn" [disabled]="loading">{{ loading ? 'Signing in…' : 'Sign in to ContractIQ' }} <span class="material-icons-round">arrow_forward</span></button>
+      </form>
+      <div class="security-note"><span class="material-icons-round">verified_user</span><span>Your session is protected with JWT authentication and role-based access controls.</span></div>
+    </div>
+  </div>
+</div>

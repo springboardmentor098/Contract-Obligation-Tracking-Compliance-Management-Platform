@@ -1,0 +1,53 @@
+<div class="shell" [class.collapsed]="!sidebarOpen">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <div class="brand-copy">
+        <strong>ContractIQ</strong>
+        <span>Enterprise Control Center</span>
+      </div>
+    </div>
+
+    <div class="nav-label">WORKSPACE</div>
+    <nav>
+      @for (item of nav; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}">
+          <span class="material-icons-round">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="security">
+        <span class="material-icons-round">shield</span>
+        <div><b>Secure workspace</b><small>JWT protected</small></div>
+      </div>
+      <button class="logout-side" (click)="auth.logout()">
+        <span class="material-icons-round">logout</span> Sign out
+      </button>
+    </div>
+  </aside>
+
+  <section class="main">
+    <header class="topbar">
+      <button class="icon-btn menu" (click)="toggleSidebar()"><span class="material-icons-round">menu</span></button>
+      <div class="breadcrumb">ContractIQ <span>/</span> Workspace</div>
+      <div class="top-actions">
+        <a routerLink="/notifications" class="icon-btn notification"><span class="material-icons-round">notifications_none</span></a>
+        <div class="user-chip">
+          <div class="avatar">{{ (auth.currentUser()?.full_name || auth.currentUser()?.name || auth.currentUser()?.email || 'U')[0].toUpperCase() }}</div>
+          <div class="user-copy">
+            <b>{{ auth.currentUser()?.full_name || auth.currentUser()?.name || 'Workspace User' }}</b>
+            <span>{{ auth.currentUser()?.role || 'Authorized user' }}</span>
+          </div>
+        </div>
+        <button class="icon-btn" (click)="auth.logout()" title="Logout"><span class="material-icons-round">logout</span></button>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </section>
+</div>
