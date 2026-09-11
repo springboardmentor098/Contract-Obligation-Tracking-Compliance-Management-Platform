@@ -1,0 +1,554 @@
+<h1 style="color: red; font-size: 40px;">
+  REPORTS COMPONENT TEST
+</h1>
+
+<div class="reports-page">
+
+  <header class="page-header">
+    <div class="header-content">
+      <div class="eyebrow">CONTRACTIQ ANALYTICS</div>
+      <h1>Reports &amp; Analytics</h1>
+      <p>Monitor contract performance, obligations, renewals, compliance, and risk from one place.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="loadReports()"
+      [disabled]="loading"
+    >
+      <span class="refresh-icon">↻</span>
+      {{ loading ? 'Refreshing...' : 'Refresh Data' }}
+    </button>
+  </header>
+
+  <div *ngIf="error" class="error-banner">
+    <div>
+      <strong>Unable to load reports</strong>
+      <p>{{ error }}</p>
+    </div>
+
+    <button type="button" (click)="loadReports()">Try Again</button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <h2>Loading analytics</h2>
+    <p>Fetching the latest ContractIQ report data...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Executive Overview -->
+    <section class="overview-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">EXECUTIVE OVERVIEW</span>
+          <h2>Portfolio at a glance</h2>
+        </div>
+      </div>
+
+      <div class="overview-grid">
+
+        <article class="overview-card blue">
+          <div class="card-top">
+            <div class="card-icon">C</div>
+            <span>Contracts</span>
+          </div>
+
+          <div class="metric">
+            {{ dashboard?.contracts?.total ?? contracts?.total ?? 0 }}
+          </div>
+
+          <div class="metric-label">Total contracts</div>
+
+          <div class="card-detail">
+            <span class="positive">
+              {{ dashboard?.contracts?.active ?? contracts?.active ?? 0 }}
+            </span>
+            active
+          </div>
+        </article>
+
+        <article class="overview-card amber">
+          <div class="card-top">
+            <div class="card-icon">O</div>
+            <span>Obligations</span>
+          </div>
+
+          <div class="metric">
+            {{ dashboard?.obligations?.total ?? obligations?.total ?? 0 }}
+          </div>
+
+          <div class="metric-label">Total obligations</div>
+
+          <div class="card-detail">
+            <span class="warning-text">
+              {{ dashboard?.obligations?.overdue ?? obligations?.overdue ?? 0 }}
+            </span>
+            overdue
+          </div>
+        </article>
+
+        <article class="overview-card purple">
+          <div class="card-top">
+            <div class="card-icon">R</div>
+            <span>Renewals</span>
+          </div>
+
+          <div class="metric">
+            {{ dashboard?.renewals?.upcoming ?? renewals?.upcoming ?? 0 }}
+          </div>
+
+          <div class="metric-label">Upcoming renewals</div>
+
+          <div class="card-detail">
+            <span class="positive">
+              {{ dashboard?.renewals?.renewed ?? renewals?.renewed ?? 0 }}
+            </span>
+            renewed
+          </div>
+        </article>
+
+        <article class="overview-card green">
+          <div class="card-top">
+            <div class="card-icon">✓</div>
+            <span>Compliance</span>
+          </div>
+
+          <div class="metric">
+            {{ dashboard?.compliance?.average_score ?? compliance?.average_score ?? 0 }}%
+          </div>
+
+          <div class="metric-label">Average compliance score</div>
+
+          <div class="card-detail">
+            <span class="positive">
+              {{ dashboard?.compliance?.compliant ?? compliance?.compliant ?? 0 }}
+            </span>
+            compliant contracts
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Detailed Reports -->
+    <section class="reports-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">PORTFOLIO BREAKDOWN</span>
+          <h2>Performance metrics</h2>
+        </div>
+      </div>
+
+      <div class="report-grid">
+
+        <!-- Contracts -->
+        <article class="report-card">
+
+          <div class="report-card-header">
+            <div>
+              <div class="report-title-row">
+                <div class="small-icon blue-bg">C</div>
+                <h3>Contracts</h3>
+              </div>
+              <p>Current contract lifecycle status</p>
+            </div>
+          </div>
+
+          <div class="stats-list">
+            <div class="stat-row">
+              <span>Total</span>
+              <strong>{{ contracts?.total ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Active</span>
+              <strong class="green-text">{{ contracts?.active ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Draft</span>
+              <strong>{{ contracts?.draft ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Under review</span>
+              <strong class="amber-text">{{ contracts?.under_review ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Approved</span>
+              <strong>{{ contracts?.approved ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Expired</span>
+              <strong class="red-text">{{ contracts?.expired ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Terminated</span>
+              <strong>{{ contracts?.terminated ?? 0 }}</strong>
+            </div>
+          </div>
+
+        </article>
+
+        <!-- Obligations -->
+        <article class="report-card">
+
+          <div class="report-card-header">
+            <div>
+              <div class="report-title-row">
+                <div class="small-icon amber-bg">O</div>
+                <h3>Obligations</h3>
+              </div>
+              <p>Obligation execution and delivery</p>
+            </div>
+          </div>
+
+          <div class="stats-list">
+            <div class="stat-row">
+              <span>Total</span>
+              <strong>{{ obligations?.total ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Pending</span>
+              <strong class="amber-text">{{ obligations?.pending ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>In progress</span>
+              <strong>{{ obligations?.in_progress ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Completed</span>
+              <strong class="green-text">{{ obligations?.completed ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Delayed</span>
+              <strong class="amber-text">{{ obligations?.delayed ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Overdue</span>
+              <strong class="red-text">{{ obligations?.overdue ?? 0 }}</strong>
+            </div>
+          </div>
+
+        </article>
+
+        <!-- Renewals -->
+        <article class="report-card">
+
+          <div class="report-card-header">
+            <div>
+              <div class="report-title-row">
+                <div class="small-icon purple-bg">R</div>
+                <h3>Renewals</h3>
+              </div>
+              <p>Renewal pipeline and outcomes</p>
+            </div>
+          </div>
+
+          <div class="stats-list">
+            <div class="stat-row">
+              <span>Upcoming</span>
+              <strong class="purple-text">{{ renewals?.upcoming ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>In progress</span>
+              <strong class="amber-text">{{ renewals?.in_progress ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Renewed</span>
+              <strong class="green-text">{{ renewals?.renewed ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Expired</span>
+              <strong class="red-text">{{ renewals?.expired ?? 0 }}</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>Cancelled</span>
+              <strong>{{ renewals?.cancelled ?? 0 }}</strong>
+            </div>
+          </div>
+
+        </article>
+
+        <!-- Compliance -->
+        <article class="report-card compliance-card">
+
+          <div class="report-card-header">
+            <div>
+              <div class="report-title-row">
+                <div class="small-icon green-bg">✓</div>
+                <h3>Compliance</h3>
+              </div>
+              <p>Portfolio compliance health</p>
+            </div>
+          </div>
+
+          <div class="compliance-score">
+            <div class="score-value">
+              {{ compliance?.average_score ?? 0 }}%
+            </div>
+            <div class="score-label">Average score</div>
+          </div>
+
+          <div class="score-bar">
+            <div
+              class="score-fill"
+              [style.width.%]="compliance?.average_score ?? 0"
+            ></div>
+          </div>
+
+          <div class="compliance-stats">
+            <div>
+              <strong class="green-text">{{ compliance?.compliant ?? 0 }}</strong>
+              <span>Compliant</span>
+            </div>
+
+            <div>
+              <strong class="amber-text">{{ compliance?.pending ?? 0 }}</strong>
+              <span>Pending</span>
+            </div>
+
+            <div>
+              <strong class="red-text">{{ compliance?.non_compliant ?? 0 }}</strong>
+              <span>Non-compliant</span>
+            </div>
+
+            <div>
+              <strong>{{ compliance?.delayed ?? 0 }}</strong>
+              <span>Delayed</span>
+            </div>
+          </div>
+
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Risk -->
+    <section class="risk-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">RISK MANAGEMENT</span>
+          <h2>Contract risk report</h2>
+          <p>Contracts requiring attention based on compliance and overdue obligations.</p>
+        </div>
+
+        <div class="risk-summary">
+          <span class="risk-count">{{ risks.length }}</span>
+          <span>flagged contracts</span>
+        </div>
+      </div>
+
+      <div *ngIf="risks.length === 0" class="empty-state">
+        <div class="empty-icon">✓</div>
+        <h3>No high-risk contracts</h3>
+        <p>No contracts currently require elevated risk attention.</p>
+      </div>
+
+      <div *ngIf="risks.length > 0" class="risk-table-container">
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Risk level</th>
+              <th>Overdue obligations</th>
+              <th>Compliance score</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let risk of risks">
+              <td>
+                <div class="contract-cell">
+                  <strong>{{ risk.contract_number }}</strong>
+                  <span>ID #{{ risk.contract_id }}</span>
+                </div>
+              </td>
+
+              <td>
+                <span
+                  class="risk-badge"
+                  [class.medium]="risk.risk_level === 'Medium'"
+                  [class.high]="risk.risk_level === 'High'"
+                  [class.critical]="risk.risk_level === 'Critical'"
+                >
+                  {{ risk.risk_level }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  [class.red-text]="risk.overdue_obligations > 0"
+                  [class.green-text]="risk.overdue_obligations === 0"
+                >
+                  {{ risk.overdue_obligations }}
+                </span>
+              </td>
+
+              <td>
+                <div class="table-score">
+                  <div class="mini-progress">
+                    <div
+                      class="mini-progress-fill"
+                      [style.width.%]="risk.compliance_score ?? 0"
+                    ></div>
+                  </div>
+                  <strong>{{ risk.compliance_score ?? 0 }}%</strong>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- Exports -->
+    <section class="exports-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">REPORT EXPORTS</span>
+          <h2>Download reports</h2>
+          <p>Export detailed report data for sharing, analysis, or record keeping.</p>
+        </div>
+      </div>
+
+      <div class="export-grid">
+
+        <article class="export-card">
+          <div class="export-icon blue-bg">C</div>
+          <div class="export-content">
+            <h3>Contracts Report</h3>
+            <p>Contract lifecycle and status data</p>
+
+            <div class="export-actions">
+              <button
+                type="button"
+                class="pdf-btn"
+                (click)="download('contracts', 'pdf')"
+                [disabled]="isDownloading('contracts', 'pdf')"
+              >
+                {{ isDownloading('contracts', 'pdf') ? 'Preparing...' : 'PDF' }}
+              </button>
+
+              <button
+                type="button"
+                class="excel-btn"
+                (click)="download('contracts', 'excel')"
+                [disabled]="isDownloading('contracts', 'excel')"
+              >
+                {{ isDownloading('contracts', 'excel') ? 'Preparing...' : 'Excel' }}
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="export-card">
+          <div class="export-icon amber-bg">O</div>
+          <div class="export-content">
+            <h3>Obligations Report</h3>
+            <p>Obligation status and delivery data</p>
+
+            <div class="export-actions">
+              <button
+                type="button"
+                class="pdf-btn"
+                (click)="download('obligations', 'pdf')"
+                [disabled]="isDownloading('obligations', 'pdf')"
+              >
+                {{ isDownloading('obligations', 'pdf') ? 'Preparing...' : 'PDF' }}
+              </button>
+
+              <button
+                type="button"
+                class="excel-btn"
+                (click)="download('obligations', 'excel')"
+                [disabled]="isDownloading('obligations', 'excel')"
+              >
+                {{ isDownloading('obligations', 'excel') ? 'Preparing...' : 'Excel' }}
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="export-card">
+          <div class="export-icon purple-bg">R</div>
+          <div class="export-content">
+            <h3>Renewals Report</h3>
+            <p>Renewal pipeline and outcome data</p>
+
+            <div class="export-actions">
+              <button
+                type="button"
+                class="pdf-btn"
+                (click)="download('renewals', 'pdf')"
+                [disabled]="isDownloading('renewals', 'pdf')"
+              >
+                {{ isDownloading('renewals', 'pdf') ? 'Preparing...' : 'PDF' }}
+              </button>
+
+              <button
+                type="button"
+                class="excel-btn"
+                (click)="download('renewals', 'excel')"
+                [disabled]="isDownloading('renewals', 'excel')"
+              >
+                {{ isDownloading('renewals', 'excel') ? 'Preparing...' : 'Excel' }}
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="export-card">
+          <div class="export-icon green-bg">✓</div>
+          <div class="export-content">
+            <h3>Compliance Report</h3>
+            <p>Compliance scores and status data</p>
+
+            <div class="export-actions">
+              <button
+                type="button"
+                class="pdf-btn"
+                (click)="download('compliance', 'pdf')"
+                [disabled]="isDownloading('compliance', 'pdf')"
+              >
+                {{ isDownloading('compliance', 'pdf') ? 'Preparing...' : 'PDF' }}
+              </button>
+
+              <button
+                type="button"
+                class="excel-btn"
+                (click)="download('compliance', 'excel')"
+                [disabled]="isDownloading('compliance', 'excel')"
+              >
+                {{ isDownloading('compliance', 'excel') ? 'Preparing...' : 'Excel' }}
+              </button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </ng-container>
+
+</div>

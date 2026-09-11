@@ -10,6 +10,7 @@ from app.models.user import User
 from app.schemas.renewal import (
     RenewalCreate,
     RenewalResponse,
+    RenewalMonitoringResponse,
     RenewalStatusUpdate,
     RenewalUpdate,
 )
@@ -441,7 +442,7 @@ def complete_renewal(
 
 @router.get(
     "/monitoring/upcoming",
-    response_model=list[RenewalResponse]
+    response_model=list[RenewalMonitoringResponse]
 )
 def get_upcoming_renewals(
     days: int = 90,
@@ -457,18 +458,45 @@ def get_upcoming_renewals(
     today = date.today()
     threshold = today + timedelta(days=days)
 
-    # Only active/upcoming renewal records are considered.
-    # Renewed and Cancelled records are excluded.
-    renewals = db.query(Renewal).join(
-        Contract,
-        Renewal.contract_id == Contract.id
-    ).filter(
+    # Renewal Monitoring is based on active contracts approaching
+    # expiry, not on whether a Renewal workflow record already exists.
+    contracts = db.query(Contract).filter(
         Contract.end_date >= today,
         Contract.end_date <= threshold,
-        Renewal.status.in_(["Upcoming", "In Progress"])
+        Contract.status == "Active"
     ).order_by(
         Contract.end_date.asc()
     ).all()
+
+    renewals = []
+
+    for contract in contracts:
+        renewal = db.query(Renewal).filter(
+            Renewal.contract_id == contract.id,
+            Renewal.status.in_(["Upcoming", "In Progress"])
+        ).order_by(
+            Renewal.id.desc()
+        ).first()
+
+        if renewal is not None:
+            renewals.append(renewal)
+            continue
+
+        # Build a monitoring-only response.
+        renewals.append(
+            RenewalMonitoringResponse(
+                id=contract.id,
+                contract_id=contract.id,
+                renewal_date=None,
+                previous_expiry_date=contract.end_date,
+                new_expiry_date=None,
+                status="Upcoming",
+                assigned_to=contract.assigned_to,
+                notes="Automatic renewal monitoring record",
+                created_at=contract.updated_at or contract.created_at,
+                updated_at=contract.updated_at or contract.created_at
+            )
+        )
 
     return renewals
 
@@ -479,7 +507,7 @@ def get_upcoming_renewals(
 
 @router.get(
     "/monitoring/expired",
-    response_model=list[RenewalResponse]
+    response_model=list[RenewalMonitoringResponse]
 )
 def get_expired_renewals(
     current_user: dict = Depends(get_current_user),
@@ -487,32 +515,52 @@ def get_expired_renewals(
 ):
     today = date.today()
 
-    renewals = db.query(Renewal).join(
-        Contract,
-        Renewal.contract_id == Contract.id
-    ).filter(
+    # Renewal Monitoring checks active contracts whose expiry date
+    # has already passed, regardless of whether a Renewal workflow
+    # record exists.
+    contracts = db.query(Contract).filter(
         Contract.end_date < today,
-        Renewal.status.in_(["Upcoming", "In Progress", "Expired"])
+        Contract.status == "Active"
     ).order_by(
         Contract.end_date.asc()
     ).all()
 
-    # Automatically mark overdue Upcoming/In Progress renewals as Expired.
-    changed = False
+    renewals = []
 
-    for renewal in renewals:
-        if renewal.status in {"Upcoming", "In Progress"}:
-            renewal.status = "Expired"
-            renewal.updated_at = datetime.now(
-                timezone.utc
-            ).replace(tzinfo=None)
-            changed = True
+    for contract in contracts:
+        renewal = db.query(Renewal).filter(
+            Renewal.contract_id == contract.id,
+            Renewal.status.in_(["Upcoming", "In Progress", "Expired"])
+        ).order_by(
+            Renewal.id.desc()
+        ).first()
 
-    if changed:
-        db.commit()
+        if renewal is not None:
+            if renewal.status in {"Upcoming", "In Progress"}:
+                renewal.status = "Expired"
+                renewal.updated_at = datetime.now(
+                    timezone.utc
+                ).replace(tzinfo=None)
 
-        for renewal in renewals:
-            db.refresh(renewal)
+            renewals.append(renewal)
+            continue
+
+        monitoring_renewal = Renewal(
+            id=0,
+            contract_id=contract.id,
+            renewal_date=None,
+            previous_expiry_date=contract.end_date,
+            new_expiry_date=None,
+            status="Expired",
+            assigned_to=contract.assigned_to,
+            notes="Automatic renewal monitoring record",
+            created_at=contract.updated_at or contract.created_at,
+            updated_at=contract.updated_at or contract.created_at
+        )
+
+        renewals.append(monitoring_renewal)
+
+    db.commit()
 
     return renewals
 

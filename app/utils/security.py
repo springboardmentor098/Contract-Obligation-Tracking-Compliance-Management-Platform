@@ -4,7 +4,6 @@ from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 
 
-# JWT configuration
 SECRET_KEY = "contractiq-sprint6-secret-key-change-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -29,28 +28,35 @@ def create_access_token(
     role: str,
     expires_delta: timedelta | None = None
 ) -> str:
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+    expire = datetime.now(timezone.utc) + (
+        expires_delta
+        if expires_delta
+        else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
 
     payload = {
         "sub": str(user_id),
         "role": role,
-        "exp": expire
+        "exp": expire,
     }
 
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(
+        payload,
+        SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
 
 
 def decode_access_token(token: str) -> dict:
     try:
-        return jwt.decode(
+        payload = jwt.decode(
             token,
             SECRET_KEY,
-            algorithms=[ALGORITHM]
+            algorithms=[ALGORITHM],
         )
-    except JWTError:
+
+        return payload
+
+    except JWTError as exc:
+        print("JWT decode error:", exc)
         return {}

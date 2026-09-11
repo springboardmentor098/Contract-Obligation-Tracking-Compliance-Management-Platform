@@ -59,6 +59,19 @@ class RenewalStatusUpdate(BaseModel):
     status: str
 
 
+class RenewalMonitoringResponse(BaseModel):
+    id: int
+    contract_id: int
+    renewal_date: Optional[date] = None
+    previous_expiry_date: date
+    new_expiry_date: Optional[date] = None
+    status: str
+    assigned_to: Optional[int] = None
+    notes: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+
 class RenewalResponse(BaseModel):
     id: int
     contract_id: int

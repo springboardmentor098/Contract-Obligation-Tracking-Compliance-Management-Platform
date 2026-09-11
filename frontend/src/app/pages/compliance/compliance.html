@@ -1,0 +1,247 @@
+<div class="compliance-page">
+
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">CONTRACTIQ COMPLIANCE</div>
+      <h1>Compliance</h1>
+      <p>
+        Monitor contractual compliance health, overdue obligations, and risk
+        across your contract portfolio.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="loadCompliance()"
+      [disabled]="loading"
+    >
+      ↻ {{ loading ? 'Refreshing...' : 'Refresh Data' }}
+    </button>
+  </header>
+
+  <div *ngIf="error" class="error-banner">
+    <div>
+      <strong>Unable to load compliance</strong>
+      <p>{{ error }}</p>
+    </div>
+
+    <button type="button" (click)="loadCompliance()">
+      Try Again
+    </button>
+  </div>
+
+  <div *ngIf="loading && !summary" class="loading-state">
+    <div class="spinner"></div>
+    <h2>Loading compliance</h2>
+    <p>Calculating the latest contract compliance health...</p>
+  </div>
+
+  <ng-container *ngIf="!loading && summary">
+
+    <!-- Compliance Score -->
+    <section class="hero-section">
+
+      <div class="score-card">
+        <div class="score-content">
+          <span class="section-label">OVERALL COMPLIANCE</span>
+
+          <h2>Portfolio Compliance Score</h2>
+
+          <p>
+            Average compliance score across all contracts.
+          </p>
+
+          <div class="score-row">
+            <div
+              class="score-circle"
+              [class.good]="getScoreClass() === 'good'"
+              [class.warning]="getScoreClass() === 'warning'"
+              [class.danger]="getScoreClass() === 'danger'"
+            >
+              <strong>{{ summary.average_score ?? 0 }}%</strong>
+            </div>
+
+            <div class="score-description">
+              <strong>
+                {{ summary.compliant ?? 0 }} compliant contract(s)
+              </strong>
+
+              <span>
+                {{ summary.total_contracts ?? 0 }} total contract(s)
+              </span>
+            </div>
+          </div>
+
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              [class.good]="getScoreClass() === 'good'"
+              [class.warning]="getScoreClass() === 'warning'"
+              [class.danger]="getScoreClass() === 'danger'"
+              [style.width.%]="summary.average_score ?? 0"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Status Cards -->
+    <section class="status-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">COMPLIANCE STATUS</span>
+          <h2>Contract health</h2>
+        </div>
+      </div>
+
+      <div class="status-grid">
+
+        <article class="status-card total">
+          <div class="status-icon">C</div>
+          <div>
+            <span>Total Contracts</span>
+            <strong>{{ summary.total_contracts ?? 0 }}</strong>
+          </div>
+        </article>
+
+        <article class="status-card compliant">
+          <div class="status-icon">✓</div>
+          <div>
+            <span>Compliant</span>
+            <strong>{{ summary.compliant ?? 0 }}</strong>
+          </div>
+        </article>
+
+        <article class="status-card pending">
+          <div class="status-icon">!</div>
+          <div>
+            <span>Pending</span>
+            <strong>{{ summary.pending ?? 0 }}</strong>
+          </div>
+        </article>
+
+        <article class="status-card delayed">
+          <div class="status-icon">◷</div>
+          <div>
+            <span>Delayed</span>
+            <strong>{{ summary.delayed ?? 0 }}</strong>
+          </div>
+        </article>
+
+        <article class="status-card non-compliant">
+          <div class="status-icon">!</div>
+          <div>
+            <span>Non-Compliant</span>
+            <strong>{{ summary.non_compliant ?? 0 }}</strong>
+          </div>
+        </article>
+
+        <article class="status-card high-risk">
+          <div class="status-icon">⚠</div>
+          <div>
+            <span>High Risk</span>
+            <strong>{{ summary.high_risk ?? 0 }}</strong>
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+    <!-- Risk Table -->
+    <section class="risk-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">RISK MANAGEMENT</span>
+          <h2>Contracts requiring attention</h2>
+          <p>
+            Contracts with medium or high compliance risk are listed below.
+          </p>
+        </div>
+
+        <div class="risk-total">
+          <strong>{{ risks.length }}</strong>
+          <span>flagged</span>
+        </div>
+      </div>
+
+      <div *ngIf="risks.length === 0" class="empty-state">
+        <div class="empty-icon">✓</div>
+        <h3>No elevated-risk contracts</h3>
+        <p>
+          There are currently no contracts requiring elevated risk attention.
+        </p>
+      </div>
+
+      <div *ngIf="risks.length > 0" class="table-container">
+
+        <table>
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Risk Level</th>
+              <th>Overdue Obligations</th>
+              <th>Compliance Score</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let risk of risks">
+
+              <td>
+                <div class="contract-cell">
+                  <strong>{{ risk.contract_number }}</strong>
+                  <span>Contract #{{ risk.contract_id }}</span>
+                </div>
+              </td>
+
+              <td>
+                <span
+                  class="risk-badge"
+                  [class.medium]="risk.risk_level === 'Medium'"
+                  [class.high]="risk.risk_level === 'High'"
+                  [class.critical]="risk.risk_level === 'Critical'"
+                >
+                  {{ risk.risk_level }}
+                </span>
+              </td>
+
+              <td>
+                <strong
+                  [class.red]="risk.overdue_obligations > 0"
+                  [class.green]="risk.overdue_obligations === 0"
+                >
+                  {{ risk.overdue_obligations }}
+                </strong>
+              </td>
+
+              <td>
+                <div class="table-score">
+                  <div class="mini-progress">
+                    <div
+                      class="mini-progress-fill"
+                      [style.width.%]="risk.compliance_score ?? 0"
+                    ></div>
+                  </div>
+
+                  <strong>
+                    {{ risk.compliance_score ?? 0 }}%
+                  </strong>
+                </div>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

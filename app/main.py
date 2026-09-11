@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.database import test_database_connection
 from app.routers.users import router as users_router
@@ -10,11 +11,20 @@ from app.api.renewals import router as renewals_router
 from app.api.renewals import contract_renewals_router
 from app.api.compliance import router as compliance_router
 from app.api.notifications import router as notifications_router
+from app.api.reports import router as reports_router
 
 
 app = FastAPI(
     title="ContractIQ API",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -32,6 +42,7 @@ app.include_router(renewals_router)
 app.include_router(contract_renewals_router)
 app.include_router(compliance_router)
 app.include_router(notifications_router)
+app.include_router(reports_router)
 
 
 @app.get("/")

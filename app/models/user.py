@@ -66,3 +66,8 @@ class User(Base):
         foreign_keys="Renewal.assigned_to",
         back_populates="assigned_user"
     )
+
+    audit_logs = relationship(
+        "AuditLog",
+        back_populates="user"
+    )

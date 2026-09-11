@@ -1,0 +1,162 @@
+<div class="notifications-page">
+
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">CONTRACTIQ ALERT CENTER</div>
+      <h1>Notifications</h1>
+      <p>
+        Review contract, obligation, renewal, and compliance alerts.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="refresh-btn"
+        (click)="loadNotifications()"
+        [disabled]="loading"
+      >
+        ↻ {{ loading ? 'Refreshing...' : 'Refresh Data' }}
+      </button>
+
+      <button
+        type="button"
+        class="mark-all-btn"
+        (click)="markAllAsRead()"
+        [disabled]="unreadCount === 0 || actionLoading"
+      >
+        {{ actionLoading ? 'Updating...' : 'Mark All as Read' }}
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="error-banner">
+    <div>
+      <strong>Unable to load notifications</strong>
+      <p>{{ error }}</p>
+    </div>
+
+    <button type="button" (click)="loadNotifications()">
+      Try Again
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <h2>Loading notifications</h2>
+    <p>Checking the latest contract alerts and reminders...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Total Notifications</span>
+        <strong>{{ notificationCount }}</strong>
+      </article>
+
+      <article class="summary-card unread">
+        <span>Unread</span>
+        <strong>{{ unreadCount }}</strong>
+      </article>
+
+      <article class="summary-card read">
+        <span>Read</span>
+        <strong>{{ notificationCount - unreadCount }}</strong>
+      </article>
+    </section>
+
+    <section class="notifications-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">ALERTS</span>
+          <h2>Recent notifications</h2>
+        </div>
+
+        <span class="notification-count">
+          {{ notificationCount }} total
+        </span>
+      </div>
+
+      <div *ngIf="notifications.length === 0" class="empty-state">
+        <div class="empty-icon">✓</div>
+        <h3>No notifications</h3>
+        <p>
+          You're all caught up. New contract alerts will appear here.
+        </p>
+      </div>
+
+      <div *ngIf="notifications.length > 0" class="notification-list">
+
+        <article
+          *ngFor="let notification of notifications"
+          class="notification-card"
+          [class.unread]="notification.status === 'Unread'"
+          (click)="markAsRead(notification)"
+        >
+
+          <div
+            class="notification-icon"
+            [class]="getTypeClass(notification.notification_type)"
+          >
+            <span *ngIf="getTypeClass(notification.notification_type) === 'overdue'">!</span>
+            <span *ngIf="getTypeClass(notification.notification_type) === 'compliance'">⚠</span>
+            <span *ngIf="getTypeClass(notification.notification_type) === 'renewal'">◷</span>
+            <span *ngIf="getTypeClass(notification.notification_type) === 'approval'">✓</span>
+            <span *ngIf="getTypeClass(notification.notification_type) === 'status'">C</span>
+            <span *ngIf="getTypeClass(notification.notification_type) === 'default'">•</span>
+          </div>
+
+          <div class="notification-content">
+
+            <div class="notification-top">
+              <div>
+                <span class="notification-type">
+                  {{ notification.notification_type }}
+                </span>
+
+                <h3>{{ notification.title }}</h3>
+              </div>
+
+              <span
+                class="status-badge"
+                [class.unread-badge]="notification.status === 'Unread'"
+              >
+                {{ notification.status }}
+              </span>
+            </div>
+
+            <p>{{ notification.message }}</p>
+
+            <div class="notification-meta">
+              <span *ngIf="notification.contract_id">
+                Contract #{{ notification.contract_id }}
+              </span>
+
+              <span *ngIf="notification.obligation_id">
+                Obligation #{{ notification.obligation_id }}
+              </span>
+
+              <span>
+                {{ formatDate(notification.created_at) }}
+              </span>
+            </div>
+
+          </div>
+
+          <div
+            *ngIf="notification.status === 'Unread'"
+            class="unread-dot"
+            title="Unread"
+          ></div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

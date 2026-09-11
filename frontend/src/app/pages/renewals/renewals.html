@@ -1,0 +1,167 @@
+<div class="renewals-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Renewals</h1>
+      <p>Track and manage contract renewals.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="loadRenewals()"
+      [disabled]="loading()"
+    >
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div class="renewals-card">
+
+    <div class="card-header">
+      <div>
+        <h2>Renewal Portfolio</h2>
+        <p>{{ renewals().length }} renewal(s) found</p>
+      </div>
+    </div>
+
+    @if (error) {
+      <div class="error">
+        {{ error }}
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="loading">
+        Loading renewals...
+      </div>
+    }
+
+    @if (!loading() && !error && renewals().length === 0) {
+      <div class="empty-state">
+        <h3>No renewals found</h3>
+        <p>There are currently no renewals in the system.</p>
+      </div>
+    }
+
+    @if (!loading() && renewals().length > 0) {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Renewal ID</th>
+              <th>Contract ID</th>
+              <th>Previous Expiry</th>
+              <th>Renewal Date</th>
+              <th>New Expiry</th>
+              <th>Assigned To</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (renewal of renewals(); track renewal.id) {
+              <tr>
+                <td>
+                  <strong>#{{ renewal.id }}</strong>
+                </td>
+
+                <td>
+                  {{ renewal.contract_id }}
+                </td>
+
+                <td>
+                  {{ formatDate(renewal.previous_expiry_date) }}
+                </td>
+
+                <td>
+                  {{ formatDate(renewal.renewal_date) }}
+                </td>
+
+                <td>
+                  {{ formatDate(renewal.new_expiry_date) }}
+                </td>
+
+                <td>
+                  {{ renewal.assigned_to ?? '—' }}
+                </td>
+
+                <td>
+                  <span
+                    class="status"
+                    [ngClass]="{
+                      'upcoming': renewal.status === 'Upcoming',
+                      'in-progress': renewal.status === 'In Progress',
+                      'renewed': renewal.status === 'Renewed',
+                      'expired': renewal.status === 'Expired',
+                      'cancelled': renewal.status === 'Cancelled'
+                    }"
+                  >
+                    {{ renewal.status }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ renewal.notes || '—' }}
+                </td>
+
+                <td class="actions">
+                  @if (renewal.status === 'Upcoming' && renewal.renewal_date) {
+                    <button
+                      type="button"
+                      class="action-button start"
+                      (click)="updateStatus(renewal.id, 'In Progress')"
+                    >
+                      Start
+                    </button>
+
+                    <button
+                      type="button"
+                      class="action-button cancel"
+                      (click)="updateStatus(renewal.id, 'Cancelled')"
+                    >
+                      Cancel
+                    </button>
+                  }
+
+                  @if (renewal.status === 'Upcoming' && !renewal.renewal_date) {
+                    <span class="no-action">Monitoring</span>
+                  }
+
+                  @if (renewal.status === 'In Progress') {
+                    <button
+                      type="button"
+                      class="action-button complete"
+                      (click)="completeRenewal(renewal.id)"
+                    >
+                      Complete
+                    </button>
+
+                    <button
+                      type="button"
+                      class="action-button cancel"
+                      (click)="updateStatus(renewal.id, 'Cancelled')"
+                    >
+                      Cancel
+                    </button>
+                  }
+
+                  @if (
+                    renewal.status === 'Renewed' ||
+                    renewal.status === 'Expired' ||
+                    renewal.status === 'Cancelled'
+                  ) {
+                    <span class="no-action">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+</div>
