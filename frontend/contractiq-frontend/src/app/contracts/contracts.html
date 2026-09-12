@@ -1,0 +1,1501 @@
+<div class="contracts-page">
+
+  <!-- =====================================================
+       SUCCESS TOAST
+  ====================================================== -->
+
+  @if (createSuccessPopup) {
+
+    <div class="success-toast" role="status">
+
+      <div class="success-toast-icon">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+
+      <div class="success-toast-content">
+        <strong>Contract Created Successfully</strong>
+        <span>
+          The new contract has been added to ContractIQ.
+        </span>
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        aria-label="Close notification"
+        title="Close notification"
+        (click)="createSuccessPopup = false">
+
+        <mat-icon>close</mat-icon>
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <section class="page-header">
+
+    <div class="page-header-content">
+
+      <div class="page-eyebrow">
+        CONTRACT MANAGEMENT
+      </div>
+
+      <h1>Contracts</h1>
+
+      <p>
+        Manage, review and track all your contracts.
+      </p>
+
+    </div>
+
+    <button
+      mat-raised-button
+      type="button"
+      class="primary-button"
+      (click)="openCreateForm()">
+
+      <mat-icon>add</mat-icon>
+
+      <span>Create Contract</span>
+
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       EDIT CONTRACT
+  ====================================================== -->
+
+  @if (showEditForm) {
+
+    <mat-card class="create-card">
+
+      <div class="create-header">
+
+        <div class="create-heading">
+
+          <div class="create-icon">
+            <mat-icon>edit</mat-icon>
+          </div>
+
+          <div>
+            <h2>Edit Contract</h2>
+
+            <p>
+              Update the contract information below.
+            </p>
+          </div>
+
+        </div>
+
+        <button
+          mat-icon-button
+          type="button"
+          class="close-button"
+          aria-label="Close edit form"
+          title="Close"
+          (click)="closeEditForm()">
+
+          <mat-icon>close</mat-icon>
+
+        </button>
+
+      </div>
+
+
+      <form
+        class="create-form"
+        (ngSubmit)="updateContract()"
+        #editForm="ngForm">
+
+
+        <!-- TITLE -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Contract Title</mat-label>
+
+          <input
+            matInput
+            name="editTitle"
+            [(ngModel)]="editContractData.title"
+            required
+            placeholder="Enter contract title">
+
+        </mat-form-field>
+
+
+        <!-- CATEGORY -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Category</mat-label>
+
+          <mat-select
+            name="editCategory"
+            [(ngModel)]="editContractData.category"
+            panelClass="contract-category-panel"
+            required>
+
+            @for (category of categories; track category) {
+
+              <mat-option [value]="category">
+                {{ category }}
+              </mat-option>
+
+            }
+
+          </mat-select>
+
+        </mat-form-field>
+
+
+        <!-- PARTY -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Party Name</mat-label>
+
+          <input
+            matInput
+            name="editPartyName"
+            [(ngModel)]="editContractData.party_name"
+            required
+            placeholder="Enter party or company name">
+
+        </mat-form-field>
+
+
+        <!-- START DATE -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Start Date</mat-label>
+
+          <input
+            matInput
+            type="date"
+            name="editStartDate"
+            [(ngModel)]="editContractData.start_date"
+            required>
+
+        </mat-form-field>
+
+
+        <!-- END DATE -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>End Date</mat-label>
+
+          <input
+            matInput
+            type="date"
+            name="editEndDate"
+            [(ngModel)]="editContractData.end_date"
+            required>
+
+        </mat-form-field>
+
+
+        <!-- DESCRIPTION -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field full-width">
+
+          <mat-label>Description</mat-label>
+
+          <textarea
+            matInput
+            name="editDescription"
+            rows="4"
+            [(ngModel)]="editContractData.description"
+            placeholder="Enter contract description">
+          </textarea>
+
+        </mat-form-field>
+
+
+        <!-- ERROR -->
+
+        @if (editError) {
+
+          <div class="form-error full-width">
+
+            <mat-icon>error_outline</mat-icon>
+
+            <span>{{ editError }}</span>
+
+          </div>
+
+        }
+
+
+        <!-- ACTIONS -->
+
+        <div class="form-actions full-width">
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="closeEditForm()"
+            [disabled]="editing">
+
+            Cancel
+
+          </button>
+
+          <button
+            mat-raised-button
+            type="submit"
+            class="submit-button"
+            [disabled]="editing">
+
+            <mat-icon>
+              {{ editing ? 'hourglass_empty' : 'save' }}
+            </mat-icon>
+
+            <span>
+              {{ editing ? 'Updating...' : 'Update Contract' }}
+            </span>
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </mat-card>
+
+  }
+
+
+  <!-- =====================================================
+       CREATE CONTRACT
+  ====================================================== -->
+
+  @if (showCreateForm) {
+
+    <mat-card class="create-card">
+
+      <div class="create-header">
+
+        <div class="create-heading">
+
+          <div class="create-icon">
+            <mat-icon>description</mat-icon>
+          </div>
+
+          <div>
+            <h2>Create Contract</h2>
+
+            <p>
+              Add a new contract to ContractIQ.
+            </p>
+          </div>
+
+        </div>
+
+        <button
+          mat-icon-button
+          type="button"
+          class="close-button"
+          aria-label="Close create form"
+          title="Close"
+          (click)="closeCreateForm()">
+
+          <mat-icon>close</mat-icon>
+
+        </button>
+
+      </div>
+
+
+      <form
+        class="create-form"
+        (ngSubmit)="createContract()"
+        #createForm="ngForm">
+
+
+        <!-- CONTRACT NUMBER -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Contract Number</mat-label>
+
+          <input
+            matInput
+            name="contractNumber"
+            [(ngModel)]="createContractData.contract_number"
+            required
+            placeholder="e.g. CNT-1004">
+
+        </mat-form-field>
+
+
+        <!-- TITLE -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Contract Title</mat-label>
+
+          <input
+            matInput
+            name="title"
+            [(ngModel)]="createContractData.title"
+            required
+            placeholder="Enter contract title">
+
+        </mat-form-field>
+
+
+        <!-- CATEGORY -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Category</mat-label>
+
+          <mat-select
+            name="category"
+            [(ngModel)]="createContractData.category"
+            panelClass="contract-category-panel"
+            required>
+
+            @for (category of categories; track category) {
+
+              <mat-option [value]="category">
+                {{ category }}
+              </mat-option>
+
+            }
+
+          </mat-select>
+
+        </mat-form-field>
+
+
+        <!-- PARTY -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Party Name</mat-label>
+
+          <input
+            matInput
+            name="partyName"
+            [(ngModel)]="createContractData.party_name"
+            required
+            placeholder="Enter party or company name">
+
+        </mat-form-field>
+
+
+        <!-- START DATE -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Start Date</mat-label>
+
+          <input
+            matInput
+            type="date"
+            name="startDate"
+            [(ngModel)]="createContractData.start_date"
+            required>
+
+        </mat-form-field>
+
+
+        <!-- END DATE -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>End Date</mat-label>
+
+          <input
+            matInput
+            type="date"
+            name="endDate"
+            [(ngModel)]="createContractData.end_date"
+            required>
+
+        </mat-form-field>
+
+
+        <!-- DESCRIPTION -->
+
+        <mat-form-field
+          appearance="outline"
+          class="form-field full-width">
+
+          <mat-label>Description</mat-label>
+
+          <textarea
+            matInput
+            name="description"
+            rows="4"
+            [(ngModel)]="createContractData.description"
+            placeholder="Enter contract description">
+          </textarea>
+
+        </mat-form-field>
+
+
+        <!-- ERROR -->
+
+        @if (createError) {
+
+          <div class="form-error full-width">
+
+            <mat-icon>error_outline</mat-icon>
+
+            <span>{{ createError }}</span>
+
+          </div>
+
+        }
+
+
+        <!-- ACTIONS -->
+
+        <div class="form-actions full-width">
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="closeCreateForm()"
+            [disabled]="creating">
+
+            Cancel
+
+          </button>
+
+          <button
+            mat-raised-button
+            type="submit"
+            class="submit-button"
+            [disabled]="creating">
+
+            <mat-icon>
+              {{ creating ? 'hourglass_empty' : 'add' }}
+            </mat-icon>
+
+            <span>
+              {{ creating ? 'Creating...' : 'Create Contract' }}
+            </span>
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </mat-card>
+
+  }
+
+
+  <!-- =====================================================
+       CONTRACT DIRECTORY / FILTERS
+  ====================================================== -->
+
+  <mat-card class="filter-card">
+
+    <div class="filter-header">
+
+      <div>
+
+        <h3>Contract Directory</h3>
+
+        <p>
+          Search and filter contracts.
+        </p>
+
+      </div>
+
+      <span class="count-badge">
+
+        {{ filteredContracts.length }}
+
+        {{ filteredContracts.length === 1
+          ? 'Contract'
+          : 'Contracts' }}
+
+      </span>
+
+    </div>
+
+
+    <div class="filters">
+
+
+      <!-- SEARCH -->
+
+      <mat-form-field
+        appearance="outline"
+        class="search-field">
+
+        <mat-label>Search contracts</mat-label>
+
+        <mat-icon matPrefix>search</mat-icon>
+
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          placeholder="Number, title, party...">
+
+        @if (searchTerm) {
+
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Clear search"
+            title="Clear search"
+            (click)="searchTerm=''; applyFilters()">
+
+            <mat-icon>close</mat-icon>
+
+          </button>
+
+        }
+
+      </mat-form-field>
+
+
+      <!-- CATEGORY FILTER -->
+
+      <mat-form-field appearance="outline">
+
+        <mat-label>Category</mat-label>
+
+        <mat-select
+          [(ngModel)]="selectedCategory"
+          (selectionChange)="applyFilters()"
+          panelClass="contract-category-panel">
+
+          <mat-option value="">
+            All Categories
+          </mat-option>
+
+          @for (category of categories; track category) {
+
+            <mat-option [value]="category">
+              {{ category }}
+            </mat-option>
+
+          }
+
+        </mat-select>
+
+      </mat-form-field>
+
+
+      <!-- STATUS FILTER -->
+
+      <mat-form-field appearance="outline">
+
+        <mat-label>Status</mat-label>
+
+        <mat-select
+          [(ngModel)]="selectedStatus"
+          (selectionChange)="applyFilters()"
+          panelClass="contract-status-panel">
+
+          <mat-option value="">
+            All Statuses
+          </mat-option>
+
+          @for (status of statuses; track status) {
+
+            <mat-option [value]="status">
+              {{ status }}
+            </mat-option>
+
+          }
+
+        </mat-select>
+
+      </mat-form-field>
+
+
+      <!-- CLEAR -->
+
+      <button
+        mat-stroked-button
+        type="button"
+        class="clear-filter-button"
+        (click)="clearFilters()">
+
+        <mat-icon>filter_alt_off</mat-icon>
+
+        <span>Clear</span>
+
+      </button>
+
+    </div>
+
+  </mat-card>
+
+
+  <!-- =====================================================
+       LOADING STATE
+  ====================================================== -->
+
+  @if (loading) {
+
+    <div class="state-container">
+
+      <mat-icon class="state-icon">
+        hourglass_empty
+      </mat-icon>
+
+      <h3>Loading contracts...</h3>
+
+      <p>
+        Please wait while contracts are being loaded.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       ERROR STATE
+  ====================================================== -->
+
+  @if (!loading && errorMessage) {
+
+    <div class="state-container error-state">
+
+      <mat-icon class="state-icon">
+        error_outline
+      </mat-icon>
+
+      <h3>Unable to load contracts</h3>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        mat-raised-button
+        type="button"
+        (click)="loadContracts()">
+
+        <mat-icon>refresh</mat-icon>
+
+        <span>Try Again</span>
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       EMPTY STATE
+  ====================================================== -->
+
+  @if (
+    !loading &&
+    !errorMessage &&
+    filteredContracts.length === 0
+  ) {
+
+    <div class="state-container">
+
+      <mat-icon class="state-icon">
+        description
+      </mat-icon>
+
+
+      @if (contracts.length === 0) {
+
+        <h3>No contracts found</h3>
+
+        <p>
+          Create your first contract to get started.
+        </p>
+
+        <button
+          mat-raised-button
+          type="button"
+          class="primary-button"
+          (click)="openCreateForm()">
+
+          <mat-icon>add</mat-icon>
+
+          <span>Create Contract</span>
+
+        </button>
+
+      } @else {
+
+        <h3>No matching contracts</h3>
+
+        <p>
+          Try changing your search or filters.
+        </p>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="clearFilters()">
+
+          Clear Filters
+
+        </button>
+
+      }
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       CONTRACT TABLE
+  ====================================================== -->
+
+  @if (
+    !loading &&
+    !errorMessage &&
+    filteredContracts.length > 0
+  ) {
+
+    <mat-card class="table-card">
+
+      <div class="table-card-header">
+
+        <div>
+
+          <h3>All Contracts</h3>
+
+          <p>
+            {{ filteredContracts.length }}
+            {{
+              filteredContracts.length === 1
+                ? 'contract'
+                : 'contracts'
+            }}
+            displayed
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- HORIZONTAL SCROLL AREA -->
+
+      <div class="table-wrapper">
+
+        <table
+          mat-table
+          [dataSource]="filteredContracts"
+          class="contracts-table">
+
+
+          <!-- CONTRACT -->
+
+          <ng-container matColumnDef="contract_number">
+
+            <th mat-header-cell *matHeaderCellDef>
+              Contract
+            </th>
+
+            <td mat-cell *matCellDef="let contract">
+
+              <div class="contract-number">
+
+                <strong>
+                  {{ contract.contract_number }}
+                </strong>
+
+                <span>
+                  {{ contract.title }}
+                </span>
+
+              </div>
+
+            </td>
+
+          </ng-container>
+
+
+          <!-- CATEGORY -->
+
+          <ng-container matColumnDef="category">
+
+            <th mat-header-cell *matHeaderCellDef>
+              Category
+            </th>
+
+            <td mat-cell *matCellDef="let contract">
+
+              <span class="category-text">
+                {{ contract.category }}
+              </span>
+
+            </td>
+
+          </ng-container>
+
+
+          <!-- PARTY -->
+
+          <ng-container matColumnDef="party_name">
+
+            <th mat-header-cell *matHeaderCellDef>
+              Party
+            </th>
+
+            <td mat-cell *matCellDef="let contract">
+
+              <span class="party-text">
+                {{ contract.party_name }}
+              </span>
+
+            </td>
+
+          </ng-container>
+
+
+          <!-- START DATE -->
+
+          <ng-container matColumnDef="start_date">
+
+            <th mat-header-cell *matHeaderCellDef>
+              Start Date
+            </th>
+
+            <td mat-cell *matCellDef="let contract">
+
+              <span class="date-text">
+                {{ contract.start_date | date:'dd MMM yyyy' }}
+              </span>
+
+            </td>
+
+          </ng-container>
+
+
+          <!-- END DATE -->
+
+          <ng-container matColumnDef="end_date">
+
+            <th mat-header-cell *matHeaderCellDef>
+              End Date
+            </th>
+
+            <td mat-cell *matCellDef="let contract">
+
+              <span class="date-text">
+                {{ contract.end_date | date:'dd MMM yyyy' }}
+              </span>
+
+            </td>
+
+          </ng-container>
+
+
+          <!-- STATUS -->
+
+          <ng-container matColumnDef="status">
+
+            <th mat-header-cell *matHeaderCellDef>
+              Status
+            </th>
+
+            <td mat-cell *matCellDef="let contract">
+
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(contract.status)">
+
+                {{ contract.status }}
+
+              </span>
+
+            </td>
+
+          </ng-container>
+
+
+          <!-- ACTIONS -->
+
+          <ng-container matColumnDef="actions">
+
+            <th mat-header-cell *matHeaderCellDef>
+              Actions
+            </th>
+
+            <td mat-cell *matCellDef="let contract">
+
+              <div class="action-buttons">
+
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="table-icon"
+                  aria-label="View Contract"
+                  title="View Contract"
+                  (click)="viewContract(contract.id)">
+
+                  <mat-icon>visibility</mat-icon>
+
+                </button>
+
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="table-icon"
+                  aria-label="Edit Contract"
+                  title="Edit Contract"
+                  (click)="editContract(contract.id)">
+
+                  <mat-icon>edit</mat-icon>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </ng-container>
+
+
+          <!-- HEADER -->
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="[
+              'contract_number',
+              'category',
+              'party_name',
+              'start_date',
+              'end_date',
+              'status',
+              'actions'
+            ]">
+          </tr>
+
+
+          <!-- ROW -->
+
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: [
+                'contract_number',
+                'category',
+                'party_name',
+                'start_date',
+                'end_date',
+                'status',
+                'actions'
+              ]
+            ">
+          </tr>
+
+        </table>
+
+      </div>
+
+
+      <!-- SCROLL HINT -->
+
+      <div class="table-scroll-hint">
+
+        <mat-icon>swap_horiz</mat-icon>
+
+        <span>
+          Scroll horizontally to view more columns
+        </span>
+
+      </div>
+
+    </mat-card>
+
+  }
+
+
+  <!-- =====================================================
+       VIEW CONTRACT MODAL
+  ====================================================== -->
+
+  @if (showViewModal) {
+
+    <div
+      class="contract-modal-overlay"
+      (click)="closeViewModal()">
+
+
+      <div
+        class="contract-modal"
+        (click)="$event.stopPropagation()">
+
+
+        <!-- MODAL HEADER -->
+
+        <div class="contract-modal-header">
+
+          <div class="contract-modal-title">
+
+            <div class="contract-modal-icon">
+              <mat-icon>description</mat-icon>
+            </div>
+
+            <div>
+
+              <div class="modal-eyebrow">
+                CONTRACT DETAILS
+              </div>
+
+              <h2>
+                {{
+                  selectedContract?.contract_number
+                  || 'Contract Details'
+                }}
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <button
+            mat-icon-button
+            type="button"
+            class="modal-close-button"
+            aria-label="Close contract details"
+            title="Close"
+            (click)="closeViewModal()">
+
+            <mat-icon>close</mat-icon>
+
+          </button>
+
+        </div>
+
+
+        <!-- MODAL BODY -->
+
+        <div class="contract-modal-body">
+
+
+          <!-- LOADING -->
+
+          @if (viewLoading) {
+
+            <div class="modal-state">
+
+              <mat-icon>
+                hourglass_empty
+              </mat-icon>
+
+              <p>
+                Loading contract details...
+              </p>
+
+            </div>
+
+          }
+
+
+          <!-- ERROR -->
+
+          @if (!viewLoading && viewError) {
+
+            <div class="modal-state modal-error-state">
+
+              <mat-icon>
+                error_outline
+              </mat-icon>
+
+              <h3>
+                Unable to load contract
+              </h3>
+
+              <p>
+                {{ viewError }}
+              </p>
+
+            </div>
+
+          }
+
+
+          <!-- DETAILS -->
+
+          @if (
+            !viewLoading &&
+            !viewError &&
+            selectedContract
+          ) {
+
+            <div class="contract-overview">
+
+
+              <!-- OVERVIEW HEADER -->
+
+              <div class="contract-overview-header">
+
+                <div>
+
+                  <div class="modal-eyebrow">
+                    CONTRACT
+                  </div>
+
+                  <h3>
+                    {{ selectedContract.title }}
+                  </h3>
+
+                </div>
+
+                <span
+                  class="status-badge"
+                  [ngClass]="
+                    getStatusClass(
+                      selectedContract.status
+                    )
+                  ">
+
+                  {{ selectedContract.status }}
+
+                </span>
+
+              </div>
+
+
+              <!-- DETAILS GRID -->
+
+              <div class="contract-details-grid">
+
+
+                <!-- NUMBER -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Contract Number
+                  </span>
+
+                  <span class="detail-value">
+                    {{ selectedContract.contract_number }}
+                  </span>
+
+                </div>
+
+
+                <!-- CATEGORY -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Category
+                  </span>
+
+                  <span class="detail-value">
+                    {{ selectedContract.category }}
+                  </span>
+
+                </div>
+
+
+                <!-- PARTY -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Party Name
+                  </span>
+
+                  <span class="detail-value">
+                    {{ selectedContract.party_name }}
+                  </span>
+
+                </div>
+
+
+                <!-- OWNER -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Owner ID
+                  </span>
+
+                  <span class="detail-value">
+                    {{ selectedContract.owner_id }}
+                  </span>
+
+                </div>
+
+
+                <!-- ASSIGNED -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Assigned To
+                  </span>
+
+                  <span class="detail-value">
+
+                    @if (selectedContract.assigned_to) {
+
+                      User #{{ selectedContract.assigned_to }}
+
+                    } @else {
+
+                      Not Assigned
+
+                    }
+
+                  </span>
+
+                </div>
+
+
+                <!-- START -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Start Date
+                  </span>
+
+                  <span class="detail-value">
+                    {{
+                      selectedContract.start_date
+                      | date:'dd MMM yyyy'
+                    }}
+                  </span>
+
+                </div>
+
+
+                <!-- END -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    End Date
+                  </span>
+
+                  <span class="detail-value">
+                    {{
+                      selectedContract.end_date
+                      | date:'dd MMM yyyy'
+                    }}
+                  </span>
+
+                </div>
+
+
+                <!-- CREATED -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Created
+                  </span>
+
+                  <span class="detail-value">
+                    {{
+                      selectedContract.created_at
+                      | date:'dd MMM yyyy, h:mm a'
+                    }}
+                  </span>
+
+                </div>
+
+
+                <!-- UPDATED -->
+
+                <div class="detail-item">
+
+                  <span class="detail-label">
+                    Last Updated
+                  </span>
+
+                  <span class="detail-value">
+                    {{
+                      selectedContract.updated_at
+                      | date:'dd MMM yyyy, h:mm a'
+                    }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <!-- DESCRIPTION -->
+
+              <div class="description-section">
+
+                <h3>Description</h3>
+
+                @if (selectedContract.description) {
+
+                  <div class="description-box">
+
+                    <p>
+                      {{ selectedContract.description }}
+                    </p>
+
+                  </div>
+
+                } @else {
+
+                  <div
+                    class="description-box empty-description">
+
+                    <p>
+                      No description provided.
+                    </p>
+
+                  </div>
+
+                }
+
+              </div>
+
+
+              <!-- APPROVAL -->
+
+              <div class="description-section">
+
+                <h3>Approval Information</h3>
+
+                <div class="contract-details-grid">
+
+
+                  <!-- REVIEWED -->
+
+                  <div class="detail-item">
+
+                    <span class="detail-label">
+                      Reviewed At
+                    </span>
+
+                    <span class="detail-value">
+
+                      @if (selectedContract.reviewed_at) {
+
+                        {{
+                          selectedContract.reviewed_at
+                          | date:'dd MMM yyyy, h:mm a'
+                        }}
+
+                      } @else {
+
+                        Not Reviewed
+
+                      }
+
+                    </span>
+
+                  </div>
+
+
+                  <!-- APPROVED -->
+
+                  <div class="detail-item">
+
+                    <span class="detail-label">
+                      Approved At
+                    </span>
+
+                    <span class="detail-value">
+
+                      @if (selectedContract.approved_at) {
+
+                        {{
+                          selectedContract.approved_at
+                          | date:'dd MMM yyyy, h:mm a'
+                        }}
+
+                      } @else {
+
+                        Not Approved
+
+                      }
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+
+        <!-- MODAL FOOTER -->
+
+        <div class="contract-modal-footer">
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="closeViewModal()">
+
+            <mat-icon>close</mat-icon>
+
+            <span>Close</span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

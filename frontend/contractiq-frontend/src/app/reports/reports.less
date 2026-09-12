@@ -1,0 +1,1129 @@
+.reports-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 28px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+
+// =======================================================
+// PAGE HEADER
+// =======================================================
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+
+.header-content {
+  min-width: 0;
+}
+
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+
+.title-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+
+  color: #2563eb;
+}
+
+
+.title-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+
+.page-header h1 {
+  margin: 0 0 5px;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+
+.page-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+.refresh-button {
+  min-width: 110px;
+  height: 42px;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+  background: #ffffff !important;
+  flex-shrink: 0;
+}
+
+
+.refresh-button mat-icon {
+  margin-right: 6px;
+}
+
+
+// =======================================================
+// LOADING
+// =======================================================
+
+.loading-card {
+  min-height: 260px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  text-align: center;
+}
+
+
+.loading-icon {
+  font-size: 38px;
+  width: 38px;
+  height: 38px;
+  color: #2563eb;
+  margin-bottom: 14px;
+}
+
+
+.loading-card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: #0f172a;
+}
+
+
+.loading-card p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+
+// =======================================================
+// ERROR
+// =======================================================
+
+.error-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 18px 20px;
+  margin-bottom: 24px;
+
+  background: #fff7f7;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+}
+
+
+.error-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fee2e2;
+  border-radius: 50%;
+  color: #dc2626;
+}
+
+
+.error-content {
+  flex: 1;
+  min-width: 0;
+}
+
+
+.error-content h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #991b1b;
+}
+
+
+.error-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+
+.error-card button {
+  flex-shrink: 0;
+}
+
+
+// =======================================================
+// SECTION TITLE
+// =======================================================
+
+.section-title {
+  margin-bottom: 14px;
+}
+
+
+.section-title h2 {
+  margin: 0 0 4px;
+  font-size: 19px;
+  color: #0f172a;
+}
+
+
+.section-title p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+
+// =======================================================
+// OVERVIEW CARDS
+// =======================================================
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+
+.overview-card {
+  display: flex !important;
+  align-items: center;
+  gap: 15px;
+
+  padding: 20px !important;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.04);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.overview-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+
+.overview-icon {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+}
+
+
+.overview-icon mat-icon {
+  font-size: 23px;
+  width: 23px;
+  height: 23px;
+}
+
+
+.contracts-card .overview-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+
+.obligations-card .overview-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+
+.renewals-card .overview-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+
+.compliance-card .overview-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+
+.overview-content {
+  min-width: 0;
+}
+
+
+.overview-label {
+  display: block;
+  margin-bottom: 4px;
+
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+.overview-content strong {
+  display: block;
+
+  color: #0f172a;
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+
+.overview-content small {
+  display: block;
+  margin-top: 4px;
+
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+
+// =======================================================
+// REPORT CARD
+// =======================================================
+
+.report-card {
+  padding: 0 !important;
+  margin-bottom: 22px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+
+.report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 20px 22px;
+
+  border-bottom: 1px solid #eef2f7;
+}
+
+
+.report-title {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+
+.report-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+}
+
+
+.report-icon mat-icon {
+  font-size: 21px;
+  width: 21px;
+  height: 21px;
+}
+
+
+.contracts-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+
+.obligations-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+
+.renewals-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+
+.compliance-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+
+.risk-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+
+.report-title h2 {
+  margin: 0 0 4px;
+
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+
+.report-title p {
+  margin: 0;
+
+  color: #64748b;
+  font-size: 12px;
+}
+
+
+.download-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+
+.pdf-button,
+.excel-button {
+  height: 38px;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+}
+
+
+.pdf-button {
+  border-color: #fecaca !important;
+  color: #dc2626 !important;
+}
+
+
+.excel-button {
+  border-color: #bbf7d0 !important;
+  color: #15803d !important;
+}
+
+
+.download-buttons mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+
+
+// =======================================================
+// STATS ROW
+// =======================================================
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+
+  padding: 18px 22px;
+}
+
+
+.stat-box {
+  padding: 15px;
+
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 9px;
+}
+
+
+.stat-box span {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+.stat-box strong {
+  display: block;
+
+  color: #0f172a;
+  font-size: 21px;
+}
+
+
+.text-success {
+  color: #15803d !important;
+}
+
+
+.text-warning {
+  color: #d97706 !important;
+}
+
+
+.text-danger {
+  color: #dc2626 !important;
+}
+
+
+// =======================================================
+// DISTRIBUTION
+// =======================================================
+
+.distribution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+
+  padding: 0 22px 22px;
+}
+
+
+.single-distribution {
+  padding: 0 22px 22px;
+}
+
+
+.distribution-section h3,
+.single-distribution h3,
+.renewal-table-wrapper h3 {
+  margin: 0 0 15px;
+
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+.distribution-item {
+  margin-bottom: 13px;
+}
+
+
+.distribution-item:last-child {
+  margin-bottom: 0;
+}
+
+
+.distribution-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 6px;
+
+  color: #475569;
+  font-size: 12px;
+}
+
+
+.distribution-label strong {
+  color: #0f172a;
+}
+
+
+.progress-track {
+  width: 100%;
+  height: 7px;
+
+  overflow: hidden;
+
+  background: #e2e8f0;
+  border-radius: 20px;
+}
+
+
+.progress-fill {
+  height: 100%;
+  min-width: 2px;
+
+  background: #64748b;
+  border-radius: 20px;
+
+  transition: width 0.3s ease;
+}
+
+
+.progress-fill.active,
+.progress-fill.completed {
+  background: #16a34a;
+}
+
+
+.progress-fill.draft,
+.progress-fill.pending {
+  background: #94a3b8;
+}
+
+
+.progress-fill.under-review,
+.progress-fill.in-progress {
+  background: #f59e0b;
+}
+
+
+.progress-fill.approved {
+  background: #2563eb;
+}
+
+
+.progress-fill.expired,
+.progress-fill.overdue,
+.progress-fill.delayed {
+  background: #dc2626;
+}
+
+
+.progress-fill.terminated {
+  background: #64748b;
+}
+
+
+.category-fill {
+  background: #2563eb;
+}
+
+
+// =======================================================
+// RENEWAL TABLE
+// =======================================================
+
+.renewal-table-wrapper {
+  padding: 0 22px 22px;
+}
+
+
+.renewal-table-wrapper h3 {
+  margin-bottom: 10px;
+}
+
+
+.renewal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+
+.renewal-table th {
+  padding: 10px 12px;
+
+  background: #f8fafc;
+
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+
+.renewal-table td {
+  padding: 12px;
+
+  color: #475569;
+  font-size: 12px;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+
+.renewal-table td strong {
+  color: #1e293b;
+}
+
+
+.days-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 9px;
+
+  background: #ecfdf5;
+  color: #15803d;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+.days-badge.urgent {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+// =======================================================
+// COMPLIANCE SCORE
+// =======================================================
+
+.compliance-score-section {
+  padding: 20px 22px;
+}
+
+
+.score-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 9px;
+}
+
+
+.score-info span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+.score-info strong {
+  font-size: 21px;
+}
+
+
+.score-info strong.good,
+.score-number.good {
+  color: #15803d;
+}
+
+
+.score-info strong.medium,
+.score-number.medium {
+  color: #d97706;
+}
+
+
+.score-info strong.poor,
+.score-number.poor {
+  color: #dc2626;
+}
+
+
+.score-track {
+  width: 100%;
+  height: 10px;
+
+  overflow: hidden;
+
+  background: #e2e8f0;
+  border-radius: 20px;
+}
+
+
+.score-fill {
+  height: 100%;
+  min-width: 0;
+
+  border-radius: 20px;
+
+  transition: width 0.3s ease;
+}
+
+
+.score-fill.good {
+  background: #16a34a;
+}
+
+
+.score-fill.medium {
+  background: #f59e0b;
+}
+
+
+.score-fill.poor {
+  background: #dc2626;
+}
+
+
+// =======================================================
+// RISK TABLE
+// =======================================================
+
+.risk-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+
+.risk-table {
+  width: 100%;
+  min-width: 650px;
+
+  border-collapse: collapse;
+}
+
+
+.risk-table th {
+  padding: 12px 22px;
+
+  background: #f8fafc;
+
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+
+.risk-table td {
+  padding: 14px 22px;
+
+  color: #475569;
+  font-size: 12px;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+
+.risk-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+
+.contract-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+
+.contract-cell strong {
+  color: #1e293b;
+  font-size: 13px;
+}
+
+
+.contract-cell small {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+.risk-badge mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+}
+
+
+.risk-badge.high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+
+.risk-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+
+.risk-badge.low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+
+.risk-badge.default {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+
+.overdue-number {
+  font-weight: 700;
+  color: #64748b;
+}
+
+
+.overdue-number.has-overdue {
+  color: #dc2626;
+}
+
+
+.score-number {
+  font-weight: 700;
+}
+
+
+// =======================================================
+// EMPTY
+// =======================================================
+
+.mini-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 24px 22px;
+
+  color: #64748b;
+  font-size: 12px;
+}
+
+
+.mini-empty mat-icon {
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+  color: #16a34a;
+}
+
+
+.empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 250px;
+
+  padding: 40px;
+
+  text-align: center;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+
+.empty-card > mat-icon {
+  font-size: 42px;
+  width: 42px;
+  height: 42px;
+
+  margin-bottom: 12px;
+
+  color: #2563eb;
+}
+
+
+.empty-card h3 {
+  margin: 0 0 6px;
+
+  color: #0f172a;
+  font-size: 17px;
+}
+
+
+.empty-card p {
+  margin: 0 0 18px;
+
+  color: #64748b;
+  font-size: 13px;
+}
+
+
+// =======================================================
+// RESPONSIVE
+// =======================================================
+
+@media (max-width: 1100px) {
+
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 850px) {
+
+  .reports-page {
+    padding: 20px;
+  }
+
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+
+  .refresh-button {
+    width: 100%;
+  }
+
+
+  .distribution-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .report-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+
+  .download-buttons {
+    width: 100%;
+  }
+
+
+  .pdf-button,
+  .excel-button {
+    flex: 1;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .reports-page {
+    padding: 14px;
+  }
+
+
+  .page-header h1 {
+    font-size: 23px;
+  }
+
+
+  .title-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .stats-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 15px;
+  }
+
+
+  .distribution-grid {
+    padding: 0 15px 18px;
+  }
+
+
+  .single-distribution {
+    padding: 0 15px 18px;
+  }
+
+
+  .compliance-score-section {
+    padding: 16px 15px;
+  }
+
+
+  .renewal-table-wrapper {
+    padding: 0 15px 18px;
+  }
+
+
+  .report-header {
+    padding: 16px;
+  }
+
+
+  .report-title h2 {
+    font-size: 15px;
+  }
+
+
+  .download-buttons {
+    flex-direction: column;
+  }
+
+
+  .pdf-button,
+  .excel-button {
+    width: 100%;
+  }
+
+}

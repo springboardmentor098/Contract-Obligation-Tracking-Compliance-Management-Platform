@@ -1,1 +1,390 @@
-/* You can add global styles to this file, and also import other style files */
+/* =========================================================
+   CONTRACTIQ - PROFESSIONAL MATERIAL DROPDOWNS
+   ========================================================= */
+
+
+/* =========================================================
+   COMMON DROPDOWN PANELS
+   ========================================================= */
+
+.contract-category-panel,
+.contract-status-panel,
+.obligation-contract-panel,
+.obligation-type-panel,
+.obligation-status-panel {
+
+  background: #ffffff !important;
+
+  border: 1px solid #dbe3ef !important;
+
+  border-radius: 10px !important;
+
+  padding: 6px !important;
+
+  box-shadow:
+    0 14px 32px rgba(15, 23, 42, 0.14),
+    0 4px 10px rgba(15, 23, 42, 0.08) !important;
+
+  overflow: hidden !important;
+}
+
+
+/* =========================================================
+   NORMAL OPTION
+   ========================================================= */
+
+.contract-category-panel .mat-mdc-option,
+.contract-status-panel .mat-mdc-option,
+.obligation-contract-panel .mat-mdc-option,
+.obligation-type-panel .mat-mdc-option,
+.obligation-status-panel .mat-mdc-option {
+
+  min-height: 48px !important;
+
+  margin: 2px 0 !important;
+
+  padding: 0 14px !important;
+
+  border-radius: 7px !important;
+
+  background: #ffffff !important;
+
+  color: #1f2937 !important;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif !important;
+
+  font-size: 14px !important;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease !important;
+}
+
+
+/* =========================================================
+   OPTION TEXT
+   ========================================================= */
+
+.contract-category-panel
+.mat-mdc-option
+.mdc-list-item__primary-text,
+
+.contract-status-panel
+.mat-mdc-option
+.mdc-list-item__primary-text,
+
+.obligation-contract-panel
+.mat-mdc-option
+.mdc-list-item__primary-text,
+
+.obligation-type-panel
+.mat-mdc-option
+.mdc-list-item__primary-text,
+
+.obligation-status-panel
+.mat-mdc-option
+.mdc-list-item__primary-text {
+
+  color: #1f2937 !important;
+
+  font-size: 14px !important;
+}
+
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+.contract-category-panel
+.mat-mdc-option:hover:not(.mdc-list-item--disabled),
+
+.contract-status-panel
+.mat-mdc-option:hover:not(.mdc-list-item--disabled),
+
+.obligation-contract-panel
+.mat-mdc-option:hover:not(.mdc-list-item--disabled),
+
+.obligation-type-panel
+.mat-mdc-option:hover:not(.mdc-list-item--disabled),
+
+.obligation-status-panel
+.mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+
+  background: #eff6ff !important;
+
+  color: #1d4ed8 !important;
+}
+
+
+/* =========================================================
+   HOVER TEXT
+   ========================================================= */
+
+.contract-category-panel
+.mat-mdc-option:hover
+.mdc-list-item__primary-text,
+
+.contract-status-panel
+.mat-mdc-option:hover
+.mdc-list-item__primary-text,
+
+.obligation-contract-panel
+.mat-mdc-option:hover
+.mdc-list-item__primary-text,
+
+.obligation-type-panel
+.mat-mdc-option:hover
+.mdc-list-item__primary-text,
+
+.obligation-status-panel
+.mat-mdc-option:hover
+.mdc-list-item__primary-text {
+
+  color: #1d4ed8 !important;
+}
+
+
+/* =========================================================
+   SELECTED OPTION
+   ========================================================= */
+
+.contract-category-panel
+.mat-mdc-option[aria-selected="true"],
+
+.contract-status-panel
+.mat-mdc-option[aria-selected="true"],
+
+.obligation-contract-panel
+.mat-mdc-option[aria-selected="true"],
+
+.obligation-type-panel
+.mat-mdc-option[aria-selected="true"],
+
+.obligation-status-panel
+.mat-mdc-option[aria-selected="true"] {
+
+  background: #2563eb !important;
+
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SELECTED TEXT
+   ========================================================= */
+
+.contract-category-panel
+.mat-mdc-option[aria-selected="true"]
+.mdc-list-item__primary-text,
+
+.contract-status-panel
+.mat-mdc-option[aria-selected="true"]
+.mdc-list-item__primary-text,
+
+.obligation-contract-panel
+.mat-mdc-option[aria-selected="true"]
+.mdc-list-item__primary-text,
+
+.obligation-type-panel
+.mat-mdc-option[aria-selected="true"]
+.mdc-list-item__primary-text,
+
+.obligation-status-panel
+.mat-mdc-option[aria-selected="true"]
+.mdc-list-item__primary-text {
+
+  color: #ffffff !important;
+
+  font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   SELECTED HOVER
+   ========================================================= */
+
+.contract-category-panel
+.mat-mdc-option[aria-selected="true"]:hover,
+
+.contract-status-panel
+.mat-mdc-option[aria-selected="true"]:hover,
+
+.obligation-contract-panel
+.mat-mdc-option[aria-selected="true"]:hover,
+
+.obligation-type-panel
+.mat-mdc-option[aria-selected="true"]:hover,
+
+.obligation-status-panel
+.mat-mdc-option[aria-selected="true"]:hover {
+
+  background: #1d4ed8 !important;
+}
+
+
+/* =========================================================
+   CHECK MARK
+   ========================================================= */
+
+.contract-category-panel
+.mat-pseudo-checkbox-checked,
+
+.contract-status-panel
+.mat-pseudo-checkbox-checked,
+
+.obligation-contract-panel
+.mat-pseudo-checkbox-checked,
+
+.obligation-type-panel
+.mat-pseudo-checkbox-checked,
+
+.obligation-status-panel
+.mat-pseudo-checkbox-checked {
+
+  --mat-pseudo-checkbox-full-selected-icon-color: #ffffff;
+
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: #ffffff;
+}
+
+/* =========================================
+   CONTRACTIQ RENEWAL DROPDOWN
+   ========================================= */
+
+.renewal-select-panel,
+.renewal-status-panel {
+  background: #ffffff !important;
+
+  border: 1px solid #dbe3ef !important;
+
+  border-radius: 10px !important;
+
+  padding: 6px !important;
+
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.16),
+    0 4px 10px rgba(15, 23, 42, 0.08) !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Normal option */
+
+.renewal-select-panel .mat-mdc-option,
+.renewal-status-panel .mat-mdc-option {
+  min-height: 48px !important;
+
+  margin: 2px 0 !important;
+
+  padding: 0 14px !important;
+
+  border-radius: 7px !important;
+
+  background: #ffffff !important;
+
+  color: #1f2937 !important;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif !important;
+
+  font-size: 14px !important;
+}
+
+
+/* Normal text */
+
+.renewal-select-panel
+.mat-mdc-option
+.mdc-list-item__primary-text,
+
+.renewal-status-panel
+.mat-mdc-option
+.mdc-list-item__primary-text {
+  color: #1f2937 !important;
+}
+
+
+/* Hover */
+
+.renewal-select-panel
+.mat-mdc-option:hover:not(.mdc-list-item--disabled),
+
+.renewal-status-panel
+.mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background: #eff6ff !important;
+
+  color: #1d4ed8 !important;
+}
+
+
+/* Selected */
+
+.renewal-select-panel
+.mat-mdc-option[aria-selected="true"],
+
+.renewal-status-panel
+.mat-mdc-option[aria-selected="true"] {
+  background: #2563eb !important;
+
+  color: #ffffff !important;
+}
+
+
+/* Selected text */
+
+.renewal-select-panel
+.mat-mdc-option[aria-selected="true"]
+.mdc-list-item__primary-text,
+
+.renewal-status-panel
+.mat-mdc-option[aria-selected="true"]
+.mdc-list-item__primary-text {
+  color: #ffffff !important;
+
+  font-weight: 600 !important;
+}
+
+
+/* Selected hover */
+
+.renewal-select-panel
+.mat-mdc-option[aria-selected="true"]:hover,
+
+.renewal-status-panel
+.mat-mdc-option[aria-selected="true"]:hover {
+  background: #1d4ed8 !important;
+}
+
+
+/* Contract option text */
+
+.renewal-select-panel
+.contract-option {
+  background: transparent !important;
+}
+
+.renewal-select-panel
+.contract-option strong {
+  color: inherit !important;
+
+  font-weight: 650;
+}
+
+.renewal-select-panel
+.contract-option span {
+  color: #64748b !important;
+}
+
+
+/* Selected contract option */
+
+.renewal-select-panel
+.mat-mdc-option[aria-selected="true"]
+.contract-option span {
+  color: #dbeafe !important;
+}

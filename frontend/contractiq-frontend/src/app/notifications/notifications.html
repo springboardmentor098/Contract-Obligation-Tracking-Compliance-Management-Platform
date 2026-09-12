@@ -1,0 +1,353 @@
+<div class="notifications-page">
+
+  <!-- =========================
+       PAGE HEADER
+  ========================== -->
+
+  <div class="page-header">
+
+    <div class="header-content">
+
+      <h1>Notifications</h1>
+
+      <p>
+        Stay updated with contract, obligation, compliance,
+        and renewal alerts.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="retry()"
+      [disabled]="loading">
+
+      <mat-icon>refresh</mat-icon>
+
+      <span>
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       LOADING
+  ========================== -->
+
+  @if (loading) {
+
+    <div class="state-card">
+
+      <mat-icon class="state-icon">
+        hourglass_empty
+      </mat-icon>
+
+      <h3>
+        Loading notifications...
+      </h3>
+
+      <p>
+        Please wait while we fetch your latest notifications.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- =========================
+       ERROR
+  ========================== -->
+
+  @if (!loading && errorMessage) {
+
+    <div class="state-card error-state">
+
+      <mat-icon class="state-icon">
+        error_outline
+      </mat-icon>
+
+      <h3>
+        Unable to load notifications
+      </h3>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="retry()">
+
+        <mat-icon>
+          refresh
+        </mat-icon>
+
+        Try Again
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- =========================
+       EMPTY
+  ========================== -->
+
+  @if (!loading && !errorMessage && isEmpty) {
+
+    <div class="state-card empty-state">
+
+      <mat-icon class="state-icon">
+        notifications_none
+      </mat-icon>
+
+      <h3>
+        No Notifications
+      </h3>
+
+      <p>
+        You don't have any notifications at the moment.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- =========================
+       MAIN CONTENT
+  ========================== -->
+
+  @if (!loading && !errorMessage && !isEmpty) {
+
+    <div class="notification-summary">
+
+      <div class="summary-info">
+
+        <mat-icon>
+          notifications
+        </mat-icon>
+
+        <div>
+
+          <strong>
+            {{ notifications.length }}
+          </strong>
+
+          <span>
+            Total Notifications
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="summary-info unread-summary">
+
+        <mat-icon>
+          mark_email_unread
+        </mat-icon>
+
+        <div>
+
+          <strong>
+            {{ getUnreadCount() }}
+          </strong>
+
+          <span>
+            Unread
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="mark-all-button"
+        (click)="markAllAsRead()"
+        [disabled]="markingAllAsRead || getUnreadCount() === 0">
+
+        <mat-icon>
+          done_all
+        </mat-icon>
+
+        <span>
+          {{ markingAllAsRead ? 'Updating...' : 'Mark All as Read' }}
+        </span>
+
+      </button>
+
+    </div>
+
+
+    <!-- =========================
+         NOTIFICATION LIST
+    ========================== -->
+
+    <div class="notification-list">
+
+      @for (
+        notification of notifications;
+        track notification.id
+      ) {
+
+        <mat-card
+          class="notification-card"
+          [class.unread-card]="notification.status === 'Unread'">
+
+
+          <!-- ICON -->
+
+          <div
+            class="notification-icon"
+            [ngClass]="getNotificationClass(notification.notification_type)">
+
+            <mat-icon>
+              {{ getNotificationIcon(notification.notification_type) }}
+            </mat-icon>
+
+          </div>
+
+
+          <!-- CONTENT -->
+
+          <div class="notification-content">
+
+            <div class="notification-top">
+
+              <div>
+
+                <span class="notification-type">
+                  {{ notification.notification_type }}
+                </span>
+
+                <h3>
+                  {{ notification.title }}
+                </h3>
+
+              </div>
+
+
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(notification.status)">
+
+                {{ notification.status }}
+
+              </span>
+
+            </div>
+
+
+            <p class="notification-message">
+              {{ notification.message }}
+            </p>
+
+
+            <div class="notification-meta">
+
+              <span>
+
+                <mat-icon>
+                  schedule
+                </mat-icon>
+
+                {{ notification.created_at | date:'medium' }}
+
+              </span>
+
+
+              @if (notification.contract_id) {
+
+                <span>
+
+                  <mat-icon>
+                    description
+                  </mat-icon>
+
+                  Contract ID:
+                  {{ notification.contract_id }}
+
+                </span>
+
+              }
+
+
+              @if (notification.obligation_id) {
+
+                <span>
+
+                  <mat-icon>
+                    task_alt
+                  </mat-icon>
+
+                  Obligation ID:
+                  {{ notification.obligation_id }}
+
+                </span>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <!-- ACTION -->
+
+          @if (notification.status === 'Unread') {
+
+            <button
+              type="button"
+              class="read-button"
+              (click)="markAsRead(notification)"
+              [disabled]="markingAsRead">
+
+              <mat-icon>
+                done
+              </mat-icon>
+
+              <span>
+                Mark as Read
+              </span>
+
+            </button>
+
+          }
+
+          @else {
+
+            <div class="read-indicator">
+
+              <mat-icon>
+                check_circle
+              </mat-icon>
+
+              Read
+
+            </div>
+
+          }
+
+        </mat-card>
+
+      }
+
+    </div>
+
+  }
+
+</div>

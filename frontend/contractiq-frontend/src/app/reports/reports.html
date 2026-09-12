@@ -1,0 +1,1265 @@
+<div class="reports-page">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <div class="page-header">
+
+    <div class="header-content">
+
+      <div class="title-row">
+        <div class="title-icon">
+          <mat-icon>analytics</mat-icon>
+        </div>
+
+        <div>
+          <h1>Reports & Analytics</h1>
+
+          <p>
+            Analyze contracts, obligations, renewals, compliance,
+            and overall business risk.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+
+    <button
+      mat-stroked-button
+      type="button"
+      class="refresh-button"
+      (click)="refresh()"
+      [disabled]="loading">
+
+      <mat-icon>
+        refresh
+      </mat-icon>
+
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  @if (errorMessage) {
+
+    <div class="error-card">
+
+      <div class="error-icon">
+        <mat-icon>error_outline</mat-icon>
+      </div>
+
+      <div class="error-content">
+
+        <h3>
+          Unable to load reports
+        </h3>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="retry()">
+
+        <mat-icon>refresh</mat-icon>
+
+        Try Again
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  @if (loading) {
+
+    <div class="loading-card">
+
+      <mat-icon class="loading-icon">
+        hourglass_empty
+      </mat-icon>
+
+      <h3>
+        Loading reports...
+      </h3>
+
+      <p>
+        Fetching the latest analytics from ContractIQ.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+  ====================================================== -->
+
+  @if (!loading && !errorMessage) {
+
+
+    <!-- ===================================================
+         REPORT OVERVIEW CARDS
+    ==================================================== -->
+
+    <div class="section-title">
+
+      <div>
+        <h2>Report Overview</h2>
+
+        <p>
+          Current statistics across the ContractIQ platform.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="overview-grid">
+
+
+      <!-- CONTRACTS -->
+
+      @if (contractSummary) {
+
+        <mat-card class="overview-card contracts-card">
+
+          <div class="overview-icon">
+            <mat-icon>description</mat-icon>
+          </div>
+
+          <div class="overview-content">
+
+            <span class="overview-label">
+              Total Contracts
+            </span>
+
+            <strong>
+              {{ contractSummary.total_contracts }}
+            </strong>
+
+            <small>
+              {{ contractSummary.active_contracts }}
+              active contracts
+            </small>
+
+          </div>
+
+        </mat-card>
+
+      }
+
+
+      <!-- OBLIGATIONS -->
+
+      @if (obligationSummary) {
+
+        <mat-card class="overview-card obligations-card">
+
+          <div class="overview-icon">
+            <mat-icon>assignment</mat-icon>
+          </div>
+
+          <div class="overview-content">
+
+            <span class="overview-label">
+              Total Obligations
+            </span>
+
+            <strong>
+              {{ obligationSummary.total_obligations }}
+            </strong>
+
+            <small>
+              {{ obligationSummary.pending_obligations }}
+              pending
+            </small>
+
+          </div>
+
+        </mat-card>
+
+      }
+
+
+      <!-- RENEWALS -->
+
+      @if (renewalSummary) {
+
+        <mat-card class="overview-card renewals-card">
+
+          <div class="overview-icon">
+            <mat-icon>autorenew</mat-icon>
+          </div>
+
+          <div class="overview-content">
+
+            <span class="overview-label">
+              Renewals
+            </span>
+
+            <strong>
+              {{ renewalSummary.upcoming }}
+            </strong>
+
+            <small>
+              upcoming renewals
+            </small>
+
+          </div>
+
+        </mat-card>
+
+      }
+
+
+      <!-- COMPLIANCE -->
+
+      @if (complianceSummary) {
+
+        <mat-card class="overview-card compliance-card">
+
+          <div class="overview-icon">
+            <mat-icon>verified_user</mat-icon>
+          </div>
+
+          <div class="overview-content">
+
+            <span class="overview-label">
+              Compliance Score
+            </span>
+
+            <strong>
+              {{ complianceSummary.average_score | number:'1.0-2' }}%
+            </strong>
+
+            <small>
+              {{ complianceSummary.compliant }}
+              compliant contracts
+            </small>
+
+          </div>
+
+        </mat-card>
+
+      }
+
+    </div>
+
+
+    <!-- ===================================================
+         CONTRACT REPORT
+    ==================================================== -->
+
+    @if (contractSummary) {
+
+      <mat-card class="report-card">
+
+        <div class="report-header">
+
+          <div class="report-title">
+
+            <div class="report-icon contracts-icon">
+              <mat-icon>description</mat-icon>
+            </div>
+
+            <div>
+
+              <h2>
+                Contract Analytics
+              </h2>
+
+              <p>
+                Contract status and category distribution.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="download-buttons">
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="pdf-button"
+              (click)="downloadContractPdf()"
+              [disabled]="downloading === 'contract-pdf'">
+
+              <mat-icon>picture_as_pdf</mat-icon>
+
+              {{
+                downloading === 'contract-pdf'
+                  ? 'Downloading...'
+                  : 'PDF'
+              }}
+
+            </button>
+
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="excel-button"
+              (click)="downloadContractExcel()"
+              [disabled]="downloading === 'contract-excel'">
+
+              <mat-icon>table_view</mat-icon>
+
+              {{
+                downloading === 'contract-excel'
+                  ? 'Downloading...'
+                  : 'Excel'
+              }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="stats-row">
+
+          <div class="stat-box">
+
+            <span>Total</span>
+
+            <strong>
+              {{ contractSummary.total_contracts }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Active</span>
+
+            <strong class="text-success">
+              {{ contractSummary.active_contracts }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Expired</span>
+
+            <strong class="text-danger">
+              {{ contractSummary.expired_contracts }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Pending Approval</span>
+
+            <strong class="text-warning">
+              {{ contractSummary.pending_approval_contracts }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="distribution-grid">
+
+
+          <!-- STATUS -->
+
+          <div class="distribution-section">
+
+            <h3>
+              Contracts by Status
+            </h3>
+
+            @if (
+              contractSummary.contracts_by_status
+              | keyvalue;
+              as statuses
+            ) {
+
+              @for (
+                item of statuses;
+                track item.key
+              ) {
+
+                <div class="distribution-item">
+
+                  <div class="distribution-label">
+
+                    <span>
+                      {{ item.key }}
+                    </span>
+
+                    <strong>
+                      {{ item.value }}
+                    </strong>
+
+                  </div>
+
+                  <div class="progress-track">
+
+                    <div
+                      class="progress-fill"
+                      [ngClass]="getStatusClass(item.key)"
+                      [style.width.%]="
+                        contractSummary.total_contracts > 0
+                          ? (item.value / contractSummary.total_contracts) * 100
+                          : 0
+                      ">
+                    </div>
+
+                  </div>
+
+                </div>
+
+              }
+
+            }
+
+          </div>
+
+
+          <!-- CATEGORY -->
+
+          <div class="distribution-section">
+
+            <h3>
+              Contracts by Category
+            </h3>
+
+            @for (
+              item of contractSummary.contracts_by_category
+              | keyvalue;
+              track item.key
+            ) {
+
+              <div class="distribution-item">
+
+                <div class="distribution-label">
+
+                  <span>
+                    {{ item.key }}
+                  </span>
+
+                  <strong>
+                    {{ item.value }}
+                  </strong>
+
+                </div>
+
+                <div class="progress-track">
+
+                  <div
+                    class="progress-fill category-fill"
+                    [style.width.%]="
+                      contractSummary.total_contracts > 0
+                        ? (item.value / contractSummary.total_contracts) * 100
+                        : 0
+                    ">
+                  </div>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        </div>
+
+      </mat-card>
+
+    }
+
+
+    <!-- ===================================================
+         OBLIGATION REPORT
+    ==================================================== -->
+
+    @if (obligationSummary) {
+
+      <mat-card class="report-card">
+
+        <div class="report-header">
+
+          <div class="report-title">
+
+            <div class="report-icon obligations-icon">
+              <mat-icon>assignment</mat-icon>
+            </div>
+
+            <div>
+
+              <h2>
+                Obligation Analytics
+              </h2>
+
+              <p>
+                Monitor obligation progress and overdue items.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="download-buttons">
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="pdf-button"
+              (click)="downloadObligationPdf()"
+              [disabled]="downloading === 'obligation-pdf'">
+
+              <mat-icon>picture_as_pdf</mat-icon>
+
+              {{
+                downloading === 'obligation-pdf'
+                  ? 'Downloading...'
+                  : 'PDF'
+              }}
+
+            </button>
+
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="excel-button"
+              (click)="downloadObligationExcel()"
+              [disabled]="downloading === 'obligation-excel'">
+
+              <mat-icon>table_view</mat-icon>
+
+              {{
+                downloading === 'obligation-excel'
+                  ? 'Downloading...'
+                  : 'Excel'
+              }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="stats-row">
+
+          <div class="stat-box">
+
+            <span>Total</span>
+
+            <strong>
+              {{ obligationSummary.total_obligations }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Pending</span>
+
+            <strong class="text-warning">
+              {{ obligationSummary.pending_obligations }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Completed</span>
+
+            <strong class="text-success">
+              {{ obligationSummary.completed_obligations }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Overdue</span>
+
+            <strong class="text-danger">
+              {{ obligationSummary.overdue_obligations }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="single-distribution">
+
+          <h3>
+            Obligations by Status
+          </h3>
+
+          @for (
+            item of obligationSummary.obligations_by_status
+            | keyvalue;
+            track item.key
+          ) {
+
+            <div class="distribution-item">
+
+              <div class="distribution-label">
+
+                <span>
+                  {{ item.key }}
+                </span>
+
+                <strong>
+                  {{ item.value }}
+                </strong>
+
+              </div>
+
+              <div class="progress-track">
+
+                <div
+                  class="progress-fill"
+                  [ngClass]="getObligationStatusClass(item.key)"
+                  [style.width.%]="
+                    obligationSummary.total_obligations > 0
+                      ? (item.value / obligationSummary.total_obligations) * 100
+                      : 0
+                  ">
+                </div>
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      </mat-card>
+
+    }
+
+
+    <!-- ===================================================
+         RENEWAL REPORT
+    ==================================================== -->
+
+    @if (renewalSummary) {
+
+      <mat-card class="report-card">
+
+        <div class="report-header">
+
+          <div class="report-title">
+
+            <div class="report-icon renewals-icon">
+              <mat-icon>autorenew</mat-icon>
+            </div>
+
+            <div>
+
+              <h2>
+                Renewal Analytics
+              </h2>
+
+              <p>
+                Track upcoming and completed contract renewals.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="download-buttons">
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="pdf-button"
+              (click)="downloadRenewalPdf()"
+              [disabled]="downloading === 'renewal-pdf'">
+
+              <mat-icon>picture_as_pdf</mat-icon>
+
+              {{
+                downloading === 'renewal-pdf'
+                  ? 'Downloading...'
+                  : 'PDF'
+              }}
+
+            </button>
+
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="excel-button"
+              (click)="downloadRenewalExcel()"
+              [disabled]="downloading === 'renewal-excel'">
+
+              <mat-icon>table_view</mat-icon>
+
+              {{
+                downloading === 'renewal-excel'
+                  ? 'Downloading...'
+                  : 'Excel'
+              }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="stats-row">
+
+          <div class="stat-box">
+
+            <span>Upcoming</span>
+
+            <strong class="text-warning">
+              {{ renewalSummary.upcoming }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>In Progress</span>
+
+            <strong>
+              {{ renewalSummary.in_progress }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Renewed</span>
+
+            <strong class="text-success">
+              {{ renewalSummary.renewed }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Expired</span>
+
+            <strong class="text-danger">
+              {{ renewalSummary.expired }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        @if (renewalSummary.upcoming_contracts.length > 0) {
+
+          <div class="renewal-table-wrapper">
+
+            <h3>
+              Upcoming Renewals
+            </h3>
+
+            <table class="renewal-table">
+
+              <thead>
+
+                <tr>
+                  <th>Contract</th>
+                  <th>Expiry Date</th>
+                  <th>Days Remaining</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                @for (
+                  renewal of renewalSummary.upcoming_contracts;
+                  track renewal.contract_id
+                ) {
+
+                  <tr>
+
+                    <td>
+                      <strong>
+                        {{ renewal.contract_number }}
+                      </strong>
+                    </td>
+
+                    <td>
+                      {{ renewal.expiry_date | date:'dd MMM yyyy' }}
+                    </td>
+
+                    <td>
+
+                      <span
+                        class="days-badge"
+                        [class.urgent]="renewal.days_remaining <= 30">
+
+                        {{ renewal.days_remaining }} days
+
+                      </span>
+
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
+
+        @if (renewalSummary.upcoming_contracts.length === 0) {
+
+          <div class="mini-empty">
+
+            <mat-icon>
+              event_available
+            </mat-icon>
+
+            <span>
+              No upcoming renewals.
+            </span>
+
+          </div>
+
+        }
+
+      </mat-card>
+
+    }
+
+
+    <!-- ===================================================
+         COMPLIANCE REPORT
+    ==================================================== -->
+
+    @if (complianceSummary) {
+
+      <mat-card class="report-card">
+
+        <div class="report-header">
+
+          <div class="report-title">
+
+            <div class="report-icon compliance-icon">
+              <mat-icon>verified_user</mat-icon>
+            </div>
+
+            <div>
+
+              <h2>
+                Compliance Analytics
+              </h2>
+
+              <p>
+                Overall contract compliance and risk indicators.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="download-buttons">
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="pdf-button"
+              (click)="downloadCompliancePdf()"
+              [disabled]="downloading === 'compliance-pdf'">
+
+              <mat-icon>picture_as_pdf</mat-icon>
+
+              {{
+                downloading === 'compliance-pdf'
+                  ? 'Downloading...'
+                  : 'PDF'
+              }}
+
+            </button>
+
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="excel-button"
+              (click)="downloadComplianceExcel()"
+              [disabled]="downloading === 'compliance-excel'">
+
+              <mat-icon>table_view</mat-icon>
+
+              {{
+                downloading === 'compliance-excel'
+                  ? 'Downloading...'
+                  : 'Excel'
+              }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="compliance-score-section">
+
+          <div class="score-info">
+
+            <span>
+              Average Compliance Score
+            </span>
+
+            <strong
+              [ngClass]="getScoreClass(
+                complianceSummary.average_score
+              )">
+
+              {{ complianceSummary.average_score | number:'1.0-2' }}%
+
+            </strong>
+
+          </div>
+
+
+          <div class="score-track">
+
+            <div
+              class="score-fill"
+              [ngClass]="getScoreClass(
+                complianceSummary.average_score
+              )"
+              [style.width.%]="
+                complianceSummary.average_score
+              ">
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="stats-row">
+
+          <div class="stat-box">
+
+            <span>Total</span>
+
+            <strong>
+              {{ complianceSummary.total_contracts }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Compliant</span>
+
+            <strong class="text-success">
+              {{ complianceSummary.compliant }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>Non-Compliant</span>
+
+            <strong class="text-danger">
+              {{ complianceSummary.non_compliant }}
+            </strong>
+
+          </div>
+
+
+          <div class="stat-box">
+
+            <span>High Risk</span>
+
+            <strong class="text-danger">
+              {{ complianceSummary.high_risk }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </mat-card>
+
+    }
+
+
+    <!-- ===================================================
+         RISK REPORT
+    ==================================================== -->
+
+    <mat-card class="report-card">
+
+      <div class="report-header">
+
+        <div class="report-title">
+
+          <div class="report-icon risk-icon">
+            <mat-icon>warning</mat-icon>
+          </div>
+
+          <div>
+
+            <h2>
+              Risk Analysis
+            </h2>
+
+            <p>
+              Contracts requiring risk monitoring or attention.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      @if (riskData.length > 0) {
+
+        <div class="risk-table-wrapper">
+
+          <table class="risk-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Contract
+                </th>
+
+                <th>
+                  Risk Level
+                </th>
+
+                <th>
+                  Overdue Obligations
+                </th>
+
+                <th>
+                  Compliance Score
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                risk of riskData;
+                track risk.contract_id
+              ) {
+
+                <tr>
+
+                  <td>
+
+                    <div class="contract-cell">
+
+                      <strong>
+                        {{ risk.contract_number }}
+                      </strong>
+
+                      <small>
+                        Contract ID: {{ risk.contract_id }}
+                      </small>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="risk-badge"
+                      [ngClass]="getRiskClass(risk.risk_level)">
+
+                      <mat-icon>
+
+                        @if (risk.risk_level === 'High') {
+                          error
+                        }
+                        @else if (risk.risk_level === 'Medium') {
+                          warning
+                        }
+                        @else {
+                          check_circle
+                        }
+
+                      </mat-icon>
+
+                      {{ risk.risk_level }}
+
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="overdue-number"
+                      [class.has-overdue]="
+                        risk.overdue_obligations > 0
+                      ">
+
+                      {{ risk.overdue_obligations }}
+
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="score-number"
+                      [ngClass]="
+                        getScoreClass(risk.compliance_score)
+                      ">
+
+                      {{
+                        risk.compliance_score
+                        | number:'1.0-2'
+                      }}%
+
+                    </span>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      }
+
+
+      @if (riskData.length === 0) {
+
+        <div class="mini-empty">
+
+          <mat-icon>
+            verified_user
+          </mat-icon>
+
+          <span>
+            No risk records found.
+          </span>
+
+        </div>
+
+      }
+
+    </mat-card>
+
+
+    <!-- ===================================================
+         NO DATA
+    ==================================================== -->
+
+    @if (
+      !contractSummary &&
+      !obligationSummary &&
+      !renewalSummary &&
+      !complianceSummary &&
+      riskData.length === 0
+    ) {
+
+      <mat-card class="empty-card">
+
+        <mat-icon>
+          analytics
+        </mat-icon>
+
+        <h3>
+          No Report Data
+        </h3>
+
+        <p>
+          There is currently no report information available.
+        </p>
+
+        <button
+          mat-raised-button
+          type="button"
+          (click)="retry()">
+
+          <mat-icon>
+            refresh
+          </mat-icon>
+
+          Try Again
+
+        </button>
+
+      </mat-card>
+
+    }
+
+  }
+
+</div>

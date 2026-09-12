@@ -1,0 +1,625 @@
+<div class="compliance-page">
+
+  <!-- =========================
+       PAGE HEADER
+  ========================== -->
+
+  <div class="page-header">
+
+    <div class="header-content">
+
+      <h1>Compliance Management</h1>
+
+      <p>
+        Monitor contract compliance, risks, and obligation performance.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="retry()"
+      [disabled]="loading">
+
+      <mat-icon>refresh</mat-icon>
+
+      <span>
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </span>
+
+    </button>
+
+  </div>
+
+
+
+  <!-- =========================
+       LOADING STATE
+  ========================== -->
+
+  @if (loading) {
+
+    <div class="state-card">
+
+      <mat-icon class="state-icon">
+        hourglass_empty
+      </mat-icon>
+
+      <h3>
+        Loading compliance data...
+      </h3>
+
+      <p>
+        Please wait while we fetch the latest compliance information.
+      </p>
+
+    </div>
+
+  }
+
+
+
+  <!-- =========================
+       ERROR STATE
+  ========================== -->
+
+  @if (!loading && errorMessage) {
+
+    <div class="state-card error-state">
+
+      <mat-icon class="state-icon">
+        error_outline
+      </mat-icon>
+
+      <h3>
+        Unable to load compliance data
+      </h3>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="retry()">
+
+        <mat-icon>
+          refresh
+        </mat-icon>
+
+        Try Again
+
+      </button>
+
+    </div>
+
+  }
+
+
+
+  <!-- =========================
+       MAIN CONTENT
+  ========================== -->
+
+  @if (!loading && !errorMessage && summary) {
+
+
+    <!-- =========================
+         SUMMARY CARDS
+    ========================== -->
+
+    <div class="summary-grid">
+
+
+      <!-- TOTAL -->
+
+      <mat-card class="summary-card total-card">
+
+        <div class="card-icon">
+
+          <mat-icon>
+            assessment
+          </mat-icon>
+
+        </div>
+
+
+        <div class="card-content">
+
+          <span class="card-label">
+            Total Contracts
+          </span>
+
+          <strong>
+            {{ summary.total }}
+          </strong>
+
+          <small>
+            Contracts evaluated
+          </small>
+
+        </div>
+
+      </mat-card>
+
+
+
+      <!-- COMPLIANT -->
+
+      <mat-card class="summary-card compliant-card">
+
+        <div class="card-icon">
+
+          <mat-icon>
+            check_circle
+          </mat-icon>
+
+        </div>
+
+
+        <div class="card-content">
+
+          <span class="card-label">
+            Compliant
+          </span>
+
+          <strong>
+            {{ summary.compliant }}
+          </strong>
+
+          <small>
+            Compliant contracts
+          </small>
+
+        </div>
+
+      </mat-card>
+
+
+
+      <!-- PENDING -->
+
+      <mat-card class="summary-card pending-card">
+
+        <div class="card-icon">
+
+          <mat-icon>
+            pending
+          </mat-icon>
+
+        </div>
+
+
+        <div class="card-content">
+
+          <span class="card-label">
+            Pending
+          </span>
+
+          <strong>
+            {{ summary.pending }}
+          </strong>
+
+          <small>
+            Pending compliance
+          </small>
+
+        </div>
+
+      </mat-card>
+
+
+
+      <!-- DELAYED -->
+
+      <mat-card class="summary-card delayed-card">
+
+        <div class="card-icon">
+
+          <mat-icon>
+            schedule
+          </mat-icon>
+
+        </div>
+
+
+        <div class="card-content">
+
+          <span class="card-label">
+            Delayed
+          </span>
+
+          <strong>
+            {{ summary.delayed }}
+          </strong>
+
+          <small>
+            Delayed contracts
+          </small>
+
+        </div>
+
+      </mat-card>
+
+
+
+      <!-- NON COMPLIANT -->
+
+      <mat-card class="summary-card non-compliant-card">
+
+        <div class="card-icon">
+
+          <mat-icon>
+            cancel
+          </mat-icon>
+
+        </div>
+
+
+        <div class="card-content">
+
+          <span class="card-label">
+            Non-Compliant
+          </span>
+
+          <strong>
+            {{ summary.non_compliant }}
+          </strong>
+
+          <small>
+            Require attention
+          </small>
+
+        </div>
+
+      </mat-card>
+
+
+
+      <!-- HIGH RISK -->
+
+      <mat-card class="summary-card high-risk-card">
+
+        <div class="card-icon">
+
+          <mat-icon>
+            warning
+          </mat-icon>
+
+        </div>
+
+
+        <div class="card-content">
+
+          <span class="card-label">
+            High Risk
+          </span>
+
+          <strong>
+            {{ summary.high_risk }}
+          </strong>
+
+          <small>
+            High-risk contracts
+          </small>
+
+        </div>
+
+      </mat-card>
+
+    </div>
+
+
+
+    <!-- =========================
+         AVERAGE SCORE
+    ========================== -->
+
+    <mat-card class="score-card">
+
+      <div class="score-header">
+
+        <div>
+
+          <h2>
+            Average Compliance Score
+          </h2>
+
+          <p>
+            Overall compliance performance across evaluated contracts.
+          </p>
+
+        </div>
+
+
+        <div
+          class="score-value"
+          [ngClass]="getScoreClass(summary.average_score)">
+
+          {{ summary.average_score | number:'1.0-2' }}%
+
+        </div>
+
+      </div>
+
+
+      <div class="score-progress">
+
+        <div
+          class="score-progress-fill"
+          [ngClass]="getScoreClass(summary.average_score)"
+          [style.width.%]="summary.average_score">
+        </div>
+
+      </div>
+
+
+      <div class="score-footer">
+
+        <span>0%</span>
+
+        <span>50%</span>
+
+        <span>100%</span>
+
+      </div>
+
+    </mat-card>
+
+
+
+    <!-- =========================
+         RISK TABLE
+    ========================== -->
+
+    @if (riskData.length > 0) {
+
+      <mat-card class="risk-card">
+
+        <div class="section-header">
+
+          <div>
+
+            <h2>
+              Risk & Compliance Details
+            </h2>
+
+            <p>
+              Contracts requiring compliance monitoring or attention.
+            </p>
+
+          </div>
+
+
+          <span class="record-count">
+
+            {{ riskData.length }}
+
+            record{{ riskData.length === 1 ? '' : 's' }}
+
+          </span>
+
+        </div>
+
+
+
+        <div class="table-wrapper">
+
+          <table class="risk-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Contract
+                </th>
+
+                <th>
+                  Risk Level
+                </th>
+
+                <th>
+                  Overdue Obligations
+                </th>
+
+                <th>
+                  Compliance Score
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                risk of riskData;
+                track risk.contract_id
+              ) {
+
+                <tr>
+
+
+                  <!-- CONTRACT -->
+
+                  <td>
+
+                    <div class="contract-info">
+
+                      <span class="contract-number">
+                        {{ risk.contract_number }}
+                      </span>
+
+                      <span class="contract-id">
+                        Contract ID: {{ risk.contract_id }}
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+
+                  <!-- RISK -->
+
+                  <td>
+
+                    <span
+                      class="risk-badge"
+                      [ngClass]="getRiskClass(risk.risk_level)">
+
+
+                      @if (risk.risk_level === 'High') {
+
+                        <mat-icon>
+                          error
+                        </mat-icon>
+
+                      }
+
+                      @else if (risk.risk_level === 'Medium') {
+
+                        <mat-icon>
+                          warning
+                        </mat-icon>
+
+                      }
+
+                      @else {
+
+                        <mat-icon>
+                          check_circle
+                        </mat-icon>
+
+                      }
+
+
+                      {{ risk.risk_level }}
+
+                    </span>
+
+                  </td>
+
+
+
+                  <!-- OVERDUE -->
+
+                  <td>
+
+                    <span
+                      class="overdue-count"
+                      [class.has-overdue]="risk.overdue_obligations > 0">
+
+                      {{ risk.overdue_obligations }}
+
+                    </span>
+
+                  </td>
+
+
+
+                  <!-- SCORE -->
+
+                  <td>
+
+                    <div class="table-score">
+
+                      <span
+                        class="score-number"
+                        [ngClass]="getScoreClass(risk.compliance_score)">
+
+                        {{ risk.compliance_score | number:'1.0-2' }}%
+
+                      </span>
+
+
+                      <div class="mini-progress">
+
+                        <div
+                          class="mini-progress-fill"
+                          [ngClass]="getScoreClass(risk.compliance_score)"
+                          [style.width.%]="risk.compliance_score">
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </mat-card>
+
+    }
+
+
+
+    <!-- =========================
+         NO RISK DATA
+    ========================== -->
+
+    @if (riskData.length === 0) {
+
+      <mat-card class="empty-card">
+
+        <mat-icon>
+          verified_user
+        </mat-icon>
+
+        <h3>
+          No Risk Records Found
+        </h3>
+
+        <p>
+          There are currently no contracts requiring risk attention.
+        </p>
+
+      </mat-card>
+
+    }
+
+  }
+
+
+
+  <!-- =========================
+       EMPTY SUMMARY
+  ========================== -->
+
+  @if (!loading && !errorMessage && isEmpty) {
+
+    <mat-card class="empty-card">
+
+      <mat-icon>
+        verified_user
+      </mat-icon>
+
+      <h3>
+        No Compliance Data
+      </h3>
+
+      <p>
+        There is currently no compliance information available.
+      </p>
+
+    </mat-card>
+
+  }
+
+</div>

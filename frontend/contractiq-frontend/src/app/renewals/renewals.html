@@ -1,0 +1,694 @@
+<div class="renewals-page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+
+    <div class="page-title">
+      <span class="page-eyebrow">CONTRACT MANAGEMENT</span>
+
+      <h1>Renewals</h1>
+
+      <p>
+        Track contract renewals, expiry dates and renewal status.
+      </p>
+    </div>
+
+    <button
+      mat-raised-button
+      class="create-button"
+      type="button"
+      (click)="openCreateForm()">
+
+      <mat-icon>add</mat-icon>
+      Create Renewal
+
+    </button>
+
+  </div>
+
+
+  <!-- CREATE RENEWAL -->
+  @if (showCreateForm) {
+
+    <mat-card class="create-card">
+
+      <div class="create-header">
+
+        <div class="create-heading">
+
+          <div class="create-icon">
+            <mat-icon>event_repeat</mat-icon>
+          </div>
+
+          <div>
+            <h2>Create Renewal</h2>
+
+            <p>
+              Add a new renewal record for a contract.
+            </p>
+          </div>
+
+        </div>
+
+        <button
+          mat-icon-button
+          type="button"
+          class="close-button"
+          (click)="closeCreateForm()">
+
+          <mat-icon>close</mat-icon>
+
+        </button>
+
+      </div>
+
+
+      <!-- SUCCESS -->
+      @if (createSuccess) {
+
+        <div class="success-message">
+
+          <mat-icon>check_circle</mat-icon>
+
+          <span>
+            {{ createSuccess }}
+          </span>
+
+        </div>
+
+      }
+
+
+      <!-- ERROR -->
+      @if (createError) {
+
+        <div class="form-error">
+
+          <mat-icon>error_outline</mat-icon>
+
+          <span>
+            {{ createError }}
+          </span>
+
+        </div>
+
+      }
+
+
+      <!-- FORM -->
+      <div class="create-form">
+
+        <!-- CONTRACT -->
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Contract</mat-label>
+
+          <mat-select
+            [(ngModel)]="newRenewal.contract_id"
+            panelClass="renewal-select-panel">
+
+            <mat-option [value]="0">
+              Select Contract
+            </mat-option>
+
+            @for (
+              contract of contracts;
+              track contract.id
+            ) {
+
+              <mat-option [value]="contract.id">
+
+                <div class="contract-option">
+
+                  <strong>
+                    {{ contract.contract_number }}
+                  </strong>
+
+                  <span>
+                    {{ contract.title }}
+                  </span>
+
+                </div>
+
+              </mat-option>
+
+            }
+
+          </mat-select>
+
+        </mat-form-field>
+
+
+        <!-- RENEWAL DATE -->
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Renewal Date</mat-label>
+
+          <input
+            matInput
+            type="date"
+            [(ngModel)]="newRenewal.renewal_date">
+
+        </mat-form-field>
+
+
+        <!-- PREVIOUS EXPIRY -->
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Previous Expiry Date</mat-label>
+
+          <input
+            matInput
+            type="date"
+            [(ngModel)]="newRenewal.previous_expiry_date">
+
+        </mat-form-field>
+
+
+        <!-- NEW EXPIRY -->
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>New Expiry Date</mat-label>
+
+          <input
+            matInput
+            type="date"
+            [(ngModel)]="newRenewal.new_expiry_date">
+
+        </mat-form-field>
+
+
+        <!-- ASSIGNED USER -->
+        <mat-form-field
+          appearance="outline"
+          class="form-field">
+
+          <mat-label>Assigned User ID</mat-label>
+
+          <input
+            matInput
+            type="number"
+            min="1"
+            [(ngModel)]="newRenewal.assigned_to"
+            placeholder="Enter user ID">
+
+        </mat-form-field>
+
+
+        <!-- NOTES -->
+        <mat-form-field
+          appearance="outline"
+          class="form-field full-width">
+
+          <mat-label>Notes</mat-label>
+
+          <textarea
+            matInput
+            rows="4"
+            [(ngModel)]="newRenewal.notes"
+            placeholder="Add renewal notes">
+          </textarea>
+
+        </mat-form-field>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+      <div class="form-actions">
+
+        <button
+          mat-stroked-button
+          type="button"
+          class="cancel-button"
+          (click)="closeCreateForm()">
+
+          Cancel
+
+        </button>
+
+        <button
+          mat-raised-button
+          type="button"
+          class="submit-button"
+          (click)="createRenewal()"
+          [disabled]="creating">
+
+          <mat-icon>
+            {{ creating ? 'hourglass_empty' : 'add' }}
+          </mat-icon>
+
+          <span>
+            {{ creating ? 'Creating...' : 'Create Renewal' }}
+          </span>
+
+        </button>
+
+      </div>
+
+    </mat-card>
+
+  }
+
+
+  <!-- RENEW ERROR -->
+  @if (renewError) {
+
+    <div class="form-error renewal-error">
+
+      <mat-icon>error_outline</mat-icon>
+
+      <span>
+        {{ renewError }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- FILTERS -->
+  <mat-card class="filter-card">
+
+    <div class="filters">
+
+      <!-- SEARCH -->
+      <mat-form-field
+        appearance="outline"
+        class="search-field">
+
+        <mat-label>Search renewals</mat-label>
+
+        <mat-icon matPrefix>
+          search
+        </mat-icon>
+
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="searchText"
+          (ngModelChange)="applyFilters()"
+          placeholder="Contract ID, status or notes">
+
+      </mat-form-field>
+
+
+      <!-- STATUS -->
+      <mat-form-field
+        appearance="outline"
+        class="status-field">
+
+        <mat-label>Status</mat-label>
+
+        <mat-select
+          [(ngModel)]="selectedStatus"
+          (selectionChange)="applyFilters()"
+          panelClass="renewal-status-panel">
+
+          <mat-option value="All">
+            All Statuses
+          </mat-option>
+
+          @for (
+            status of renewalStatuses;
+            track status
+          ) {
+
+            <mat-option [value]="status">
+              {{ status }}
+            </mat-option>
+
+          }
+
+        </mat-select>
+
+      </mat-form-field>
+
+
+      <!-- CLEAR -->
+      <button
+        mat-stroked-button
+        class="clear-button"
+        type="button"
+        (click)="clearFilters()">
+
+        <mat-icon>clear</mat-icon>
+
+        Clear
+
+      </button>
+
+    </div>
+
+  </mat-card>
+
+
+  <!-- LOADING -->
+  @if (loading) {
+
+    <mat-card class="state-container">
+
+      <div class="state-icon">
+        <mat-icon>sync</mat-icon>
+      </div>
+
+      <h3>Loading renewals...</h3>
+
+      <p>
+        Please wait while we fetch renewal records.
+      </p>
+
+    </mat-card>
+
+  }
+
+
+  <!-- ERROR -->
+  @if (!loading && errorMessage) {
+
+    <mat-card class="state-container error-state">
+
+      <div class="state-icon">
+        <mat-icon>error_outline</mat-icon>
+      </div>
+
+      <h3>Unable to load renewals</h3>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        mat-raised-button
+        type="button"
+        (click)="loadRenewals()">
+
+        Try Again
+
+      </button>
+
+    </mat-card>
+
+  }
+
+
+  <!-- EMPTY -->
+  @if (
+    !loading &&
+    !errorMessage &&
+    filteredRenewals.length === 0
+  ) {
+
+    <mat-card class="state-container">
+
+      <div class="state-icon">
+        <mat-icon>event_repeat</mat-icon>
+      </div>
+
+      <h3>No renewals found</h3>
+
+      @if (renewals.length === 0) {
+
+        <p>
+          There are no renewal records yet.
+        </p>
+
+        <button
+          mat-raised-button
+          type="button"
+          (click)="openCreateForm()">
+
+          Create Renewal
+
+        </button>
+
+      } @else {
+
+        <p>
+          No renewals match your current search or filter.
+        </p>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="clearFilters()">
+
+          Clear Filters
+
+        </button>
+
+      }
+
+    </mat-card>
+
+  }
+
+
+  <!-- TABLE -->
+  @if (
+    !loading &&
+    !errorMessage &&
+    filteredRenewals.length > 0
+  ) {
+
+    <mat-card class="table-card">
+
+      <div class="table-header">
+
+        <div class="table-title">
+
+          <div class="table-icon">
+            <mat-icon>event_repeat</mat-icon>
+          </div>
+
+          <div>
+            <h2>Renewal Records</h2>
+
+            <p>
+              Contract renewal information
+            </p>
+          </div>
+
+          <span class="count-badge">
+            {{ filteredRenewals.length }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Contract</th>
+              <th>Renewal Date</th>
+              <th>Previous Expiry</th>
+              <th>New Expiry</th>
+              <th>Assigned To</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              renewal of filteredRenewals;
+              track renewal.id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <div class="contract-cell">
+
+                    <span class="contract-id">
+                      #{{ renewal.contract_id }}
+                    </span>
+
+                    <span class="renewal-id">
+                      Renewal #{{ renewal.id }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <span class="date-cell">
+                    {{ renewal.renewal_date | date:'dd MMM yyyy' }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <span class="date-cell">
+                    {{ renewal.previous_expiry_date | date:'dd MMM yyyy' }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <div class="expiry-cell">
+
+                    <span
+                      class="date-cell"
+                      [class.expired-date]="isExpired(renewal)">
+
+                      {{ renewal.new_expiry_date | date:'dd MMM yyyy' }}
+
+                    </span>
+
+                    @if (isExpired(renewal)) {
+
+                      <span class="expired-label">
+                        Expired
+                      </span>
+
+                    }
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <span class="assigned-user">
+                    User #{{ renewal.assigned_to }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="status-badge"
+                    [ngClass]="getStatusClass(renewal.status)">
+
+                    {{ renewal.status }}
+
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <div class="notes-cell">
+
+                    <span
+                      class="notes-text"
+                      [title]="renewal.notes || 'No notes'">
+
+                      {{ renewal.notes || 'No notes' }}
+
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <div class="actions">
+
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="renew-button"
+                      [disabled]="
+                        renewingId === renewal.id ||
+                        renewal.status === 'Renewed' ||
+                        renewal.status === 'Cancelled'
+                      "
+                      [title]="
+                        renewal.status === 'Renewed'
+                          ? 'Already renewed'
+                          : renewal.status === 'Cancelled'
+                            ? 'Renewal cancelled'
+                            : 'Renew contract'
+                      "
+                      (click)="renewContract(renewal)">
+
+                      <mat-icon>
+                        {{
+                          renewingId === renewal.id
+                            ? 'hourglass_empty'
+                            : 'autorenew'
+                        }}
+                      </mat-icon>
+
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div class="table-footer">
+
+        <span>
+          Showing
+        </span>
+
+        <strong>
+          {{ filteredRenewals.length }}
+        </strong>
+
+        <span>
+          renewal(s)
+        </span>
+
+        @if (
+          filteredRenewals.length !== renewals.length
+        ) {
+
+          <span class="result-count">
+            of {{ renewals.length }} total
+          </span>
+
+        }
+
+      </div>
+
+    </mat-card>
+
+  }
+
+</div>

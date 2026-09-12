@@ -53,7 +53,6 @@
     <mat-card class="login-card">
 
       <!-- Login Header -->
-
       <div class="login-header">
 
         <div class="mobile-logo">
@@ -71,15 +70,13 @@
       </div>
 
 
-      <!-- Login Form -->
-
+      <!-- Reactive Login Form -->
       <form
+        [formGroup]="loginForm"
         (ngSubmit)="login()"
-        #loginForm="ngForm"
       >
 
         <!-- Email -->
-
         <mat-form-field
           appearance="outline"
           class="full-width"
@@ -90,18 +87,37 @@
           <input
             matInput
             type="email"
-            [(ngModel)]="username"
-            name="username"
+            formControlName="username"
             placeholder="Enter your email"
             autocomplete="email"
-            required
           />
+
+          @if (
+            loginForm.get('username')?.hasError('required')
+            && loginForm.get('username')?.touched
+          ) {
+
+            <mat-error>
+              Email is required.
+            </mat-error>
+
+          }
+
+          @if (
+            loginForm.get('username')?.hasError('email')
+            && loginForm.get('username')?.touched
+          ) {
+
+            <mat-error>
+              Please enter a valid email address.
+            </mat-error>
+
+          }
 
         </mat-form-field>
 
 
         <!-- Password -->
-
         <mat-form-field
           appearance="outline"
           class="full-width"
@@ -112,18 +128,37 @@
           <input
             matInput
             type="password"
-            [(ngModel)]="password"
-            name="password"
+            formControlName="password"
             placeholder="Enter your password"
             autocomplete="current-password"
-            required
           />
+
+          @if (
+            loginForm.get('password')?.hasError('required')
+            && loginForm.get('password')?.touched
+          ) {
+
+            <mat-error>
+              Password is required.
+            </mat-error>
+
+          }
+
+          @if (
+            loginForm.get('password')?.hasError('minlength')
+            && loginForm.get('password')?.touched
+          ) {
+
+            <mat-error>
+              Password must be at least 6 characters.
+            </mat-error>
+
+          }
 
         </mat-form-field>
 
 
-        <!-- Error -->
-
+        <!-- API Error -->
         @if (errorMessage) {
 
           <div class="error-message">
@@ -142,24 +177,37 @@
 
 
         <!-- Login Button -->
-
         <button
-          mat-flat-button
-          type="submit"
-          class="login-button"
-          [disabled]="!loginForm.valid"
-        >
+  mat-flat-button
+  type="submit"
+  class="login-button"
+  [disabled]="loginForm.invalid || loading"
+>
+  @if (loading) {
+    Signing In...
+  } @else {
+    Sign In
+  }
+</button>
 
-          Sign In
 
-        </button>
+<!-- Forgot Password -->
+<div class="forgot-password">
 
+  <button
+    type="button"
+    class="forgot-button"
+    (click)="forgotPassword()"
+  >
+    Forgot Password?
+  </button>
 
-      </form>
+</div>
+
+</form>
 
 
       <!-- Footer -->
-
       <div class="login-footer">
 
         <span>

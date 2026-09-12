@@ -1,0 +1,368 @@
+<div class="audit-page">
+
+  <!-- ================= HEADER ================= -->
+
+  <div class="page-header">
+
+    <div class="header-content">
+
+      <div class="title-icon">
+        <mat-icon>history</mat-icon>
+      </div>
+
+      <div>
+        <h1>Audit History</h1>
+
+        <p>
+          Track user actions, contract changes, and system activity.
+        </p>
+      </div>
+
+    </div>
+
+
+    <button
+      mat-stroked-button
+      class="refresh-button"
+      type="button"
+      (click)="refresh()"
+      [disabled]="loading">
+
+      <mat-icon>
+        refresh
+      </mat-icon>
+
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+
+    </button>
+
+  </div>
+
+
+  <!-- ================= ERROR ================= -->
+
+  @if (errorMessage) {
+
+    <div class="error-box">
+
+      <mat-icon>error_outline</mat-icon>
+
+      <div class="error-content">
+
+        <strong>
+          Unable to load audit history
+        </strong>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="retry()">
+
+        Retry
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- ================= LOADING ================= -->
+
+  @if (loading) {
+
+    <div class="state-card">
+
+      <div class="state-icon loading-icon">
+        <mat-icon>hourglass_empty</mat-icon>
+      </div>
+
+      <h2>
+        Loading audit history...
+      </h2>
+
+      <p>
+        Fetching the latest activity from ContractIQ.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- ================= EMPTY ================= -->
+
+  @if (!loading && !errorMessage && isEmpty) {
+
+    <div class="state-card">
+
+      <div class="state-icon empty-icon">
+        <mat-icon>history</mat-icon>
+      </div>
+
+      <h2>
+        No audit activity found
+      </h2>
+
+      <p>
+        There are no audit records available yet.
+      </p>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="refresh()">
+
+        <mat-icon>refresh</mat-icon>
+
+        Refresh
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- ================= AUDIT CONTENT ================= -->
+
+  @if (!loading && !errorMessage && !isEmpty) {
+
+    <div class="audit-card">
+
+      <!-- Card Header -->
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Activity History
+          </h2>
+
+          <p>
+            {{ auditLogs.length }}
+            {{ auditLogs.length === 1 ? 'activity' : 'activities' }}
+            recorded
+          </p>
+
+        </div>
+
+        <div class="total-badge">
+
+          <mat-icon>list_alt</mat-icon>
+
+          {{ auditLogs.length }}
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= TABLE ================= -->
+
+      <div class="table-wrapper">
+
+        <table class="audit-table">
+
+          <thead>
+
+            <tr>
+
+              <th>Action</th>
+
+              <th>Entity</th>
+
+              <th>Record ID</th>
+
+              <th>User</th>
+
+              <th>IP Address</th>
+
+              <th>Date & Time</th>
+
+              <th>Details</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (log of auditLogs; track log.id) {
+
+              <tr>
+
+                <!-- ACTION -->
+
+                <td>
+
+                  <div
+                    class="action-badge"
+                    [ngClass]="getActionClass(log.action)">
+
+                    <mat-icon>
+                      {{ getActionIcon(log.action) }}
+                    </mat-icon>
+
+                    <span>
+                      {{ formatAction(log.action) }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ENTITY -->
+
+                <td>
+
+                  <div class="entity-cell">
+
+                    <mat-icon>
+                      description
+                    </mat-icon>
+
+                    <span>
+                      {{ formatEntityType(log.entity_type) }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ENTITY ID -->
+
+                <td>
+
+                  @if (
+                    log.entity_id !== null &&
+                    log.entity_id !== undefined
+                  ) {
+
+                    <span class="record-id">
+                      #{{ log.entity_id }}
+                    </span>
+
+                  } @else {
+
+                    <span class="not-available">
+                      —
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <!-- USER -->
+
+                <td>
+
+                  @if (log.user_id !== null && log.user_id !== undefined) {
+
+                    <div class="user-cell">
+
+                      <div class="user-avatar">
+                        {{ log.user_id }}
+                      </div>
+
+                      <span>
+                        User #{{ log.user_id }}
+                      </span>
+
+                    </div>
+
+                  } @else {
+
+                    <span class="system-user">
+
+                      <mat-icon>
+                        computer
+                      </mat-icon>
+
+                      System
+
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <!-- IP ADDRESS -->
+
+                <td>
+
+                  @if (log.ip_address) {
+
+                    <span class="ip-address">
+                      {{ log.ip_address }}
+                    </span>
+
+                  } @else {
+
+                    <span class="not-available">
+                      —
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <!-- DATE -->
+
+                <td>
+
+                  <div class="date-cell">
+
+                    <strong>
+                      {{ log.created_at | date:'dd MMM yyyy' }}
+                    </strong>
+
+                    <span>
+                      {{ log.created_at | date:'hh:mm a' }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- DETAILS -->
+
+                <td>
+
+                  <span class="details-text">
+
+                    {{ formatDetails(log) }}
+
+                  </span>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

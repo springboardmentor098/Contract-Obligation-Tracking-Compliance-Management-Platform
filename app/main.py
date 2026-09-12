@@ -10,7 +10,7 @@ from app.routers.obligations import router as obligation_router
 from app.routers.renewals import router as renewal_router
 from app.routers.compliance import router as compliance_router
 from app.routers.notifications import router as notification_router
-
+from app.routers import audit
 from app.routers.reports import (
     router as report_router,
     dashboard_router
@@ -73,3 +73,4 @@ app.include_router(notification_router)
 
 app.include_router(report_router)
 app.include_router(dashboard_router)
+app.include_router(audit.router)

@@ -1,0 +1,108 @@
+<div class="app-layout">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-button" type="button">
+        ☰
+      </button>
+
+      <div class="brand">
+        <div class="brand-logo">CQ</div>
+        <div>
+          <h2>ContractIQ</h2>
+          <span>Contract Management Platform</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="user-info">
+        <strong>{{ userName }}</strong>
+        <span>{{ userRole }}</span>
+      </div>
+
+      <button class="logout-button" type="button" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </header>
+
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <nav class="navigation">
+
+        <a routerLink="/dashboard"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>📊</span>
+          <span>Dashboard</span>
+        </a>
+
+        <a routerLink="/contracts"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>📄</span>
+          <span>Contracts</span>
+        </a>
+
+        <a routerLink="/obligations"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>✅</span>
+          <span>Obligations</span>
+        </a>
+
+        <a routerLink="/renewals"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>🔄</span>
+          <span>Renewals</span>
+        </a>
+
+        <a routerLink="/compliance"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>🛡️</span>
+          <span>Compliance</span>
+        </a>
+
+        <a routerLink="/notifications"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>🔔</span>
+          <span>Notifications</span>
+        </a>
+
+        <a routerLink="/reports"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>📈</span>
+          <span>Reports</span>
+        </a>
+
+        <a routerLink="/audit-history"
+           routerLinkActive="active"
+           class="nav-item">
+          <span>📋</span>
+          <span>Audit History</span>
+        </a>
+
+      </nav>
+
+    </aside>
+
+
+    <!-- Content -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>
