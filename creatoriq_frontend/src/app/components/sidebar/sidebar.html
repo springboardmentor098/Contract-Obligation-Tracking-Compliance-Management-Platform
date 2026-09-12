@@ -1,0 +1,101 @@
+<aside class="sidebar">
+
+  
+
+  <nav class="sidebar-nav">
+
+    <!-- Dashboard -->
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+
+
+    <!-- Contracts -->
+    @if (canViewContracts()) {
+      <a
+        routerLink="/contracts"
+        routerLinkActive="active"
+        class="nav-item">
+        <span class="nav-icon">📄</span>
+        <span>Contracts</span>
+      </a>
+    }
+
+
+    <!-- Obligations -->
+    @if (canViewObligations()) {
+      <a
+        routerLink="/obligations"
+        routerLinkActive="active"
+        class="nav-item">
+        <span class="nav-icon">📌</span>
+        <span>Obligations</span>
+      </a>
+    }
+
+
+    <!-- Renewals -->
+    @if (canViewRenewals()) {
+      <a
+        routerLink="/renewals"
+        routerLinkActive="active"
+        class="nav-item">
+        <span class="nav-icon">🔄</span>
+        <span>Renewals</span>
+      </a>
+    }
+
+
+    <!-- Compliance -->
+    @if (canViewObligations()) {
+      <a
+        routerLink="/compliance"
+        routerLinkActive="active"
+        class="nav-item">
+        <span class="nav-icon">✓</span>
+        <span>Compliance</span>
+      </a>
+    }
+
+
+    <!-- Notifications -->
+    <a
+      routerLink="/notifications"
+      routerLinkActive="active"
+      class="nav-item">
+      <span class="nav-icon">🔔</span>
+      <span>Notifications</span>
+    </a>
+
+
+    <!-- Reports -->
+    @if (canViewReports()) {
+      <a
+        routerLink="/reports"
+        routerLinkActive="active"
+        class="nav-item">
+        <span class="nav-icon">📈</span>
+        <span>Reports</span>
+      </a>
+    }
+
+
+    <!-- Audit History -->
+    @if (canViewAuditHistory()) {
+      <a
+        routerLink="/audit-history"
+        routerLinkActive="active"
+        class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span>Audit History</span>
+      </a>
+    }
+
+  </nav>
+
+</aside>

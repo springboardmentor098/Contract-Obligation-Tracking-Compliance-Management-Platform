@@ -1,0 +1,144 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Contracts</h1>
+      <p>Manage and monitor contracts.</p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="loadContracts()">
+      Refresh
+    </button>
+  </div>
+
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="state-message">
+      <div class="loading-spinner"></div>
+      <p>Loading contracts...</p>
+    </div>
+  }
+
+
+  <!-- Error -->
+  @if (!loading && errorMessage) {
+    <div class="state-message error-state">
+
+      <div class="state-icon">⚠</div>
+
+      <h2>Unable to load contracts</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="loadContracts()">
+        Try Again
+      </button>
+
+    </div>
+  }
+
+
+  <!-- Empty -->
+  @if (!loading && !errorMessage && contracts.length === 0) {
+    <div class="state-message">
+
+      <div class="state-icon">📄</div>
+
+      <h2>No contracts found</h2>
+
+      <p>
+        There are currently no contracts available for your account.
+      </p>
+
+    </div>
+  }
+
+
+  <!-- Contract table -->
+  @if (!loading && !errorMessage && contracts.length > 0) {
+
+    <div class="table-card">
+
+      <div class="table-header">
+        <div>
+          <h2>Contract List</h2>
+          <span>{{ contracts.length }} contracts</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Contract Number</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (contract of contracts; track contract.id) {
+
+              <tr>
+
+                <td class="contract-number">
+                  {{ contract.contract_number }}
+                </td>
+
+                <td>
+                  {{ contract.title }}
+                </td>
+
+                <td>
+                  {{ contract.category }}
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.status-draft]="contract.status === 'Draft'"
+                    [class.status-review]="contract.status === 'Under Review'"
+                    [class.status-approved]="contract.status === 'Approved'"
+                    [class.status-active]="contract.status === 'Active'"
+                    [class.status-expired]="contract.status === 'Expired'"
+                    [class.status-terminated]="contract.status === 'Terminated'">
+                    {{ contract.status }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ contract.start_date || '—' }}
+                </td>
+
+                <td>
+                  {{ contract.end_date || '—' }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

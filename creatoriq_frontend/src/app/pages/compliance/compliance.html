@@ -1,0 +1,142 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Compliance</h1>
+      <p>Monitor contract compliance and risk.</p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="loadCompliance()">
+      Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="state-message">
+      <div class="loading-spinner"></div>
+      <p>Loading compliance records...</p>
+    </div>
+  }
+
+  @if (!loading && errorMessage) {
+    <div class="state-message error-state">
+      <div class="state-icon">⚠</div>
+
+      <h2>Unable to load compliance</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="loadCompliance()">
+        Try Again
+      </button>
+    </div>
+  }
+
+  @if (!loading && !errorMessage && complianceRecords.length === 0) {
+    <div class="state-message">
+      <div class="state-icon">✓</div>
+
+      <h2>No compliance records found</h2>
+
+      <p>
+        There are currently no compliance records available.
+      </p>
+    </div>
+  }
+
+  @if (!loading && !errorMessage && complianceRecords.length > 0) {
+    <div class="table-card">
+
+      <div class="table-header">
+        <div>
+          <h2>Compliance Overview</h2>
+          <span>{{ complianceRecords.length }} contracts evaluated</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+
+          <thead>
+            <tr>
+              <th>Contract Number</th>
+              <th>Compliance Status</th>
+              <th>Compliance Score</th>
+              <th>Overdue Obligations</th>
+              <th>Risk Level</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (record of complianceRecords; track record.contract_id) {
+              <tr>
+
+                <td class="contract-number">
+                  {{ record.contract_number }}
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.status-compliant]="record.compliance_status === 'Compliant'"
+                    [class.status-pending]="record.compliance_status === 'Pending'"
+                    [class.status-delayed]="record.compliance_status === 'Delayed'"
+                    [class.status-non-compliant]="record.compliance_status === 'Non-Compliant'">
+                    {{ record.compliance_status }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="score-container">
+
+                    <div class="score-bar">
+                      <div
+                        class="score-fill"
+                        [style.width.%]="record.compliance_score">
+                      </div>
+                    </div>
+
+                    <span class="score-value">
+                      {{ record.compliance_score }}%
+                    </span>
+
+                  </div>
+                </td>
+
+                <td>
+                  <span
+                    [class.overdue-warning]="record.overdue_obligations > 0"
+                    [class.overdue-clear]="record.overdue_obligations === 0">
+                    {{ record.overdue_obligations }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="risk-badge"
+                    [class.risk-low]="record.risk_level === 'Low'"
+                    [class.risk-medium]="record.risk_level === 'Medium'"
+                    [class.risk-high]="record.risk_level === 'High'">
+                    {{ record.risk_level }}
+                  </span>
+                </td>
+
+              </tr>
+            }
+
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  }
+
+</div>

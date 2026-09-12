@@ -1,0 +1,53 @@
+<header class="app-header">
+
+  <div class="header-left">
+
+    <button
+      class="menu-button"
+      type="button"
+      aria-label="Toggle menu">
+      ☰
+    </button>
+
+    <div class="brand">
+      <span class="brand-name">ContractIQ</span>
+      <span class="brand-subtitle">Contract Management</span>
+    </div>
+
+  </div>
+
+
+  <div class="header-right">
+
+    <div class="user-profile">
+
+      <div class="avatar">
+        {{ userInitial }}
+      </div>
+
+      <div class="user-details">
+
+        <span class="user-name">
+          {{ currentUser?.full_name || 'User' }}
+        </span>
+
+        <span class="user-role">
+          {{ currentUser?.role || 'User' }}
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="logout-button"
+      type="button"
+      (click)="logout()"
+      aria-label="Logout">
+      Logout
+    </button>
+
+  </div>
+
+</header>

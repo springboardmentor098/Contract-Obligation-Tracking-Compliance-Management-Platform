@@ -1,0 +1,196 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Reports</h1>
+      <p>Generate, view, and export compliance management reports.</p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="loadReports()">
+      Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="state-message">
+      <div class="loading-spinner"></div>
+      <p>Loading reports...</p>
+    </div>
+  }
+
+  @if (!loading && errorMessage) {
+    <div class="state-message error-state">
+      <div class="state-icon">⚠</div>
+
+      <h2>Unable to load reports</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="loadReports()">
+        Try Again
+      </button>
+    </div>
+  }
+
+  @if (!loading && !errorMessage) {
+
+    <div class="report-grid">
+
+      <!-- Contracts Report -->
+      <div class="report-card">
+
+        <div class="report-icon">📄</div>
+
+        <div class="report-content">
+          <h2>Contract Report</h2>
+
+          @if (contractReport) {
+            <p>
+              {{ contractReport.total_records }}
+              contract records available.
+            </p>
+          }
+
+          <div class="report-actions">
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadContractPdf()">
+              Download PDF
+            </button>
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadContractExcel()">
+              Download Excel
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- Obligations Report -->
+      <div class="report-card">
+
+        <div class="report-icon">📌</div>
+
+        <div class="report-content">
+          <h2>Obligation Report</h2>
+
+          @if (obligationReport) {
+            <p>
+              {{ obligationReport.total_records }}
+              obligation records available.
+            </p>
+          }
+
+          <div class="report-actions">
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadObligationPdf()">
+              Download PDF
+            </button>
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadObligationExcel()">
+              Download Excel
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- Renewals Report -->
+      <div class="report-card">
+
+        <div class="report-icon">🔄</div>
+
+        <div class="report-content">
+          <h2>Renewal Report</h2>
+
+          @if (renewalReport) {
+            <p>
+              {{ renewalReport.total_records }}
+              renewal records available.
+            </p>
+          }
+
+          <div class="report-actions">
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadRenewalPdf()">
+              Download PDF
+            </button>
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadRenewalExcel()">
+              Download Excel
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- Compliance Report -->
+      <div class="report-card">
+
+        <div class="report-icon">✓</div>
+
+        <div class="report-content">
+          <h2>Compliance Report</h2>
+
+          @if (complianceReport) {
+            <p>
+              {{ complianceReport.total_records }}
+              compliance records available.
+            </p>
+          }
+
+          <div class="report-actions">
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadCompliancePdf()">
+              Download PDF
+            </button>
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="downloadComplianceExcel()">
+              Download Excel
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

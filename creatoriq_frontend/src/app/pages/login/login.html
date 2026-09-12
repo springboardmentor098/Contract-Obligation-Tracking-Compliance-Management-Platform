@@ -1,48 +1,230 @@
 <div class="login-page">
-  <div class="login-card">
 
-    <div class="login-header">
-      <h1>ContractIQ</h1>
-      <p>Contract Obligation & Compliance Management</p>
-    </div>
+  <!-- Project Branding - Outside the Box -->
+  <div class="project-branding">
 
-    <form (ngSubmit)="login()">
+    <h1>ContractIQ</h1>
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          placeholder="Enter your email"
-          required
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          name="password"
-          [(ngModel)]="password"
-          placeholder="Enter your password"
-          required
-        />
-      </div>
-
-      @if (errorMessage) {
-        <div class="error-message">
-          {{ errorMessage }}
-        </div>
-      }
-
-      <button type="submit" [disabled]="loading">
-        {{ loading ? 'Signing in...' : 'Sign In' }}
-      </button>
-
-    </form>
+    <p>Contract Obligation &amp; Compliance Management</p>
 
   </div>
+
+
+  <!-- Main Login Box -->
+  <div class="login-container">
+
+    <!-- Left Illustration Section -->
+    <div class="branding-section">
+
+      <div class="contract-illustration">
+
+        <!-- Decorative circles -->
+        <div class="illustration-circle circle-one"></div>
+        <div class="illustration-circle circle-two"></div>
+
+
+        <!-- Floating document -->
+        <div class="floating-element floating-document">
+          <span class="floating-document-icon">▤</span>
+        </div>
+
+
+        <!-- Floating calendar -->
+        <div class="floating-element floating-calendar">
+          <span class="calendar-top"></span>
+          <span class="calendar-body">□</span>
+        </div>
+
+
+        <!-- Floating chart -->
+        <div class="floating-element floating-chart">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+
+        <!-- Main document -->
+        <div class="document">
+
+          <div class="document-fold"></div>
+
+          <div class="document-line document-line-long"></div>
+          <div class="document-line"></div>
+          <div class="document-line"></div>
+          <div class="document-line document-line-short"></div>
+
+          <div class="document-signature">
+            ✓
+          </div>
+
+        </div>
+
+
+        <!-- Security shield -->
+        <div class="security-shield">
+
+          <div class="shield-check">
+            ✓
+          </div>
+
+        </div>
+
+
+        <!-- Decorative base -->
+        <div class="illustration-base"></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Right Login Section -->
+    <div class="login-section">
+
+      <div class="login-form-container">
+
+        <div class="login-header">
+
+          <h2>Welcome Back</h2>
+
+          <p>
+            Sign in to access your ContractIQ dashboard
+          </p>
+
+        </div>
+
+
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="login()">
+
+          <!-- Email -->
+          <div class="form-group">
+
+            <label for="email">
+              Email Address
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+            />
+
+            @if (
+              loginForm.controls.email.touched &&
+              loginForm.controls.email.hasError('required')
+            ) {
+
+              <div class="field-error">
+                Email is required.
+              </div>
+
+            }
+
+            @if (
+              loginForm.controls.email.touched &&
+              loginForm.controls.email.hasError('email')
+            ) {
+
+              <div class="field-error">
+                Please enter a valid email address.
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- Password -->
+          <div class="form-group">
+
+            <label for="password">
+              Password
+            </label>
+
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+
+            @if (
+              loginForm.controls.password.touched &&
+              loginForm.controls.password.hasError('required')
+            ) {
+
+              <div class="field-error">
+                Password is required.
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- Forgot Password -->
+          <div class="forgot-password-container">
+            <a
+              class="forgot-password-link"
+              routerLink="/forgot-password">
+              Forgot Password?
+            </a>
+          </div>
+
+
+          <!-- Server Error -->
+          @if (errorMessage) {
+
+            <div class="error-message">
+
+              <span class="error-icon">
+                !
+              </span>
+
+              <span>
+                {{ errorMessage }}
+              </span>
+
+            </div>
+
+          }
+
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            [disabled]="loading">
+
+            @if (loading) {
+
+              <span class="button-spinner"></span>
+              Signing in...
+
+            } @else {
+
+              Sign In
+
+            }
+
+          </button>
+
+        </form>
+
+
+        <div class="login-footer">
+          Secure access to ContractIQ
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>

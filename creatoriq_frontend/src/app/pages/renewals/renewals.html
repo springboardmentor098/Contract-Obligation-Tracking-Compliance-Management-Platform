@@ -1,0 +1,131 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Renewals</h1>
+      <p>Track and manage contract renewals.</p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="loadRenewals()">
+      Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="state-message">
+      <div class="loading-spinner"></div>
+      <p>Loading renewals...</p>
+    </div>
+  }
+
+  @if (!loading && errorMessage) {
+    <div class="state-message error-state">
+      <div class="state-icon">⚠</div>
+
+      <h2>Unable to load renewals</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="loadRenewals()">
+        Try Again
+      </button>
+    </div>
+  }
+
+  @if (!loading && !errorMessage && renewals.length === 0) {
+    <div class="state-message">
+      <div class="state-icon">🔄</div>
+
+      <h2>No renewals found</h2>
+
+      <p>
+        There are currently no renewals available for your account.
+      </p>
+    </div>
+  }
+
+  @if (!loading && !errorMessage && renewals.length > 0) {
+    <div class="table-card">
+
+      <div class="table-header">
+        <div>
+          <h2>Renewal List</h2>
+          <span>{{ renewals.length }} renewals</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+
+          <thead>
+            <tr>
+              <th>Contract ID</th>
+              <th>Renewal Date</th>
+              <th>Previous Expiry</th>
+              <th>New Expiry</th>
+              <th>Status</th>
+              <th>Approval</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (renewal of renewals; track renewal.id) {
+              <tr>
+
+                <td class="contract-id">
+                  {{ renewal.contract_id }}
+                </td>
+
+                <td>
+                  {{ renewal.renewal_date || '—' }}
+                </td>
+
+                <td>
+                  {{ renewal.previous_expiry_date || '—' }}
+                </td>
+
+                <td>
+                  {{ renewal.new_expiry_date || '—' }}
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.status-upcoming]="renewal.status === 'Upcoming'"
+                    [class.status-progress]="renewal.status === 'In Progress'"
+                    [class.status-renewed]="renewal.status === 'Renewed'"
+                    [class.status-expired]="renewal.status === 'Expired'"
+                    [class.status-cancelled]="renewal.status === 'Cancelled'">
+                    {{ renewal.status }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="approval-badge"
+                    [class.approval-approved]="renewal.approval_status === 'Approved'"
+                    [class.approval-pending]="renewal.approval_status === 'Pending'"
+                    [class.approval-rejected]="renewal.approval_status === 'Rejected'">
+                    {{ renewal.approval_status || 'Not Required' }}
+                  </span>
+                </td>
+
+              </tr>
+            }
+
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  }
+
+</div>

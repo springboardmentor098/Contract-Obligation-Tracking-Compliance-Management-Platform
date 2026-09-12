@@ -1,0 +1,121 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Notifications</h1>
+      <p>View and monitor your notifications.</p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="loadNotifications()">
+      Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="state-message">
+      <div class="loading-spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
+  }
+
+  @if (!loading && errorMessage) {
+    <div class="state-message error-state">
+      <div class="state-icon">⚠</div>
+
+      <h2>Unable to load notifications</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="loadNotifications()">
+        Try Again
+      </button>
+    </div>
+  }
+
+  @if (!loading && !errorMessage && notifications.length === 0) {
+    <div class="state-message">
+      <div class="state-icon">🔔</div>
+
+      <h2>No notifications</h2>
+
+      <p>
+        You currently have no notifications.
+      </p>
+    </div>
+  }
+
+  @if (!loading && !errorMessage && notifications.length > 0) {
+    <div class="notification-list">
+
+      <div class="list-header">
+        <div>
+          <h2>Notification List</h2>
+          <span>{{ notifications.length }} notifications</span>
+        </div>
+      </div>
+
+      @for (notification of notifications; track notification.id) {
+        <div
+          class="notification-card"
+          [class.unread]="!notification.read_at">
+
+          <div class="notification-icon">
+            🔔
+          </div>
+
+          <div class="notification-content">
+
+            <div class="notification-top">
+              <h3>{{ notification.title }}</h3>
+
+              <span
+                class="status-badge"
+                [class.status-read]="notification.read_at"
+                [class.status-unread]="!notification.read_at">
+                {{ notification.read_at ? 'Read' : 'Unread' }}
+              </span>
+            </div>
+
+            <p class="notification-message">
+              {{ notification.message }}
+            </p>
+
+            <div class="notification-meta">
+
+              <span>
+                Type: {{ notification.notification_type }}
+              </span>
+
+              @if (notification.contract_id !== null) {
+                <span>
+                  Contract ID: {{ notification.contract_id }}
+                </span>
+              }
+
+              @if (notification.obligation_id !== null) {
+                <span>
+                  Obligation ID: {{ notification.obligation_id }}
+                </span>
+              }
+
+              <span>
+                {{ notification.created_at }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+      }
+
+    </div>
+  }
+
+</div>
