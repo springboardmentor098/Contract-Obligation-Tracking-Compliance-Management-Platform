@@ -199,10 +199,22 @@ def report_rows(db: Session, report_type: str) -> list[dict]:
         rows = db.query(Contract, User.full_name).outerjoin(User, Contract.assigned_to == User.id).all()
         return [{"Contract Number": c.contract_number, "Title": c.title, "Category": c.category, "Status": c.status, "Start Date": c.start_date, "End Date": c.end_date, "Assigned User": name or ""} for c, name in rows]
     if report_type == "obligations":
-        rows = db.query(Obligation, Contract.contract_number, User.full_name).join(Contract).outerjoin(User, Obligation.assigned_to == User.id).all()
+        rows = (
+            db.query(Obligation, Contract.contract_number, User.full_name)
+            .select_from(Obligation)
+            .join(Contract, Obligation.contract_id == Contract.id)
+            .outerjoin(User, Obligation.assigned_to == User.id)
+            .all()
+        )
         return [{"Contract": number, "Obligation Title": o.title, "Obligation Type": o.obligation_type, "Assigned User": name or "", "Due Date": o.due_date, "Status": o.status, "Completion Date": o.completion_date} for o, number, name in rows]
     if report_type == "renewals":
-        rows = db.query(Renewal, Contract.contract_number, User.full_name).join(Contract).outerjoin(User, Renewal.assigned_to == User.id).all()
+        rows = (
+            db.query(Renewal, Contract.contract_number, User.full_name)
+            .select_from(Renewal)
+            .join(Contract, Renewal.contract_id == Contract.id)
+            .outerjoin(User, Renewal.assigned_to == User.id)
+            .all()
+        )
         return [{"Contract": number, "Previous Expiry Date": r.previous_expiry_date, "Renewal Date": r.renewal_date, "New Expiry Date": r.new_expiry_date, "Renewal Status": r.status, "Assigned User": name or ""} for r, number, name in rows]
     rows = db.query(Contract, User.full_name).outerjoin(User, Contract.assigned_to == User.id).all()
     compliance = {row["contract"].id: row for row in _compliance_rows(db)}
