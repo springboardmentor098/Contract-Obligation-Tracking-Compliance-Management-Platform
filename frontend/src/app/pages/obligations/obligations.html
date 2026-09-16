@@ -1,0 +1,378 @@
+<div class="obligations-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Obligations</h1>
+      <p>Track contractual obligations and deadlines</p>
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="scanOverdue()">
+        Scan Overdue
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreateForm()">
+        + New Obligation
+      </button>
+
+    </div>
+
+  </div>
+
+
+  @if (showForm) {
+
+    <div class="form-card">
+
+      <div class="form-header">
+
+        <div>
+          <h2>Create Obligation</h2>
+          <p>Enter the obligation details below.</p>
+        </div>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="cancelCreate()">
+          Cancel
+        </button>
+
+      </div>
+
+
+      @if (error) {
+        <div class="form-error">
+          {{ error }}
+        </div>
+      }
+
+
+      <form
+        [formGroup]="obligationForm"
+        (ngSubmit)="createObligation()">
+
+        <div class="form-grid">
+
+          <div class="form-field">
+
+            <label for="contract_id">
+              Contract ID *
+            </label>
+
+            <input
+              id="contract_id"
+              type="number"
+              formControlName="contract_id"
+              placeholder="e.g. 1">
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="title">
+              Title *
+            </label>
+
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="Obligation title">
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="due_date">
+              Due Date *
+            </label>
+
+            <input
+              id="due_date"
+              type="date"
+              formControlName="due_date">
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="priority">
+              Priority *
+            </label>
+
+            <select
+              id="priority"
+              formControlName="priority">
+
+              <option value="low">
+                Low
+              </option>
+
+              <option value="medium">
+                Medium
+              </option>
+
+              <option value="high">
+                High
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="responsible_party">
+              Responsible Party
+            </label>
+
+            <input
+              id="responsible_party"
+              type="text"
+              formControlName="responsible_party"
+              placeholder="Responsible person">
+
+          </div>
+
+
+          <div class="form-field full-width">
+
+            <label for="description">
+              Description
+            </label>
+
+            <textarea
+              id="description"
+              rows="4"
+              formControlName="description"
+              placeholder="Obligation description">
+            </textarea>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="cancelCreate()">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving">
+
+            @if (saving) {
+              Creating...
+            } @else {
+              Create Obligation
+            }
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  }
+
+
+  @if (loading) {
+
+    <div class="state-card">
+      <p>Loading obligations...</p>
+    </div>
+
+  } @else if (error && !showForm) {
+
+    <div class="state-card error">
+
+      <p>{{ error }}</p>
+
+      <button
+        type="button"
+        (click)="loadObligations()">
+        Retry
+      </button>
+
+    </div>
+
+  } @else if (obligations.length === 0) {
+
+    <div class="state-card">
+      <p>No obligations found.</p>
+    </div>
+
+  } @else {
+
+    <div class="table-card">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Title</th>
+            <th>Contract</th>
+            <th>Due Date</th>
+            <th>Priority</th>
+            <th>Responsible Party</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+            obligation of obligations;
+            track obligation.id
+          ) {
+
+            <tr>
+
+              <td>
+                <strong>
+                  {{ obligation.title }}
+                </strong>
+
+                @if (obligation.description) {
+                  <div class="description-preview">
+                    {{ obligation.description }}
+                  </div>
+                }
+              </td>
+
+
+              <td>
+                #{{ obligation.contract_id }}
+              </td>
+
+
+              <td>
+                {{ obligation.due_date }}
+              </td>
+
+
+              <td>
+                <span class="priority-badge">
+                  {{ obligation.priority }}
+                </span>
+              </td>
+
+
+              <td>
+                {{ obligation.responsible_party || 'Unassigned' }}
+              </td>
+
+
+              <td>
+                <span class="status-badge">
+                  {{ obligation.status }}
+                </span>
+              </td>
+
+
+              <td>
+
+                <div class="action-buttons">
+
+                  @if (
+                    obligation.status === 'pending'
+                  ) {
+
+                    <button
+                      type="button"
+                      class="secondary-button"
+                      (click)="changeStatus(
+                        obligation,
+                        'in_progress'
+                      )">
+                      Start
+                    </button>
+
+                  }
+
+
+                  @if (
+                    obligation.status === 'in_progress'
+                  ) {
+
+                    <button
+                      type="button"
+                      class="primary-button"
+                      (click)="changeStatus(
+                        obligation,
+                        'completed'
+                      )">
+                      Complete
+                    </button>
+
+                  }
+
+
+                  @if (
+                    obligation.status === 'overdue'
+                  ) {
+
+                    <button
+                      type="button"
+                      class="secondary-button"
+                      (click)="changeStatus(
+                        obligation,
+                        'in_progress'
+                      )">
+                      Resume
+                    </button>
+
+                  }
+
+
+                  <button
+                    type="button"
+                    class="delete-button"
+                    (click)="deleteObligation(
+                      obligation
+                    )">
+                    Delete
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</div>

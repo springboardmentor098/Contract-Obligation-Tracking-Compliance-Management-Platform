@@ -1,0 +1,44 @@
+<aside class="sidebar">
+
+  <div class="sidebar-section">
+
+    <div class="section-title">
+      WORKSPACE
+    </div>
+
+    <nav>
+      @for (item of workspaceItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+  </div>
+
+  @if (insightItems.length > 0) {
+
+    <div class="sidebar-section">
+
+      <div class="section-title">
+        INSIGHTS
+      </div>
+
+      <nav>
+        @for (item of insightItems; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active">
+            {{ item.label }}
+          </a>
+        }
+      </nav>
+
+    </div>
+
+  }
+
+</aside>

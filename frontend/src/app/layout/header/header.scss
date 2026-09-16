@@ -1,0 +1,166 @@
+:host {
+  display: block;
+  height: 72px;
+  flex: 0 0 72px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 72px;
+  padding: 0 28px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-bottom: 1px solid #e5eaf1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+/* =========================
+   BRAND
+   ========================= */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 7px 16px rgba(79, 70, 229, 0.22);
+}
+
+.brand h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 20px;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.brand span {
+  display: block;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 550;
+}
+
+/* =========================
+   HEADER ACTIONS
+   ========================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 13px;
+  font-weight: 750;
+  border: 1px solid #e0e7ff;
+}
+
+.user-info strong {
+  display: block;
+  color: #172033;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.user-info span {
+  display: block;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+/* =========================
+   LOGOUT
+   ========================= */
+
+.logout-button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.logout-button:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+@media (max-width: 700px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .brand span,
+  .user-info span {
+    display: none;
+  }
+
+  .user-info strong {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 450px) {
+  .brand h1 {
+    font-size: 17px;
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .logout-button {
+    padding: 0 10px;
+  }
+}

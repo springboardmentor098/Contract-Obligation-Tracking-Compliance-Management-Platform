@@ -1,0 +1,489 @@
+<div class="dashboard-page">
+
+  <!-- =========================
+       PAGE HEADER
+       ========================= -->
+
+  <header class="dashboard-header">
+
+    <div class="header-copy">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        CONTRACT MANAGEMENT
+      </div>
+
+      <h1>Dashboard</h1>
+
+      <p>
+        Monitor contracts, obligations, renewals and compliance
+        from one centralized workspace.
+      </p>
+    </div>
+
+    <div class="header-meta">
+      <span class="live-dot"></span>
+      <span>Live data</span>
+    </div>
+
+  </header>
+
+
+  @if (loading()) {
+
+    <!-- =========================
+         LOADING
+         ========================= -->
+
+    <div class="state-card loading-state">
+      <div class="loading-spinner"></div>
+      <h3>Loading dashboard</h3>
+      <p>Fetching the latest contract information...</p>
+    </div>
+
+  } @else if (error()) {
+
+    <!-- =========================
+         ERROR
+         ========================= -->
+
+    <div class="state-card error-state">
+      <div class="state-icon">!</div>
+      <h3>Unable to load dashboard</h3>
+      <p>{{ error() }}</p>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="loadDashboard()">
+        Try Again
+      </button>
+    </div>
+
+  } @else {
+
+    @if (summary(); as data) {
+
+      <!-- =========================
+           KPI CARDS
+           ========================= -->
+
+      <section class="stats-grid">
+
+        <article class="stat-card contracts-card">
+          <div class="stat-top">
+            <div class="stat-icon icon-contracts"><span>?</span></div>
+            <span class="stat-caption">CONTRACTS</span>
+          </div>
+
+          <div class="stat-value">
+            {{ data.contracts.total }}
+          </div>
+
+          <div class="stat-bottom">
+            <span>Active contracts</span>
+            <strong>{{ data.contracts.active }}</strong>
+          </div>
+        </article>
+
+
+        <article class="stat-card active-card">
+          <div class="stat-top">
+            <div class="stat-icon icon-contracts"><span>?</span></div>
+            <span class="stat-caption">ACTIVE</span>
+          </div>
+
+          <div class="stat-value">
+            {{ data.contracts.active }}
+          </div>
+
+          <div class="stat-bottom">
+            <span>Currently active</span>
+            <strong>{{ data.contracts.active }}</strong>
+          </div>
+        </article>
+
+
+        <article class="stat-card expired-card">
+          <div class="stat-top">
+            <div class="stat-icon icon-expired"><span>!</span></div>
+            <span class="stat-caption">EXPIRED</span>
+          </div>
+
+          <div class="stat-value">
+            {{ data.contracts.expired }}
+          </div>
+
+          <div class="stat-bottom">
+            <span>Require attention</span>
+            <strong>{{ data.contracts.expired }}</strong>
+          </div>
+        </article>
+
+
+        <article class="stat-card obligation-card">
+          <div class="stat-top">
+            <div class="stat-icon icon-contracts"><span>?</span></div>
+            <span class="stat-caption">OBLIGATIONS</span>
+          </div>
+
+          <div class="stat-value">
+            {{ data.obligations.total }}
+          </div>
+
+          <div class="stat-bottom">
+            <span>Pending</span>
+            <strong>{{ data.obligations.pending }}</strong>
+          </div>
+        </article>
+
+
+        <article class="stat-card overdue-card">
+          <div class="stat-top">
+            <div class="stat-icon icon-expired"><span>!</span></div>
+            <span class="stat-caption">OVERDUE</span>
+          </div>
+
+          <div class="stat-value">
+            {{ data.obligations.overdue }}
+          </div>
+
+          <div class="stat-bottom">
+            <span>Need attention</span>
+            <strong>{{ data.obligations.overdue }}</strong>
+          </div>
+        </article>
+
+
+        <article class="stat-card renewal-card">
+          <div class="stat-top">
+            <div class="stat-icon icon-contracts"><span>?</span></div>
+            <span class="stat-caption">RENEWALS</span>
+          </div>
+
+          <div class="stat-value">
+            {{ data.renewals.total }}
+          </div>
+
+          <div class="stat-bottom">
+            <span>Upcoming</span>
+            <strong>{{ data.renewals.upcoming }}</strong>
+          </div>
+        </article>
+
+      </section>
+
+
+      <!-- =========================
+           ANALYTICS GRID
+           ========================= -->
+
+      <section class="analytics-grid">
+
+        <!-- CONTRACT STATUS -->
+
+        <article class="dashboard-card">
+
+          <div class="card-header">
+            <div>
+              <span class="card-eyebrow">OVERVIEW</span>
+              <h2>Contract Status</h2>
+            </div>
+
+            <div class="card-icon icon-card-contracts"><span>?</span></div>
+          </div>
+
+          <div class="status-list">
+
+            <div class="status-item">
+              <div class="status-info">
+                <span class="status-dot active"></span>
+                <span>Active</span>
+              </div>
+
+              <strong>{{ data.contracts.active }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill active-fill"
+                [style.width.%]="
+                  data.contracts.total
+                    ? (data.contracts.active / data.contracts.total) * 100
+                    : 0
+                ">
+              </div>
+            </div>
+
+
+            <div class="status-item">
+              <div class="status-info">
+                <span class="status-dot draft"></span>
+                <span>Draft</span>
+              </div>
+
+              <strong>{{ data.contracts.draft }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill draft-fill"
+                [style.width.%]="
+                  data.contracts.total
+                    ? (data.contracts.draft / data.contracts.total) * 100
+                    : 0
+                ">
+              </div>
+            </div>
+
+
+            <div class="status-item">
+              <div class="status-info">
+                <span class="status-dot review"></span>
+                <span>Under Review</span>
+              </div>
+
+              <strong>{{ data.contracts.under_review }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill review-fill"
+                [style.width.%]="
+                  data.contracts.total
+                    ? (data.contracts.under_review / data.contracts.total) * 100
+                    : 0
+                ">
+              </div>
+            </div>
+
+
+            <div class="status-item">
+              <div class="status-info">
+                <span class="status-dot expired"></span>
+                <span>Expired</span>
+              </div>
+
+              <strong>{{ data.contracts.expired }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill expired-fill"
+                [style.width.%]="
+                  data.contracts.total
+                    ? (data.contracts.expired / data.contracts.total) * 100
+                    : 0
+                ">
+              </div>
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- OBLIGATIONS -->
+
+        <article class="dashboard-card">
+
+          <div class="card-header">
+            <div>
+              <span class="card-eyebrow">TASK HEALTH</span>
+              <h2>Obligation Status</h2>
+            </div>
+
+            <div class="card-icon icon-card-contracts"><span>?</span></div>
+          </div>
+
+          <div class="obligation-summary">
+
+            <div class="obligation-highlight">
+              <span class="big-number">
+                {{ data.obligations.total }}
+              </span>
+
+              <span class="big-label">
+                Total obligations
+              </span>
+            </div>
+
+          </div>
+
+          <div class="status-list compact">
+
+            <div class="status-item">
+              <div class="status-info">
+                <span class="status-dot pending"></span>
+                <span>Pending</span>
+              </div>
+
+              <strong>{{ data.obligations.pending }}</strong>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <span class="status-dot overdue"></span>
+                <span>Overdue</span>
+              </div>
+
+              <strong>{{ data.obligations.overdue }}</strong>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <span class="status-dot completed"></span>
+                <span>Completed</span>
+              </div>
+
+              <strong>{{ data.obligations.completed }}</strong>
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- RENEWALS -->
+
+        <article class="dashboard-card">
+
+          <div class="card-header">
+            <div>
+              <span class="card-eyebrow">LIFECYCLE</span>
+              <h2>Renewals</h2>
+            </div>
+
+            <div class="card-icon icon-card-contracts"><span>?</span></div>
+          </div>
+
+          <div class="renewal-main">
+
+            <div class="renewal-number">
+              {{ data.renewals.total }}
+            </div>
+
+            <div>
+              <span class="renewal-label">
+                Total renewals
+              </span>
+
+              <span class="renewal-description">
+                Track upcoming contract lifecycle events
+              </span>
+            </div>
+
+          </div>
+
+          <div class="renewal-stats">
+
+            <div>
+              <span>Upcoming</span>
+              <strong>{{ data.renewals.upcoming }}</strong>
+            </div>
+
+            <div>
+              <span>Completed</span>
+              <strong>{{ data.renewals.completed }}</strong>
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- COMPLIANCE -->
+
+        <article class="dashboard-card compliance-card">
+
+          <div class="card-header">
+            <div>
+              <span class="card-eyebrow">RISK & COMPLIANCE</span>
+              <h2>Compliance Summary</h2>
+            </div>
+
+            <div class="card-icon shield icon-card-compliance"><span>?</span></div>
+          </div>
+
+          <div class="compliance-overview">
+
+            <div class="compliance-score">
+
+              <div class="score-number">
+                {{
+                  data.contracts.total
+                    ? ((data.compliance.compliant_contracts / data.contracts.total) * 100).toFixed(0)
+                    : 0
+                }}%
+              </div>
+
+              <span>Compliance rate</span>
+
+            </div>
+
+            <div class="compliance-details">
+
+              <div class="compliance-row">
+                <span>
+                  <i class="status-dot compliant"></i>
+                  Compliant
+                </span>
+
+                <strong>
+                  {{ data.compliance.compliant_contracts }}
+                </strong>
+              </div>
+
+              <div class="compliance-row">
+                <span>
+                  <i class="status-dot non-compliant"></i>
+                  Non-Compliant
+                </span>
+
+                <strong>
+                  {{ data.compliance.non_compliant_contracts }}
+                </strong>
+              </div>
+
+              <div class="compliance-row">
+                <span>
+                  <i class="status-dot high-risk"></i>
+                  High Risk
+                </span>
+
+                <strong>
+                  {{ data.compliance.high_risk_contracts }}
+                </strong>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="compliance-track">
+            <div
+              class="compliance-fill"
+              [style.width.%]="
+                data.contracts.total
+                  ? (data.compliance.compliant_contracts / data.contracts.total) * 100
+                  : 0
+              ">
+            </div>
+          </div>
+
+        </article>
+
+      </section>
+
+    } @else {
+
+      <div class="state-card">
+        <div class="state-icon">—</div>
+        <h3>No dashboard data</h3>
+        <p>There is currently no dashboard information to display.</p>
+      </div>
+
+    }
+
+  }
+
+</div>

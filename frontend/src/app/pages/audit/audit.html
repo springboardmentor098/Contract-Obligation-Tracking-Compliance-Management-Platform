@@ -1,0 +1,180 @@
+<div class="audit-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Audit History</h1>
+      <p>Track system activity and changes across ContractIQ</p>
+    </div>
+
+    <button
+      class="btn primary"
+      type="button"
+      (click)="loadAuditLogs()"
+      [disabled]="loading">
+
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+
+    </button>
+
+  </div>
+
+  <div *ngIf="error" class="alert error">
+
+    {{ error }}
+
+    <button type="button" (click)="loadAuditLogs()">
+      Retry
+    </button>
+
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Loading audit history...
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- SUMMARY -->
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <span>Total Events</span>
+        <strong>{{ auditLogs.length }}</strong>
+        <small>Recorded audit events</small>
+      </div>
+
+      <div class="summary-card">
+        <span>Contract Events</span>
+        <strong>{{ contractActions }}</strong>
+        <small>Contract activity</small>
+      </div>
+
+      <div class="summary-card">
+        <span>Obligation Events</span>
+        <strong>{{ obligationActions }}</strong>
+        <small>Obligation activity</small>
+      </div>
+
+      <div class="summary-card">
+        <span>Renewal Events</span>
+        <strong>{{ renewalActions }}</strong>
+        <small>Renewal activity</small>
+      </div>
+
+    </div>
+
+    <!-- AUDIT TABLE -->
+
+    <div
+      *ngIf="auditLogs.length > 0"
+      class="table-card">
+
+      <div class="card-header">
+
+        <div>
+          <h2>Activity Log</h2>
+          <p>
+            {{ auditLogs.length }} audit events recorded
+          </p>
+        </div>
+
+        <span class="event-count">
+          {{ auditLogs.length }}
+        </span>
+
+      </div>
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Date & Time</th>
+              <th>Action</th>
+              <th>Entity</th>
+              <th>Entity ID</th>
+              <th>User ID</th>
+              <th>Contract ID</th>
+              <th>Details</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let log of auditLogs">
+
+              <td class="date">
+                {{ log.created_at | date:'medium' }}
+              </td>
+
+              <td>
+
+                <span
+                  class="action-badge"
+                  [class.created]="getActionClass(log.action) === 'created'"
+                  [class.updated]="getActionClass(log.action) === 'updated'"
+                  [class.deleted]="getActionClass(log.action) === 'deleted'"
+                  [class.warning]="getActionClass(log.action) === 'warning'">
+
+                  {{ log.action }}
+
+                </span>
+
+              </td>
+
+              <td>
+
+                <span class="entity-badge">
+                  {{ log.entity_type || '—' }}
+                </span>
+
+              </td>
+
+              <td>
+                {{ log.entity_id ?? '—' }}
+              </td>
+
+              <td>
+                {{ log.user_id }}
+              </td>
+
+              <td>
+                {{ log.contract_id ?? '—' }}
+              </td>
+
+              <td class="details">
+                {{ log.details || 'No additional details' }}
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="auditLogs.length === 0"
+      class="empty-state">
+
+      <div class="empty-icon">?</div>
+
+      <h2>No audit events</h2>
+
+      <p>
+        No audit history is currently available.
+      </p>
+
+    </div>
+
+  </ng-container>
+
+</div>

@@ -1,0 +1,223 @@
+<div class="compliance-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Compliance</h1>
+      <p>Monitor contract compliance, risk, and overdue obligations</p>
+    </div>
+
+    <button
+      class="btn primary"
+      type="button"
+      (click)="loadCompliance()"
+      [disabled]="loading">
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div *ngIf="error" class="alert error">
+    {{ error }}
+
+    <button type="button" (click)="loadCompliance()">
+      Retry
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Loading compliance data...
+  </div>
+
+  <ng-container *ngIf="!loading && data">
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <span>Total Contracts</span>
+        <strong>{{ data.total_contracts }}</strong>
+        <small>Contracts under monitoring</small>
+      </div>
+
+      <div class="summary-card success">
+        <span>Compliant Contracts</span>
+        <strong>{{ data.compliant_contracts }}</strong>
+        <small>Contracts meeting compliance requirements</small>
+      </div>
+
+      <div class="summary-card danger">
+        <span>Non-Compliant</span>
+        <strong>{{ data.non_compliant_contracts }}</strong>
+        <small>Contracts requiring attention</small>
+      </div>
+
+      <div class="summary-card warning">
+        <span>High Risk</span>
+        <strong>{{ data.high_risk_contracts }}</strong>
+        <small>{{ getRiskLevel() }}</small>
+      </div>
+
+    </div>
+
+    <div class="main-grid">
+
+      <div class="card compliance-score">
+
+        <div class="card-header">
+          <div>
+            <h2>Compliance Rate</h2>
+            <p>Overall contract compliance performance</p>
+          </div>
+        </div>
+
+        <div class="score-area">
+
+          <div
+            class="score-circle"
+            [class.good]="getComplianceClass() === 'good'"
+            [class.warning]="getComplianceClass() === 'warning'"
+            [class.danger]="getComplianceClass() === 'danger'">
+
+            <strong>{{ data.compliance_rate }}%</strong>
+            <span>Compliant</span>
+
+          </div>
+
+          <div class="score-details">
+
+            <div class="detail-row">
+              <span>Compliant</span>
+              <strong>{{ data.compliant_contracts }}</strong>
+            </div>
+
+            <div class="detail-row">
+              <span>Non-Compliant</span>
+              <strong>{{ data.non_compliant_contracts }}</strong>
+            </div>
+
+            <div class="detail-row">
+              <span>High Risk</span>
+              <strong>{{ data.high_risk_contracts }}</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card obligations-risk">
+
+        <div class="card-header">
+          <div>
+            <h2>Obligation Risk</h2>
+            <p>Overdue obligations requiring attention</p>
+          </div>
+        </div>
+
+        <div class="risk-list">
+
+          <div class="risk-item">
+            <div>
+              <span class="risk-title">Overdue Obligations</span>
+              <small>All overdue obligations</small>
+            </div>
+
+            <strong class="danger-text">
+              {{ data.overdue_obligations }}
+            </strong>
+          </div>
+
+          <div class="risk-item">
+            <div>
+              <span class="risk-title">High-Priority Overdue</span>
+              <small>Critical obligations requiring action</small>
+            </div>
+
+            <strong class="danger-text">
+              {{ data.high_priority_overdue_obligations }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card status-card">
+
+      <div class="card-header">
+        <div>
+          <h2>Compliance Overview</h2>
+          <p>Current contract compliance distribution</p>
+        </div>
+      </div>
+
+      <div class="status-bars">
+
+        <div class="status-row">
+
+          <div class="status-label">
+            <span>Compliant</span>
+            <strong>{{ data.compliant_contracts }}</strong>
+          </div>
+
+          <div class="bar">
+            <div
+              class="bar-fill compliant"
+              [style.width.%]="
+                data.total_contracts
+                  ? (data.compliant_contracts / data.total_contracts) * 100
+                  : 0
+              ">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="status-row">
+
+          <div class="status-label">
+            <span>Non-Compliant</span>
+            <strong>{{ data.non_compliant_contracts }}</strong>
+          </div>
+
+          <div class="bar">
+            <div
+              class="bar-fill non-compliant"
+              [style.width.%]="
+                data.total_contracts
+                  ? (data.non_compliant_contracts / data.total_contracts) * 100
+                  : 0
+              ">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="status-row">
+
+          <div class="status-label">
+            <span>High Risk</span>
+            <strong>{{ data.high_risk_contracts }}</strong>
+          </div>
+
+          <div class="bar">
+            <div
+              class="bar-fill high-risk"
+              [style.width.%]="
+                data.total_contracts
+                  ? (data.high_risk_contracts / data.total_contracts) * 100
+                  : 0
+              ">
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

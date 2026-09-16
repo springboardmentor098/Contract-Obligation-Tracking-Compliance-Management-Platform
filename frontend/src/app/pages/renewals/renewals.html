@@ -1,0 +1,190 @@
+﻿<div class="renewals-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Renewals</h1>
+      <p>Track contract renewal dates and terms</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn primary" (click)="openCreateForm()">
+        + New Renewal
+      </button>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Total Renewals</span>
+      <strong>{{ renewals.length }}</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Upcoming</span>
+      <strong>{{ upcomingCount }}</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Completed</span>
+      <strong>{{ completedCount }}</strong>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="alert success">
+    {{ success }}
+  </div>
+
+  <div *ngIf="error" class="alert error">
+    {{ error }}
+    <button type="button" (click)="loadRenewals()">Retry</button>
+  </div>
+
+  <div *ngIf="showForm" class="form-card">
+
+    <h2>{{ editingId ? 'Edit Renewal' : 'Create Renewal' }}</h2>
+
+    <form [formGroup]="renewalForm" (ngSubmit)="saveRenewal()">
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Contract *</label>
+
+          <select formControlName="contract_id">
+            <option
+              *ngFor="let contract of contracts"
+              [value]="contract.id">
+              {{ contract.contract_number }} — {{ contract.title }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Renewal Date *</label>
+          <input type="date" formControlName="renewal_date">
+        </div>
+
+        <div class="field">
+          <label>Status *</label>
+
+          <select formControlName="status">
+            <option value="upcoming">Upcoming</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label>Renewal Terms</label>
+
+          <textarea
+            rows="4"
+            formControlName="renewal_terms"
+            placeholder="Enter renewal terms...">
+          </textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn secondary"
+          (click)="cancelForm()">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="btn primary"
+          [disabled]="saving">
+          {{ saving ? 'Saving...' : (editingId ? 'Save Changes' : 'Create Renewal') }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Loading renewals...
+  </div>
+
+  <div
+    *ngIf="!loading && renewals.length === 0"
+    class="empty-state">
+    No renewals found.
+  </div>
+
+  <div
+    *ngIf="!loading && renewals.length > 0"
+    class="table-card">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Contract</th>
+          <th>Renewal Date</th>
+          <th>Status</th>
+          <th>Renewal Terms</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let renewal of renewals">
+
+          <td>
+            <strong>{{ renewal.contract_number }}</strong>
+            <small>{{ renewal.contract_title }}</small>
+          </td>
+
+          <td>
+            {{ renewal.renewal_date | date:'mediumDate' }}
+          </td>
+
+          <td>
+            <span
+              class="status"
+              [class.completed]="renewal.status.toLowerCase() === 'completed'"
+              [class.upcoming]="renewal.status.toLowerCase() === 'upcoming'"
+              [class.pending]="renewal.status.toLowerCase() === 'pending'"
+              [class.cancelled]="renewal.status.toLowerCase() === 'cancelled'">
+              {{ renewal.status }}
+            </span>
+          </td>
+
+          <td>
+            {{ renewal.renewal_terms || '—' }}
+          </td>
+
+          <td class="actions">
+
+            <button
+              class="btn small"
+              (click)="openEdit(renewal)">
+              Edit
+            </button>
+
+            <button
+              class="btn small danger"
+              (click)="deleteRenewal(renewal)">
+              Delete
+            </button>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

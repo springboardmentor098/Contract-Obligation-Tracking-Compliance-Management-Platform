@@ -1,0 +1,488 @@
+<div class="details-page">
+
+  <div class="page-header">
+
+    <div>
+      <button
+        type="button"
+        class="back-button"
+        (click)="goBack()">
+        ? Back to Contracts
+      </button>
+
+      @if (contract) {
+        <h1>{{ contract.title }}</h1>
+        <p>{{ contract.contract_number }}</p>
+      }
+    </div>
+
+  </div>
+
+
+  @if (loading) {
+
+    <div class="state-card">
+      <p>Loading contract...</p>
+    </div>
+
+  } @else if (error && !editMode) {
+
+    <div class="state-card error">
+      <p>{{ error }}</p>
+
+      <button
+        type="button"
+        (click)="goBack()">
+        Back to Contracts
+      </button>
+    </div>
+
+  } @else if (contract) {
+
+    @if (editMode) {
+
+      <div class="details-card">
+
+        <div class="card-header">
+
+          <div>
+            <h2>Edit Contract</h2>
+            <p>Update the contract information below.</p>
+          </div>
+
+          <span class="status-badge">
+            {{ contract.status }}
+          </span>
+
+        </div>
+
+
+        @if (error) {
+          <div class="form-error">
+            {{ error }}
+          </div>
+        }
+
+
+        <form
+          [formGroup]="contractForm"
+          (ngSubmit)="saveContract()">
+
+          <div class="details-grid">
+
+            <div class="form-field">
+              <label for="contract_number">
+                Contract Number *
+              </label>
+
+              <input
+                id="contract_number"
+                type="text"
+                formControlName="contract_number">
+
+              @if (
+                contractForm.controls.contract_number.invalid &&
+                contractForm.controls.contract_number.touched
+              ) {
+                <small>
+                  Contract number is required.
+                </small>
+              }
+            </div>
+
+
+            <div class="form-field">
+              <label for="title">
+                Title *
+              </label>
+
+              <input
+                id="title"
+                type="text"
+                formControlName="title">
+
+              @if (
+                contractForm.controls.title.invalid &&
+                contractForm.controls.title.touched
+              ) {
+                <small>
+                  Title is required.
+                </small>
+              }
+            </div>
+
+
+            <div class="form-field">
+              <label for="category">
+                Category *
+              </label>
+
+              <input
+                id="category"
+                type="text"
+                formControlName="category">
+
+              @if (
+                contractForm.controls.category.invalid &&
+                contractForm.controls.category.touched
+              ) {
+                <small>
+                  Category is required.
+                </small>
+              }
+            </div>
+
+
+            <div class="form-field">
+              <label for="counterparty_name">
+                Counterparty *
+              </label>
+
+              <input
+                id="counterparty_name"
+                type="text"
+                formControlName="counterparty_name">
+
+              @if (
+                contractForm.controls.counterparty_name.invalid &&
+                contractForm.controls.counterparty_name.touched
+              ) {
+                <small>
+                  Counterparty name is required.
+                </small>
+              }
+            </div>
+
+
+            <div class="form-field">
+              <label for="start_date">
+                Start Date *
+              </label>
+
+              <input
+                id="start_date"
+                type="date"
+                formControlName="start_date">
+
+              @if (
+                contractForm.controls.start_date.invalid &&
+                contractForm.controls.start_date.touched
+              ) {
+                <small>
+                  Start date is required.
+                </small>
+              }
+            </div>
+
+
+            <div class="form-field">
+              <label for="end_date">
+                End Date
+              </label>
+
+              <input
+                id="end_date"
+                type="date"
+                formControlName="end_date">
+            </div>
+
+
+            <div class="form-field">
+              <label for="assigned_to">
+                Assigned To
+              </label>
+
+              <input
+                id="assigned_to"
+                type="number"
+                formControlName="assigned_to"
+                placeholder="User ID (optional)">
+            </div>
+
+
+            <div class="form-field full-width">
+              <label for="description">
+                Description
+              </label>
+
+              <textarea
+                id="description"
+                rows="5"
+                formControlName="description"
+                placeholder="Contract description">
+              </textarea>
+            </div>
+
+          </div>
+
+
+          <div class="actions-section">
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="cancelEdit()">
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="saving">
+
+              @if (saving) {
+                Saving...
+              } @else {
+                Save Changes
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    } @else {
+
+      <div class="details-card">
+
+        <div class="card-header">
+
+          <div>
+            <h2>Contract Information</h2>
+            <p>Contract details and current status</p>
+          </div>
+
+          <span class="status-badge">
+            {{ contract.status }}
+          </span>
+
+        </div>
+
+
+        <div class="details-grid">
+
+          <div class="detail-item">
+            <span class="label">Contract Number</span>
+            <span class="value">
+              {{ contract.contract_number }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Title</span>
+            <span class="value">
+              {{ contract.title }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Category</span>
+            <span class="value">
+              {{ contract.category }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Counterparty</span>
+            <span class="value">
+              {{ contract.counterparty_name }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Start Date</span>
+            <span class="value">
+              {{ contract.start_date }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">End Date</span>
+            <span class="value">
+              {{ contract.end_date || '—' }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Created By</span>
+            <span class="value">
+              User #{{ contract.created_by }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Assigned To</span>
+            <span class="value">
+              {{ contract.assigned_to
+                ? 'User #' + contract.assigned_to
+                : 'Unassigned' }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Created At</span>
+            <span class="value">
+              {{ contract.created_at | date:'medium' }}
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="label">Updated At</span>
+            <span class="value">
+              {{ contract.updated_at | date:'medium' }}
+            </span>
+          </div>
+
+
+          @if (contract.reviewed_at) {
+
+            <div class="detail-item">
+              <span class="label">Reviewed At</span>
+              <span class="value">
+                {{ contract.reviewed_at | date:'medium' }}
+              </span>
+            </div>
+
+          }
+
+
+          @if (contract.approved_at) {
+
+            <div class="detail-item">
+              <span class="label">Approved At</span>
+              <span class="value">
+                {{ contract.approved_at | date:'medium' }}
+              </span>
+            </div>
+
+          }
+
+        </div>
+
+
+        <div class="description-section">
+
+          <h3>Description</h3>
+
+          <p>
+            {{ contract.description || 'No description provided.' }}
+          </p>
+
+        </div>
+
+
+        @if (workflowError) {
+
+          <div class="form-error">
+            {{ workflowError }}
+          </div>
+
+        }
+
+
+        <div class="actions-section">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="openEdit()">
+            Edit Contract
+          </button>
+
+
+          @if (contract.status === 'Draft') {
+
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="workflowSaving"
+              (click)="changeStatus('Under Review')">
+
+              @if (workflowSaving) {
+                Updating...
+              } @else {
+                Submit for Review
+              }
+
+            </button>
+
+          }
+
+
+          @if (contract.status === 'Under Review') {
+
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="workflowSaving"
+              (click)="changeStatus('Approved')">
+
+              @if (workflowSaving) {
+                Updating...
+              } @else {
+                Approve Contract
+              }
+
+            </button>
+
+          }
+
+
+          @if (contract.status === 'Approved') {
+
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="workflowSaving"
+              (click)="changeStatus('Active')">
+
+              @if (workflowSaving) {
+                Updating...
+              } @else {
+                Activate Contract
+              }
+
+            </button>
+
+          }
+
+
+          @if (contract.status === 'Active') {
+
+            <button
+              type="button"
+              class="secondary-button"
+              [disabled]="workflowSaving"
+              (click)="changeStatus('Expired')">
+
+              @if (workflowSaving) {
+                Updating...
+              } @else {
+                Mark as Expired
+              }
+
+            </button>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  }
+
+</div>

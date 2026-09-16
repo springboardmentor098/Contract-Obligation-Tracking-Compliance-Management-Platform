@@ -1,0 +1,507 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
+
+from app.database.database import get_db
+from app.models.report import Report
+from app.models.user import User
+from app.models.contract import Contract
+from app.schemas.report_schema import (
+    ReportCreate,
+    ReportUpdate,
+    ReportRead,
+    DashboardSummary,
+    ContractAnalyticsResponse,
+    ObligationAnalyticsResponse,
+    RenewalAnalyticsResponse,
+    ComplianceAnalyticsResponse,
+)
+from app.services.audit_service import create_audit_log
+from app.services.report_service import get_dashboard_summary, get_contract_analytics, get_obligation_analytics, get_renewal_analytics, get_compliance_analytics
+from app.core.dependencies import get_current_user, require_permission
+from app.core.permissions import Permission
+from app.services.report_generation_service import (
+    generate_contract_report_excel,
+    generate_contract_report_pdf,
+    generate_obligation_report_excel,
+    generate_renewal_report_excel,
+    generate_dashboard_report_pdf,
+)
+
+
+router = APIRouter(
+    prefix="/reports",
+    tags=["Reports"],
+)
+
+dashboard_router = APIRouter(
+    tags=["Dashboard"],
+)
+
+
+# =========================================================
+# CREATE REPORT
+# =========================================================
+
+@router.post(
+    "",
+    response_model=ReportRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_report(
+    report_data: ReportCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(
+        require_permission(Permission.MANAGE_USERS)
+    ),
+):
+    user = (
+        db.query(User)
+        .filter(User.id == report_data.user_id)
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot create report for inactive user",
+        )
+
+    if report_data.contract_id is not None:
+        contract = (
+            db.query(Contract)
+            .filter(Contract.id == report_data.contract_id)
+            .first()
+        )
+
+        if not contract:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contract not found",
+            )
+
+    report = Report(
+        user_id=report_data.user_id,
+        contract_id=report_data.contract_id,
+        report_type=report_data.report_type,
+        title=report_data.title,
+        description=report_data.description,
+        file_path=report_data.file_path,
+    )
+
+    db.add(report)
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        user_id=int(current_user["sub"]),
+        contract_id=report.contract_id,
+        action="Created report",
+        entity_type="Report",
+        entity_id=report.id,
+        details=(
+            f"Created report '{report.title}' "
+            f"for user ID {report.user_id}"
+        ),
+    )
+
+    db.commit()
+    db.refresh(report)
+
+    return report
+
+
+# =========================================================
+# LIST CURRENT USER REPORTS
+# =========================================================
+
+@router.get(
+    "",
+    response_model=list[ReportRead],
+)
+def list_reports(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = int(current_user["sub"])
+
+    return (
+        db.query(Report)
+        .filter(Report.user_id == user_id)
+        .order_by(Report.generated_at.desc())
+        .all()
+    )
+
+
+# =========================================================
+
+@router.get("/dashboard/summary", response_model=DashboardSummary)
+def dashboard_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_dashboard_summary(db)
+
+@dashboard_router.get("/dashboard/summary", response_model=DashboardSummary)
+def dashboard_summary_root(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_dashboard_summary(db)
+
+@router.get(
+    "/analytics/contracts",
+    response_model=ContractAnalyticsResponse,
+)
+def contract_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_contract_analytics(db)
+
+@router.get(
+    "/analytics/obligations",
+    response_model=ObligationAnalyticsResponse,
+)
+def obligation_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_obligation_analytics(db)
+
+@router.get(
+    "/analytics/renewals",
+    response_model=RenewalAnalyticsResponse,
+)
+def renewal_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_renewal_analytics(db)
+# =========================================================
+# COMPLIANCE ANALYTICS
+# =========================================================
+
+@router.get(
+    "/analytics/compliance",
+    response_model=ComplianceAnalyticsResponse,
+)
+def compliance_analytics(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    return get_compliance_analytics(db)
+
+# GET CURRENT USER REPORT
+# =========================================================
+
+@router.get(
+    "/{report_id}",
+    response_model=ReportRead,
+)
+def get_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = int(current_user["sub"])
+
+    report = (
+        db.query(Report)
+        .filter(
+            Report.id == report_id,
+            Report.user_id == user_id,
+        )
+        .first()
+    )
+
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found",
+        )
+
+    return report
+
+
+# =========================================================
+# UPDATE CURRENT USER REPORT
+# =========================================================
+
+@router.put(
+    "/{report_id}",
+    response_model=ReportRead,
+)
+def update_report(
+    report_id: int,
+    report_data: ReportUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = int(current_user["sub"])
+
+    report = (
+        db.query(Report)
+        .filter(
+            Report.id == report_id,
+            Report.user_id == user_id,
+        )
+        .first()
+    )
+
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found",
+        )
+
+    changes = []
+
+    if report_data.report_type is not None:
+        if report.report_type != report_data.report_type:
+            changes.append(
+                f"report_type: {report.report_type} -> "
+                f"{report_data.report_type}"
+            )
+            report.report_type = report_data.report_type
+
+    if report_data.title is not None:
+        if report.title != report_data.title:
+            changes.append(
+                f"title: {report.title} -> "
+                f"{report_data.title}"
+            )
+            report.title = report_data.title
+
+    if report_data.description is not None:
+        if report.description != report_data.description:
+            changes.append(
+                f"description: {report.description} -> "
+                f"{report_data.description}"
+            )
+            report.description = report_data.description
+
+    if report_data.file_path is not None:
+        if report.file_path != report_data.file_path:
+            changes.append(
+                f"file_path: {report.file_path} -> "
+                f"{report_data.file_path}"
+            )
+            report.file_path = report_data.file_path
+
+    if not changes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No changes provided",
+        )
+
+    create_audit_log(
+        db=db,
+        user_id=user_id,
+        contract_id=report.contract_id,
+        action="Updated report",
+        entity_type="Report",
+        entity_id=report.id,
+        details="; ".join(changes),
+    )
+
+    db.commit()
+    db.refresh(report)
+
+    return report
+
+
+# =========================================================
+# =========================================================
+# REPORT EXPORTS
+# =========================================================
+
+# =========================================================
+# GENERATED REPORT RECORD HELPER
+# =========================================================
+
+def _create_generated_report_record(
+    db: Session,
+    user_id: int,
+    report_type: str,
+    title: str,
+    file_path: str,
+):
+    report = Report(
+        user_id=user_id,
+        contract_id=None,
+        report_type=report_type,
+        title=title,
+        description=f"Generated {report_type} report",
+        file_path=file_path,
+    )
+
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+
+    return report
+
+@router.get("/export/contracts/excel")
+def export_contracts_excel(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    file_path = generate_contract_report_excel(db)
+
+    _create_generated_report_record(
+        db=db,
+        user_id=int(current_user["sub"]),
+        report_type="contract_excel",
+        title="Contract Excel Report",
+        file_path=file_path,
+    )
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename="contracts.xlsx",
+    )
+
+
+@router.get("/export/contracts/pdf")
+def export_contracts_pdf(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    file_path = generate_contract_report_pdf(db)
+
+    _create_generated_report_record(
+        db=db,
+        user_id=int(current_user["sub"]),
+        report_type="contract_pdf",
+        title="Contract PDF Report",
+        file_path=file_path,
+    )
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/pdf",
+        filename="contracts.pdf",
+    )
+
+
+@router.get("/export/obligations/excel")
+def export_obligations_excel(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    file_path = generate_obligation_report_excel(db)
+
+    _create_generated_report_record(
+        db=db,
+        user_id=int(current_user["sub"]),
+        report_type="obligation_excel",
+        title="Obligation Excel Report",
+        file_path=file_path,
+    )
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename="obligations.xlsx",
+    )
+
+
+@router.get("/export/renewals/excel")
+def export_renewals_excel(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    file_path = generate_renewal_report_excel(db)
+
+    _create_generated_report_record(
+        db=db,
+        user_id=int(current_user["sub"]),
+        report_type="renewal_excel",
+        title="Renewal Excel Report",
+        file_path=file_path,
+    )
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename="renewals.xlsx",
+    )
+
+
+@router.get("/export/dashboard/pdf")
+def export_dashboard_pdf(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    dashboard_data = get_dashboard_summary(db)
+    file_path = generate_dashboard_report_pdf(db, dashboard_data)
+
+    _create_generated_report_record(
+        db=db,
+        user_id=int(current_user["sub"]),
+        report_type="dashboard_pdf",
+        title="Dashboard PDF Report",
+        file_path=file_path,
+    )
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/pdf",
+        filename="dashboard.pdf",
+    )
+
+# DELETE REPORT
+# =========================================================
+
+@router.delete(
+    "/{report_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(
+        require_permission(Permission.MANAGE_USERS)
+    ),
+):
+    report = (
+        db.query(Report)
+        .filter(Report.id == report_id)
+        .first()
+    )
+
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found",
+        )
+
+    title = report.title
+    contract_id = report.contract_id
+    user_id = report.user_id
+
+    create_audit_log(
+        db=db,
+        user_id=int(current_user["sub"]),
+        contract_id=contract_id,
+        action="Deleted report",
+        entity_type="Report",
+        entity_id=report.id,
+        details=(
+            f"Deleted report '{title}' "
+            f"for user ID {user_id}"
+        ),
+    )
+
+    db.delete(report)
+    db.commit()
+
+    return None

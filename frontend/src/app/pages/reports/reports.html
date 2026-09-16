@@ -1,0 +1,461 @@
+<div class="reports-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Reports & Analytics</h1>
+      <p>Analyze contracts, obligations, renewals, and compliance</p>
+    </div>
+
+    <button
+      class="btn primary"
+      type="button"
+      (click)="loadReports()"
+      [disabled]="loading">
+
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+
+    </button>
+
+  </div>
+
+  <div *ngIf="error" class="alert error">
+    {{ error }}
+
+    <button type="button" (click)="loadReports()">
+      Retry
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Loading reports and analytics...
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- KPI SUMMARY -->
+
+    <div
+      class="summary-grid"
+      *ngIf="summary">
+
+      <div class="summary-card">
+        <span>Total Contracts</span>
+        <strong>{{ summary.contracts.total }}</strong>
+      </div>
+
+      <div class="summary-card">
+        <span>Total Obligations</span>
+        <strong>{{ summary.obligations.total }}</strong>
+      </div>
+
+      <div class="summary-card">
+        <span>Total Renewals</span>
+        <strong>{{ summary.renewals.total }}</strong>
+      </div>
+
+      <div class="summary-card">
+        <span>High Risk Contracts</span>
+        <strong>{{ summary.compliance.high_risk_contracts }}</strong>
+      </div>
+
+    </div>
+
+    <!-- EXPORTS -->
+
+    <div class="card exports-card">
+
+      <div class="card-header">
+        <div>
+          <h2>Export Reports</h2>
+          <p>Download operational reports for further analysis</p>
+        </div>
+      </div>
+
+      <div class="export-grid">
+
+        <button
+          class="export-btn"
+          (click)="export('dashboard-pdf')"
+          [disabled]="!!exporting">
+
+          <strong>Dashboard PDF</strong>
+          <small>
+            {{ exporting === 'dashboard-pdf' ? 'Exporting...' : 'Download PDF' }}
+          </small>
+
+        </button>
+
+        <button
+          class="export-btn"
+          (click)="export('contracts-excel')"
+          [disabled]="!!exporting">
+
+          <strong>Contracts Excel</strong>
+          <small>
+            {{ exporting === 'contracts-excel' ? 'Exporting...' : 'Download XLSX' }}
+          </small>
+
+        </button>
+
+        <button
+          class="export-btn"
+          (click)="export('contracts-pdf')"
+          [disabled]="!!exporting">
+
+          <strong>Contracts PDF</strong>
+          <small>
+            {{ exporting === 'contracts-pdf' ? 'Exporting...' : 'Download PDF' }}
+          </small>
+
+        </button>
+
+        <button
+          class="export-btn"
+          (click)="export('obligations-excel')"
+          [disabled]="!!exporting">
+
+          <strong>Obligations Excel</strong>
+          <small>
+            {{ exporting === 'obligations-excel' ? 'Exporting...' : 'Download XLSX' }}
+          </small>
+
+        </button>
+
+        <button
+          class="export-btn"
+          (click)="export('renewals-excel')"
+          [disabled]="!!exporting">
+
+          <strong>Renewals Excel</strong>
+          <small>
+            {{ exporting === 'renewals-excel' ? 'Exporting...' : 'Download XLSX' }}
+          </small>
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- CONTRACT ANALYTICS -->
+
+    <div class="card" *ngIf="contracts">
+
+      <div class="card-header">
+
+        <div>
+          <h2>Contract Analytics</h2>
+          <p>Contract distribution and expiry information</p>
+        </div>
+
+        <strong class="metric">
+          {{ contracts.total }}
+        </strong>
+
+      </div>
+
+      <div class="analytics-grid">
+
+        <div class="analytics-section">
+
+          <h3>By Status</h3>
+
+          <div
+            class="bar-row"
+            *ngFor="let row of objectToRows(contracts.by_status)">
+
+            <div class="bar-label">
+              <span>{{ row.name }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar-fill"
+                [style.width.%]="getBarWidth(row.value, contracts.by_status)">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="analytics-section">
+
+          <h3>By Category</h3>
+
+          <div
+            class="bar-row"
+            *ngFor="let row of objectToRows(contracts.by_category)">
+
+            <div class="bar-label">
+              <span>{{ row.name }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar-fill"
+                [style.width.%]="getBarWidth(row.value, contracts.by_category)">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="mini-stats">
+
+        <div>
+          <span>Expiring in 30 Days</span>
+          <strong>{{ contracts.expiring_next_30_days }}</strong>
+        </div>
+
+        <div>
+          <span>Expiring in 90 Days</span>
+          <strong>{{ contracts.expiring_next_90_days }}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- OBLIGATION ANALYTICS -->
+
+    <div class="card" *ngIf="obligations">
+
+      <div class="card-header">
+
+        <div>
+          <h2>Obligation Analytics</h2>
+          <p>Obligation status, priority, and overdue analysis</p>
+        </div>
+
+        <strong class="metric">
+          {{ obligations.total }}
+        </strong>
+
+      </div>
+
+      <div class="analytics-grid">
+
+        <div class="analytics-section">
+
+          <h3>By Status</h3>
+
+          <div
+            class="bar-row"
+            *ngFor="let row of objectToRows(obligations.by_status)">
+
+            <div class="bar-label">
+              <span>{{ row.name }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar-fill"
+                [style.width.%]="getBarWidth(row.value, obligations.by_status)">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="analytics-section">
+
+          <h3>By Priority</h3>
+
+          <div
+            class="bar-row"
+            *ngFor="let row of objectToRows(obligations.by_priority)">
+
+            <div class="bar-label">
+              <span>{{ row.name }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar-fill"
+                [style.width.%]="getBarWidth(row.value, obligations.by_priority)">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="mini-stats">
+
+        <div class="danger-stat">
+          <span>Overdue</span>
+          <strong>{{ obligations.overdue }}</strong>
+        </div>
+
+        <div>
+          <span>Due Next 7 Days</span>
+          <strong>{{ obligations.due_next_7_days }}</strong>
+        </div>
+
+        <div>
+          <span>Due Next 30 Days</span>
+          <strong>{{ obligations.due_next_30_days }}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RENEWAL ANALYTICS -->
+
+    <div class="card" *ngIf="renewals">
+
+      <div class="card-header">
+
+        <div>
+          <h2>Renewal Analytics</h2>
+          <p>Renewal schedule and contract distribution</p>
+        </div>
+
+        <strong class="metric">
+          {{ renewals.total }}
+        </strong>
+
+      </div>
+
+      <div class="analytics-grid">
+
+        <div class="analytics-section">
+
+          <h3>By Status</h3>
+
+          <div
+            class="bar-row"
+            *ngFor="let row of objectToRows(renewals.by_status)">
+
+            <div class="bar-label">
+              <span>{{ row.name }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar-fill"
+                [style.width.%]="getBarWidth(row.value, renewals.by_status)">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="analytics-section">
+
+          <h3>By Contract</h3>
+
+          <div
+            class="bar-row"
+            *ngFor="let row of objectToRows(renewals.by_contract)">
+
+            <div class="bar-label">
+              <span>{{ row.name }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar-fill"
+                [style.width.%]="getBarWidth(row.value, renewals.by_contract)">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="mini-stats">
+
+        <div class="danger-stat">
+          <span>Overdue</span>
+          <strong>{{ renewals.overdue }}</strong>
+        </div>
+
+        <div>
+          <span>Due Next 7 Days</span>
+          <strong>{{ renewals.due_next_7_days }}</strong>
+        </div>
+
+        <div>
+          <span>Due Next 30 Days</span>
+          <strong>{{ renewals.due_next_30_days }}</strong>
+        </div>
+
+        <div>
+          <span>Due Next 90 Days</span>
+          <strong>{{ renewals.due_next_90_days }}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- COMPLIANCE -->
+
+    <div class="card" *ngIf="compliance">
+
+      <div class="card-header">
+
+        <div>
+          <h2>Compliance Analytics</h2>
+          <p>Contract compliance and risk indicators</p>
+        </div>
+
+        <strong class="metric">
+          {{ compliance.compliance_rate }}%
+        </strong>
+
+      </div>
+
+      <div class="compliance-grid">
+
+        <div>
+          <span>Compliant Contracts</span>
+          <strong>{{ compliance.compliant_contracts }}</strong>
+        </div>
+
+        <div>
+          <span>Non-Compliant Contracts</span>
+          <strong>{{ compliance.non_compliant_contracts }}</strong>
+        </div>
+
+        <div>
+          <span>High Risk Contracts</span>
+          <strong>{{ compliance.high_risk_contracts }}</strong>
+        </div>
+
+        <div>
+          <span>Overdue Obligations</span>
+          <strong>{{ compliance.overdue_obligations }}</strong>
+        </div>
+
+        <div>
+          <span>High-Priority Overdue</span>
+          <strong>{{ compliance.high_priority_overdue_obligations }}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

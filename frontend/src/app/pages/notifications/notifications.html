@@ -1,0 +1,135 @@
+<div class="notifications-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Notifications</h1>
+      <p>Stay informed about important contract activities</p>
+    </div>
+
+    <button
+      class="btn primary"
+      type="button"
+      (click)="loadNotifications()"
+      [disabled]="loading">
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    </button>
+
+  </div>
+
+  <div *ngIf="error" class="alert error">
+
+    {{ error }}
+
+    <button type="button" (click)="loadNotifications()">
+      Retry
+    </button>
+
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Loading notifications...
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <span>Total Notifications</span>
+        <strong>{{ notifications.length }}</strong>
+        <small>All notifications</small>
+      </div>
+
+      <div class="summary-card unread">
+        <span>Unread</span>
+        <strong>{{ unreadCount }}</strong>
+        <small>Require your attention</small>
+      </div>
+
+      <div class="summary-card read">
+        <span>Read</span>
+        <strong>{{ readCount }}</strong>
+        <small>Previously reviewed</small>
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="notifications.length === 0"
+      class="empty-state">
+
+      <div class="empty-icon">?</div>
+
+      <h2>No notifications</h2>
+
+      <p>
+        You don't have any notifications at the moment.
+      </p>
+
+    </div>
+
+    <div
+      *ngIf="notifications.length > 0"
+      class="notification-list">
+
+      <div
+        *ngFor="let notification of notifications"
+        class="notification-card"
+        [class.unread]="!notification.is_read">
+
+        <div class="notification-icon">
+          {{ notification.notification_type.charAt(0).toUpperCase() }}
+        </div>
+
+        <div class="notification-content">
+
+          <div class="notification-top">
+
+            <div>
+
+              <h2>{{ notification.title }}</h2>
+
+              <span
+                class="notification-type"
+                [class]="getNotificationClass(notification.notification_type)">
+                {{ notification.notification_type }}
+              </span>
+
+            </div>
+
+            <span
+              class="read-status"
+              [class.unread-status]="!notification.is_read">
+
+              {{ notification.is_read ? 'Read' : 'Unread' }}
+
+            </span>
+
+          </div>
+
+          <p class="message">
+            {{ notification.message }}
+          </p>
+
+          <div class="notification-meta">
+
+            <span>
+              Contract ID: {{ notification.contract_id ?? '—' }}
+            </span>
+
+            <span>
+              {{ notification.created_at | date:'medium' }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>
