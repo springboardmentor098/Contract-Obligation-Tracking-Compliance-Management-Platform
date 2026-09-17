@@ -1,0 +1,497 @@
+<div class="compliance-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Compliance Management</h1>
+      <p>Monitor contract compliance, scores and risk levels.</p>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="message error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid" *ngIf="summary">
+
+    <mat-card class="summary-card">
+      <div class="summary-value">
+        {{ summary.total_contracts }}
+      </div>
+      <div class="summary-label">
+        Total Contracts
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card compliant">
+      <div class="summary-value">
+        {{ summary.compliant_contracts }}
+      </div>
+      <div class="summary-label">
+        Compliant
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card pending">
+      <div class="summary-value">
+        {{ summary.pending_contracts }}
+      </div>
+      <div class="summary-label">
+        Pending
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card delayed">
+      <div class="summary-value">
+        {{ summary.delayed_contracts }}
+      </div>
+      <div class="summary-label">
+        Delayed
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card non-compliant">
+      <div class="summary-value">
+        {{ summary.non_compliant_contracts }}
+      </div>
+      <div class="summary-label">
+        Non-Compliant
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card high-risk">
+      <div class="summary-value">
+        {{ summary.high_risk_contracts }}
+      </div>
+      <div class="summary-label">
+        High Risk
+      </div>
+    </mat-card>
+
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filter-card">
+
+    <div class="filters">
+
+      <mat-form-field appearance="outline">
+
+        <mat-label>Search contracts</mat-label>
+
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (input)="applyFilters()"
+          placeholder="Contract number or ID">
+
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+
+        <mat-label>Compliance Status</mat-label>
+
+        <mat-select
+          [(value)]="selectedStatus"
+          (selectionChange)="applyFilters()">
+
+          <mat-option value="">
+            All statuses
+          </mat-option>
+
+          <mat-option
+            *ngFor="let status of statuses"
+            [value]="status">
+
+            {{ status }}
+
+          </mat-option>
+
+        </mat-select>
+
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+
+        <mat-label>Risk Level</mat-label>
+
+        <mat-select
+          [(value)]="selectedRisk"
+          (selectionChange)="applyFilters()">
+
+          <mat-option value="">
+            All risk levels
+          </mat-option>
+
+          <mat-option
+            *ngFor="let risk of riskLevels"
+            [value]="risk">
+
+            {{ risk }}
+
+          </mat-option>
+
+        </mat-select>
+
+      </mat-form-field>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="clearFilters()">
+
+        Clear Filters
+
+      </button>
+
+    </div>
+
+  </mat-card>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    Loading compliance records...
+  </div>
+
+  <!-- Empty -->
+  <mat-card
+    class="empty-card"
+    *ngIf="
+      !loading &&
+      filteredRecords.length === 0
+    ">
+
+    <h3>No compliance records found</h3>
+
+    <p *ngIf="records.length === 0">
+      There are no compliance records available.
+    </p>
+
+    <p *ngIf="records.length > 0">
+      No records match the selected filters.
+    </p>
+
+  </mat-card>
+
+  <!-- Compliance Table -->
+  <mat-card
+    class="table-card"
+    *ngIf="
+      !loading &&
+      filteredRecords.length > 0
+    ">
+
+    <div class="table-container">
+
+      <table
+        mat-table
+        [dataSource]="filteredRecords">
+
+        <!-- Contract Number -->
+        <ng-container matColumnDef="contract_number">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Contract
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+            {{ record.contract_number }}
+          </td>
+
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="compliance_status">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Compliance Status
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+
+            <span
+              class="status-badge"
+              [ngClass]="getStatusClass(record.compliance_status)">
+
+              {{ record.compliance_status }}
+
+            </span>
+
+          </td>
+
+        </ng-container>
+
+        <!-- Score -->
+        <ng-container matColumnDef="compliance_score">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Score
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+
+            <span
+              class="score"
+              [ngClass]="getScoreClass(record.compliance_score)">
+
+              {{ record.compliance_score | number:'1.0-2' }}%
+
+            </span>
+
+          </td>
+
+        </ng-container>
+
+        <!-- Total Obligations -->
+        <ng-container matColumnDef="total_obligations">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Total Obligations
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+            {{ record.total_obligations }}
+          </td>
+
+        </ng-container>
+
+        <!-- Completed -->
+        <ng-container matColumnDef="completed_obligations">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Completed
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+            {{ record.completed_obligations }}
+          </td>
+
+        </ng-container>
+
+        <!-- Pending -->
+        <ng-container matColumnDef="pending_obligations">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Pending
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+            {{ record.pending_obligations }}
+          </td>
+
+        </ng-container>
+
+        <!-- Overdue -->
+        <ng-container matColumnDef="overdue_obligations">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Overdue
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+            {{ record.overdue_obligations }}
+          </td>
+
+        </ng-container>
+
+        <!-- Risk -->
+        <ng-container matColumnDef="risk_level">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Risk
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+
+            <span
+              class="risk-badge"
+              [ngClass]="getRiskClass(record.risk_level)">
+
+              {{ record.risk_level }}
+
+            </span>
+
+          </td>
+
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Actions
+          </th>
+
+          <td mat-cell *matCellDef="let record">
+
+            <button
+              mat-button
+              color="primary"
+              (click)="viewDetails(record)">
+
+              View Details
+
+            </button>
+
+          </td>
+
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns">
+        </tr>
+
+        <tr
+          mat-row
+          *matRowDef="
+            let row;
+            columns: displayedColumns;
+          ">
+        </tr>
+
+      </table>
+
+    </div>
+
+  </mat-card>
+
+  <!-- Compliance Details -->
+  <mat-card
+    class="details-card"
+    *ngIf="selectedRecord">
+
+    <mat-card-header>
+      <mat-card-title>
+        Compliance Details
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <div class="details-grid">
+
+        <div>
+          <strong>Contract Number</strong>
+          <span>
+            {{ selectedRecord.contract_number }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Compliance Status</strong>
+          <span>
+            {{ selectedRecord.compliance_status }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Compliance Score</strong>
+          <span>
+            {{ selectedRecord.compliance_score | number:'1.0-2' }}%
+          </span>
+        </div>
+
+        <div>
+          <strong>Risk Level</strong>
+          <span>
+            {{ selectedRecord.risk_level }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Total Obligations</strong>
+          <span>
+            {{ selectedRecord.total_obligations }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Completed Obligations</strong>
+          <span>
+            {{ selectedRecord.completed_obligations }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Pending Obligations</strong>
+          <span>
+            {{ selectedRecord.pending_obligations }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Overdue Obligations</strong>
+          <span>
+            {{ selectedRecord.overdue_obligations }}
+          </span>
+        </div>
+
+      </div>
+
+      <h3>Compliance History</h3>
+
+      <div
+        class="history-loading"
+        *ngIf="historyLoading">
+
+        Loading compliance history...
+
+      </div>
+
+      <div
+        class="history-empty"
+        *ngIf="
+          !historyLoading &&
+          history.length === 0
+        ">
+
+        No compliance history available.
+
+      </div>
+
+      <div
+        class="history-list"
+        *ngIf="
+          !historyLoading &&
+          history.length > 0
+        ">
+
+        <div
+          class="history-item"
+          *ngFor="let item of history">
+
+          <div>
+            <strong>Status:</strong>
+            {{ item.compliance_status || '—' }}
+          </div>
+
+          <div>
+            <strong>Score:</strong>
+            {{ item.compliance_score || 0 }}
+          </div>
+
+          <div>
+            <strong>Evaluated:</strong>
+            {{ item.evaluated_at | date:'dd-MM-yyyy HH:mm' }}
+          </div>
+
+        </div>
+
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="closeDetails()">
+
+        Close Details
+
+      </button>
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>

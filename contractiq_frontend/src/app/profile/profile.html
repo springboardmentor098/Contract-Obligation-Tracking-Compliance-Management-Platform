@@ -1,0 +1,54 @@
+<div class="profile-page">
+
+  <div class="page-header">
+    <div>
+      <h1>My Profile</h1>
+      <p>View your ContractIQ account information.</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading profile...</p>
+  </div>
+
+  <div *ngIf="!loading && errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <mat-card *ngIf="!loading && profile" class="profile-card">
+
+    <mat-card-header>
+      <mat-card-title>Account Information</mat-card-title>
+      <mat-card-subtitle>
+        Your registered ContractIQ details
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <div class="profile-row">
+        <span class="label">User ID</span>
+        <span class="value">{{ profile.id }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="label">Full Name</span>
+        <span class="value">{{ profile.full_name }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="label">Email</span>
+        <span class="value">{{ profile.email }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="label">Role</span>
+        <span class="value role">{{ profile.role }}</span>
+      </div>
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>

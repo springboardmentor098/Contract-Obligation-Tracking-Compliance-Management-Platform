@@ -1,0 +1,103 @@
+<div class="dashboard-container">
+
+  <h1>ContractIQ Dashboard</h1>
+  <p class="subtitle">Contract management overview</p>
+
+  <div *ngIf="errorMessage" class="error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="summary" class="cards">
+
+    <mat-card>
+      <h3>Total Contracts</h3>
+      <div class="value">{{ summary.total_contracts }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Active Contracts</h3>
+      <div class="value">{{ summary.active_contracts }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Draft Contracts</h3>
+      <div class="value">{{ summary.draft_contracts }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Under Review</h3>
+      <div class="value">{{ summary.contracts_under_review }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Upcoming Renewals</h3>
+      <div class="value">{{ summary.upcoming_renewals }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Expired Contracts</h3>
+      <div class="value">{{ summary.expired_contracts }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Total Obligations</h3>
+      <div class="value">{{ summary.total_obligations }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Pending Obligations</h3>
+      <div class="value">{{ summary.pending_obligations }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Overdue Obligations</h3>
+      <div class="value">{{ summary.overdue_obligations }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Completed Obligations</h3>
+      <div class="value">{{ summary.completed_obligations }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Compliant Contracts</h3>
+      <div class="value">{{ summary.compliant_contracts }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>Non-Compliant Contracts</h3>
+      <div class="value">{{ summary.non_compliant_contracts }}</div>
+    </mat-card>
+
+    <mat-card>
+      <h3>High-Risk Contracts</h3>
+      <div class="value">{{ summary.high_risk_contracts }}</div>
+    </mat-card>
+
+  </div>
+
+  <div class="charts">
+
+    <mat-card class="chart-card">
+      <h2>Contract Status</h2>
+      <canvas id="contractChart"></canvas>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <h2>Obligation Status</h2>
+      <canvas id="obligationChart"></canvas>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <h2>Compliance</h2>
+      <canvas id="complianceChart"></canvas>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <h2>Contract Category</h2>
+      <canvas id="categoryChart"></canvas>
+    </mat-card>
+
+  </div>
+
+</div>

@@ -1,0 +1,428 @@
+<div class="contracts-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Contract Management</h1>
+      <p>View, create, update and manage contracts.</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openCreateForm()"
+      *ngIf="!showForm">
+      + Create Contract
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="message success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="message error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Contract Form -->
+  <mat-card class="form-card" *ngIf="showForm">
+
+    <mat-card-header>
+      <mat-card-title>
+        {{ editingContract ? 'Update Contract' : 'Create Contract' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <form [formGroup]="contractForm" (ngSubmit)="saveContract()">
+
+        <div class="form-grid">
+
+          <mat-form-field appearance="outline">
+            <mat-label>Contract Title</mat-label>
+            <input
+              matInput
+              formControlName="title"
+              placeholder="Enter contract title">
+
+            <mat-error
+              *ngIf="contractForm.get('title')?.hasError('required')">
+              Contract title is required.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Contract Number</mat-label>
+            <input
+              matInput
+              formControlName="contract_number"
+              placeholder="Enter contract number"
+              [readonly]="!!editingContract">
+
+            <mat-error
+              *ngIf="contractForm.get('contract_number')?.hasError('required')">
+              Contract number is required.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <input
+              matInput
+              formControlName="category"
+              placeholder="Enter category">
+
+            <mat-error
+              *ngIf="contractForm.get('category')?.hasError('required')">
+              Category is required.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input
+              matInput
+              type="date"
+              formControlName="start_date">
+
+            <mat-error
+              *ngIf="contractForm.get('start_date')?.hasError('required')">
+              Start date is required.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input
+              matInput
+              type="date"
+              formControlName="end_date">
+
+            <mat-error
+              *ngIf="contractForm.get('end_date')?.hasError('required')">
+              End date is required.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="description-field">
+            <mat-label>Description</mat-label>
+            <textarea
+              matInput
+              rows="3"
+              formControlName="description"
+              placeholder="Enter contract description">
+            </textarea>
+          </mat-form-field>
+
+        </div>
+
+        <div class="form-actions">
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="saving">
+
+            {{ saving ? 'Saving...' : (editingContract ? 'Update Contract' : 'Create Contract') }}
+
+          </button>
+
+          <button
+            mat-button
+            type="button"
+            (click)="cancelForm()"
+            [disabled]="saving">
+            Cancel
+          </button>
+
+        </div>
+
+      </form>
+
+    </mat-card-content>
+
+  </mat-card>
+
+  <!-- Filters -->
+  <mat-card class="filter-card" *ngIf="!showForm">
+
+    <div class="filters">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Search contracts</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (input)="applyFilters()"
+          placeholder="Title, number or category">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Filter by status</mat-label>
+
+        <mat-select
+          [(value)]="selectedStatus"
+          (selectionChange)="applyFilters()">
+
+          <mat-option value="">All statuses</mat-option>
+
+          <mat-option
+            *ngFor="let status of statuses"
+            [value]="status">
+            {{ status }}
+          </mat-option>
+
+        </mat-select>
+
+      </mat-form-field>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="searchText=''; selectedStatus=''; applyFilters()">
+        Clear Filters
+      </button>
+
+    </div>
+
+  </mat-card>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    Loading contracts...
+  </div>
+
+  <!-- Empty -->
+  <mat-card
+    class="empty-card"
+    *ngIf="!loading && !showForm && filteredContracts.length === 0">
+
+    <h3>No contracts found</h3>
+
+    <p *ngIf="contracts.length === 0">
+      There are no contracts available yet.
+    </p>
+
+    <p *ngIf="contracts.length > 0">
+      No contracts match your search or status filter.
+    </p>
+
+  </mat-card>
+
+  <!-- Contract Table -->
+  <mat-card
+    class="table-card"
+    *ngIf="!loading && !showForm && filteredContracts.length > 0">
+
+    <div class="table-container">
+
+      <table mat-table [dataSource]="filteredContracts">
+
+        <!-- Contract Number -->
+        <ng-container matColumnDef="contract_number">
+          <th mat-header-cell *matHeaderCellDef>
+            Contract No.
+          </th>
+
+          <td mat-cell *matCellDef="let contract">
+            {{ contract.contract_number }}
+          </td>
+        </ng-container>
+
+        <!-- Title -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>
+            Title
+          </th>
+
+          <td mat-cell *matCellDef="let contract">
+            {{ contract.title }}
+          </td>
+        </ng-container>
+
+        <!-- Category -->
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>
+            Category
+          </th>
+
+          <td mat-cell *matCellDef="let contract">
+            {{ contract.category }}
+          </td>
+        </ng-container>
+
+        <!-- Start Date -->
+        <ng-container matColumnDef="start_date">
+          <th mat-header-cell *matHeaderCellDef>
+            Start Date
+          </th>
+
+          <td mat-cell *matCellDef="let contract">
+            {{ contract.start_date | date:'dd-MM-yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- End Date -->
+        <ng-container matColumnDef="end_date">
+          <th mat-header-cell *matHeaderCellDef>
+            End Date
+          </th>
+
+          <td mat-cell *matCellDef="let contract">
+            {{ contract.end_date | date:'dd-MM-yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>
+            Status
+          </th>
+
+          <td mat-cell *matCellDef="let contract">
+            <span class="status-badge">
+              {{ contract.status }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Actions
+          </th>
+
+          <td mat-cell *matCellDef="let contract">
+
+            <button
+              mat-button
+              color="primary"
+              (click)="openEditForm(contract)">
+              Edit
+            </button>
+
+            <button
+              mat-button
+              (click)="viewContract(contract)">
+              View
+            </button>
+
+            <button
+              mat-button
+              *ngIf="contract.status === 'Draft'"
+              (click)="submitForReview(contract)">
+              Submit Review
+            </button>
+
+            <button
+              mat-button
+              color="primary"
+              *ngIf="contract.status === 'Under Review'"
+              (click)="approveContract(contract)">
+              Approve
+            </button>
+
+            <button
+              mat-button
+              color="primary"
+              *ngIf="contract.status === 'Approved'"
+              (click)="activateContract(contract)">
+              Activate
+            </button>
+
+          </td>
+
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns">
+        </tr>
+
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns;">
+        </tr>
+
+      </table>
+
+    </div>
+
+  </mat-card>
+  <!-- Contract Details -->
+<mat-card class="details-card" *ngIf="selectedContract">
+
+  <mat-card-header>
+    <mat-card-title>Contract Details</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+
+    <div class="details-grid">
+
+      <div>
+        <strong>Contract Number</strong>
+        <span>{{ selectedContract.contract_number }}</span>
+      </div>
+
+      <div>
+        <strong>Title</strong>
+        <span>{{ selectedContract.title }}</span>
+      </div>
+
+      <div>
+        <strong>Category</strong>
+        <span>{{ selectedContract.category }}</span>
+      </div>
+
+      <div>
+        <strong>Status</strong>
+        <span>{{ selectedContract.status }}</span>
+      </div>
+
+      <div>
+        <strong>Start Date</strong>
+        <span>{{ selectedContract.start_date | date:'dd-MM-yyyy' }}</span>
+      </div>
+
+      <div>
+        <strong>End Date</strong>
+        <span>{{ selectedContract.end_date | date:'dd-MM-yyyy' }}</span>
+      </div>
+
+      <div>
+        <strong>Created By</strong>
+        <span>{{ selectedContract.created_by }}</span>
+      </div>
+
+      <div>
+        <strong>Assigned To</strong>
+        <span>
+          {{ selectedContract.assigned_to || 'Not assigned' }}
+        </span>
+      </div>
+
+      <div class="full-width">
+        <strong>Description</strong>
+        <span>
+          {{ selectedContract.description || 'No description provided.' }}
+        </span>
+      </div>
+
+    </div>
+
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="closeDetails()">
+      Close Details
+    </button>
+
+  </mat-card-content>
+
+</mat-card>
+
+</div>

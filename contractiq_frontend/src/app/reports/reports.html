@@ -1,0 +1,512 @@
+<div class="reports-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Reports</h1>
+      <p>View contract, obligation, renewal, compliance and risk summaries.</p>
+    </div>
+
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="loadReports()"
+      [disabled]="loading">
+      Refresh Reports
+    </button>
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="success-message">
+    {{ successMessage }}
+  </div>
+  <mat-card class="filter-card">
+
+    <div class="filter-header">
+      <div>
+        <h2>Report Filters</h2>
+        <p>Filter report data by date range and report type.</p>
+      </div>
+    </div>
+
+    <div class="filter-grid">
+
+      <div class="filter-field">
+        <label for="reportType">Report Type</label>
+        <select
+          id="reportType"
+          [(ngModel)]="selectedReportType">
+          <option value="all">All Reports</option>
+          <option value="contracts">Contracts</option>
+          <option value="obligations">Obligations</option>
+          <option value="renewals">Renewals</option>
+          <option value="compliance">Compliance</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="startDate">Start Date</label>
+        <input
+          id="startDate"
+          type="date"
+          [(ngModel)]="startDate">
+      </div>
+
+      <div class="filter-field">
+        <label for="endDate">End Date</label>
+        <input
+          id="endDate"
+          type="date"
+          [(ngModel)]="endDate">
+      </div>
+
+      <div class="filter-actions">
+        <button
+          mat-flat-button
+          type="button"
+          (click)="applyFilters()">
+          Apply Filters
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="clearFilters()">
+          Clear
+        </button>
+      </div>
+
+    </div>
+
+  </mat-card>
+
+  <div
+    *ngIf="errorMessage"
+    class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div
+    *ngIf="loading"
+    class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading reports...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Contract Report -->
+    <mat-card
+      class="report-card"
+      *ngIf="contractStats">
+
+      <div class="report-header">
+        <div>
+          <h2>Contract Report</h2>
+          <p>Current contract status and category distribution.</p>
+        </div>
+
+        <div class="export-buttons">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('pdf', 'contracts')">
+            Export PDF
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('excel', 'contracts')">
+            Export Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+
+        <div class="stat-box">
+          <span>Total</span>
+          <strong>{{ contractStats.total }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Active</span>
+          <strong>{{ contractStats.active }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Draft</span>
+          <strong>{{ contractStats.draft }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Under Review</span>
+          <strong>{{ contractStats.under_review }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Approved</span>
+          <strong>{{ contractStats.approved }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Expired</span>
+          <strong>{{ contractStats.expired }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Terminated</span>
+          <strong>{{ contractStats.terminated }}</strong>
+        </div>
+
+      </div>
+
+      <div class="category-section">
+        <h3>Contracts by Category</h3>
+
+        <div
+          *ngIf="getCategoryEntries().length === 0"
+          class="empty-small">
+          No category data available.
+        </div>
+
+        <div
+          *ngFor="let item of getCategoryEntries()"
+          class="category-row">
+
+          <span>{{ item.category }}</span>
+          <strong>{{ item.count }}</strong>
+
+        </div>
+      </div>
+
+    </mat-card>
+
+    <!-- Obligation Report -->
+    <mat-card
+      class="report-card"
+      *ngIf="obligationStats">
+
+      <div class="report-header">
+        <div>
+          <h2>Obligation Report</h2>
+          <p>Obligation status summary.</p>
+        </div>
+
+        <div class="export-buttons">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('pdf', 'obligations')">
+            Export PDF
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('excel', 'obligations')">
+            Export Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+
+        <div class="stat-box">
+          <span>Total</span>
+          <strong>{{ obligationStats.total }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Pending</span>
+          <strong>{{ obligationStats.pending }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>In Progress</span>
+          <strong>{{ obligationStats.in_progress }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Completed</span>
+          <strong>{{ obligationStats.completed }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Delayed</span>
+          <strong>{{ obligationStats.delayed }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Overdue</span>
+          <strong>{{ obligationStats.overdue }}</strong>
+        </div>
+
+      </div>
+
+    </mat-card>
+
+    <!-- Renewal Report -->
+    <mat-card
+      class="report-card"
+      *ngIf="renewalStats">
+
+      <div class="report-header">
+        <div>
+          <h2>Renewal Report</h2>
+          <p>Renewal status and approaching expiries.</p>
+        </div>
+
+        <div class="export-buttons">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('pdf', 'renewals')">
+            Export PDF
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('excel', 'renewals')">
+            Export Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+
+        <div class="stat-box">
+          <span>Upcoming</span>
+          <strong>{{ renewalStats.upcoming }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>In Progress</span>
+          <strong>{{ renewalStats.in_progress }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Renewed</span>
+          <strong>{{ renewalStats.renewed }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Expired</span>
+          <strong>{{ renewalStats.expired }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Cancelled</span>
+          <strong>{{ renewalStats.cancelled }}</strong>
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <h3>Approaching Expiry</h3>
+
+        <div
+          *ngIf="renewalStats.approaching_expiry.length === 0"
+          class="empty-small">
+          No contracts are currently approaching expiry.
+        </div>
+
+        <table
+          *ngIf="renewalStats.approaching_expiry.length > 0">
+
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Expiry Date</th>
+              <th>Days Remaining</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="let item of renewalStats.approaching_expiry">
+
+              <td>{{ item.contract_number }}</td>
+
+              <td>
+                {{ item.expiry_date | date:'dd-MM-yyyy' }}
+              </td>
+
+              <td>
+                {{ item.days_remaining }}
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </mat-card>
+
+    <!-- Compliance Report -->
+    <mat-card
+      class="report-card"
+      *ngIf="complianceStats">
+
+      <div class="report-header">
+        <div>
+          <h2>Compliance Report</h2>
+          <p>Compliance status and average score.</p>
+        </div>
+
+        <div class="export-buttons">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('pdf', 'compliance')">
+            Export PDF
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadFile('excel', 'compliance')">
+            Export Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+
+        <div class="stat-box">
+          <span>Total Evaluated</span>
+          <strong>{{ complianceStats.total_evaluated }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Compliant</span>
+          <strong>{{ complianceStats.compliant }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Pending</span>
+          <strong>{{ complianceStats.pending }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Delayed</span>
+          <strong>{{ complianceStats.delayed }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Non-Compliant</span>
+          <strong>{{ complianceStats.non_compliant }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>High Risk</span>
+          <strong>{{ complianceStats.high_risk }}</strong>
+        </div>
+
+        <div class="stat-box">
+          <span>Average Score</span>
+          <strong>
+            {{
+              complianceStats.average_compliance_score !== null
+                ? (complianceStats.average_compliance_score | number:'1.0-2') + '%'
+                : 'N/A'
+            }}
+          </strong>
+        </div>
+
+      </div>
+
+    </mat-card>
+
+    <!-- Risk Report -->
+    <mat-card
+      class="report-card"
+      *ngIf="riskSummary">
+
+      <div class="report-header">
+        <div>
+          <h2>Risk Report</h2>
+          <p>Contracts requiring attention.</p>
+        </div>
+      </div>
+
+      <div class="risk-summary">
+        <span>Contracts Needing Attention</span>
+        <strong>{{ getRiskCount() }}</strong>
+      </div>
+
+      <div class="table-container">
+
+        <div
+          *ngIf="riskSummary.contracts_needing_attention.length === 0"
+          class="empty-small">
+          No contracts currently require attention.
+        </div>
+
+        <table
+          *ngIf="riskSummary.contracts_needing_attention.length > 0">
+
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Risk Level</th>
+              <th>Overdue Obligations</th>
+              <th>Compliance Score</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="let item of riskSummary.contracts_needing_attention">
+
+              <td>{{ item.contract_number }}</td>
+
+              <td>
+                <span class="risk-badge">
+                  {{ item.risk_level }}
+                </span>
+              </td>
+
+              <td>{{ item.overdue_obligations }}</td>
+
+              <td>
+                {{
+                  item.compliance_score !== null
+                    ? (item.compliance_score | number:'1.0-2') + '%'
+                    : 'N/A'
+                }}
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </mat-card>
+
+    <div
+      *ngIf="
+        !contractStats &&
+        !obligationStats &&
+        !renewalStats &&
+        !complianceStats &&
+        !riskSummary
+      "
+      class="empty-state">
+
+      <h3>No report data available</h3>
+      <p>There is currently no report information to display.</p>
+
+    </div>
+
+  </ng-container>
+
+
+</div>

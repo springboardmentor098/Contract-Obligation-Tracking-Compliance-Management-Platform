@@ -1,0 +1,135 @@
+<div class="audit-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Audit & Activity</h1>
+      <p>Track recent user actions, contract changes, and system activity.</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading audit history...</p>
+  </div>
+
+  <div *ngIf="!loading && errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && !errorMessage">
+
+    <!-- Recent Activities -->
+    <mat-card class="audit-card">
+      <mat-card-header>
+        <mat-card-title>Recent Activities</mat-card-title>
+        <mat-card-subtitle>
+          User activities and contract-related actions
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <div *ngIf="activities.length === 0" class="empty-state">
+          No activities found.
+        </div>
+
+        <div *ngIf="activities.length > 0" class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Who</th>
+                <th>Contract</th>
+                <th>Activity</th>
+                <th>Description</th>
+                <th>When</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let activity of activities">
+                <td>User #{{ activity.user_id }}</td>
+
+                <td>
+                  Contract #{{ activity.contract_id }}
+                </td>
+
+                <td>
+                  <span class="activity-type">
+                    {{ activity.activity_type }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ activity.description || 'No description available' }}
+                </td>
+
+                <td>
+                  {{ activity.created_at | date:'medium' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Audit Logs -->
+    <mat-card class="audit-card">
+      <mat-card-header>
+        <mat-card-title>Audit Logs</mat-card-title>
+        <mat-card-subtitle>
+          Recorded contract actions and changes
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <div *ngIf="auditLogs.length === 0" class="empty-state">
+          No audit logs found.
+        </div>
+
+        <div *ngIf="auditLogs.length > 0" class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Who</th>
+                <th>Contract</th>
+                <th>Action</th>
+                <th>Details</th>
+                <th>When</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let log of auditLogs">
+                <td>User #{{ log.user_id }}</td>
+
+                <td>
+                  Contract #{{ log.contract_id }}
+                </td>
+
+                <td>
+                  <span class="action-type">
+                    {{ log.action }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ log.details || 'No details available' }}
+                </td>
+
+                <td>
+                  {{ log.created_at | date:'medium' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+</div>

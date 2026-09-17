@@ -1,0 +1,28 @@
+<header class="app-header">
+  <div class="header-title">
+    <span class="logo">ContractIQ</span>
+    <span class="page-title">Contract Management System</span>
+  </div>
+
+  <div class="header-user">
+    <div class="user-info">
+      <span class="welcome-text">Welcome</span>
+
+      <span class="user-id" *ngIf="userId">
+        User #{{ userId }}
+      </span>
+
+      <span class="user-role" *ngIf="userRole">
+        {{ userRole }}
+      </span>
+    </div>
+
+    <button mat-raised-button (click)="goToProfile()">
+  Profile
+</button>
+
+<button mat-raised-button color="warn" (click)="logout()">
+  Logout
+</button>
+  </div>
+</header>

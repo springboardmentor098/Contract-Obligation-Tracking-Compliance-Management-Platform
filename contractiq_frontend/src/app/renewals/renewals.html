@@ -1,0 +1,535 @@
+<div class="renewals-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Renewal Management</h1>
+      <p>Track upcoming, active and completed contract renewals.</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openCreateForm()"
+      *ngIf="!showForm">
+      + Create Renewal
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="message success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="message error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Create / Edit Form -->
+  <mat-card class="form-card" *ngIf="showForm">
+
+    <mat-card-header>
+      <mat-card-title>
+        {{ editingRenewal ? 'Update Renewal' : 'Create Renewal' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <form
+        [formGroup]="renewalForm"
+        (ngSubmit)="saveRenewal()">
+
+        <div class="form-grid">
+
+          <mat-form-field appearance="outline">
+            <mat-label>Contract</mat-label>
+
+            <mat-select formControlName="contract_id">
+
+              <mat-option
+                *ngFor="let contract of contracts"
+                [value]="contract.id">
+
+                {{ contract.contract_number }} -
+                {{ contract.title }}
+
+              </mat-option>
+
+            </mat-select>
+
+            <mat-error
+              *ngIf="renewalForm.get('contract_id')?.hasError('required')">
+              Contract is required.
+            </mat-error>
+
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Renewal Date</mat-label>
+
+            <input
+              matInput
+              type="date"
+              formControlName="renewal_date">
+
+            <mat-error
+              *ngIf="renewalForm.get('renewal_date')?.hasError('required')">
+              Renewal date is required.
+            </mat-error>
+
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Previous Expiry Date</mat-label>
+
+            <input
+              matInput
+              type="date"
+              formControlName="previous_expiry_date">
+
+            <mat-error
+              *ngIf="renewalForm.get('previous_expiry_date')?.hasError('required')">
+              Previous expiry date is required.
+            </mat-error>
+
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>New Expiry Date</mat-label>
+
+            <input
+              matInput
+              type="date"
+              formControlName="new_expiry_date">
+
+            <mat-error
+              *ngIf="renewalForm.get('new_expiry_date')?.hasError('required')">
+              New expiry date is required.
+            </mat-error>
+
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Assigned User ID</mat-label>
+
+            <input
+              matInput
+              type="number"
+              formControlName="assigned_to"
+              placeholder="Optional user ID">
+
+          </mat-form-field>
+
+          <mat-form-field
+            appearance="outline"
+            class="notes-field">
+
+            <mat-label>Notes</mat-label>
+
+            <textarea
+              matInput
+              rows="3"
+              formControlName="notes"
+              placeholder="Enter renewal notes">
+            </textarea>
+
+          </mat-form-field>
+
+        </div>
+
+        <div class="form-actions">
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="saving">
+
+            {{ saving
+              ? 'Saving...'
+              : (editingRenewal
+                ? 'Update Renewal'
+                : 'Create Renewal') }}
+
+          </button>
+
+          <button
+            mat-button
+            type="button"
+            (click)="cancelForm()"
+            [disabled]="saving">
+
+            Cancel
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </mat-card-content>
+
+  </mat-card>
+
+  <!-- Filters -->
+  <mat-card class="filter-card" *ngIf="!showForm">
+
+    <div class="filters">
+
+      <mat-form-field appearance="outline">
+
+        <mat-label>Search renewals</mat-label>
+
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (input)="applyFilters()"
+          placeholder="Contract title or ID">
+
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+
+        <mat-label>Filter by status</mat-label>
+
+        <mat-select
+          [(value)]="selectedStatus"
+          (selectionChange)="applyFilters()">
+
+          <mat-option value="">
+            All statuses
+          </mat-option>
+
+          <mat-option
+            *ngFor="let status of statuses"
+            [value]="status">
+
+            {{ status }}
+
+          </mat-option>
+
+        </mat-select>
+
+      </mat-form-field>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="searchText=''; selectedStatus=''; applyFilters()">
+
+        Clear Filters
+
+      </button>
+
+    </div>
+
+  </mat-card>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    Loading renewals...
+  </div>
+
+  <!-- Empty State -->
+  <mat-card
+    class="empty-card"
+    *ngIf="
+      !loading &&
+      !showForm &&
+      filteredRenewals.length === 0
+    ">
+
+    <h3>No renewals found</h3>
+
+    <p *ngIf="renewals.length === 0">
+      There are no renewals available yet.
+    </p>
+
+    <p *ngIf="renewals.length > 0">
+      No renewals match your search or status filter.
+    </p>
+
+  </mat-card>
+
+  <!-- Renewal Table -->
+  <mat-card
+    class="table-card"
+    *ngIf="
+      !loading &&
+      !showForm &&
+      filteredRenewals.length > 0
+    ">
+
+    <div class="table-container">
+
+      <table
+        mat-table
+        [dataSource]="filteredRenewals">
+
+        <!-- Contract -->
+        <ng-container matColumnDef="contract_id">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Contract
+          </th>
+
+          <td mat-cell *matCellDef="let renewal">
+
+            {{ getContractTitle(renewal.contract_id) }}
+
+          </td>
+
+        </ng-container>
+
+        <!-- Renewal Date -->
+        <ng-container matColumnDef="renewal_date">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Renewal Date
+          </th>
+
+          <td mat-cell *matCellDef="let renewal">
+
+            {{ renewal.renewal_date | date:'dd-MM-yyyy' }}
+
+          </td>
+
+        </ng-container>
+
+        <!-- Previous Expiry -->
+        <ng-container matColumnDef="previous_expiry_date">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Previous Expiry
+          </th>
+
+          <td mat-cell *matCellDef="let renewal">
+
+            {{
+              renewal.previous_expiry_date
+                ? (renewal.previous_expiry_date | date:'dd-MM-yyyy')
+                : '—'
+            }}
+
+          </td>
+
+        </ng-container>
+
+        <!-- New Expiry -->
+        <ng-container matColumnDef="new_expiry_date">
+
+          <th mat-header-cell *matHeaderCellDef>
+            New Expiry
+          </th>
+
+          <td mat-cell *matCellDef="let renewal">
+
+            {{
+              renewal.new_expiry_date
+                ? (renewal.new_expiry_date | date:'dd-MM-yyyy')
+                : '—'
+            }}
+
+          </td>
+
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="renewal_status">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Status
+          </th>
+
+          <td mat-cell *matCellDef="let renewal">
+
+            <span class="status-badge">
+              {{ renewal.renewal_status }}
+            </span>
+
+          </td>
+
+        </ng-container>
+
+        <!-- Assigned -->
+        <ng-container matColumnDef="assigned_to">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Assigned To
+          </th>
+
+          <td mat-cell *matCellDef="let renewal">
+
+            {{
+              renewal.assigned_to
+                ? 'User #' + renewal.assigned_to
+                : 'Not assigned'
+            }}
+
+          </td>
+
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Actions
+          </th>
+
+          <td mat-cell *matCellDef="let renewal">
+
+            <button
+              mat-button
+              (click)="viewRenewal(renewal)">
+              View
+            </button>
+
+            <button
+              mat-button
+              color="primary"
+              (click)="openEditForm(renewal)"
+              *ngIf="
+                renewal.renewal_status !== 'Renewed' &&
+                renewal.renewal_status !== 'Expired' &&
+                renewal.renewal_status !== 'Cancelled'
+              ">
+
+              Edit
+
+            </button>
+
+            <button
+              mat-button
+              *ngIf="renewal.renewal_status === 'Upcoming'"
+              (click)="updateStatus(renewal, 'In Progress')">
+
+              Start
+
+            </button>
+
+            <button
+              mat-button
+              color="primary"
+              *ngIf="renewal.renewal_status === 'In Progress'"
+              (click)="renewContract(renewal)">
+
+              Renew
+
+            </button>
+
+          </td>
+
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns">
+        </tr>
+
+        <tr
+          mat-row
+          *matRowDef="
+            let row;
+            columns: displayedColumns;
+          ">
+        </tr>
+
+      </table>
+
+    </div>
+
+  </mat-card>
+
+  <!-- Renewal Details -->
+  <mat-card
+    class="details-card"
+    *ngIf="selectedRenewal">
+
+    <mat-card-header>
+      <mat-card-title>
+        Renewal Details
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <div class="details-grid">
+
+        <div>
+          <strong>Contract</strong>
+          <span>
+            {{ getContractTitle(selectedRenewal.contract_id) }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Status</strong>
+          <span>
+            {{ selectedRenewal.renewal_status }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Renewal Date</strong>
+          <span>
+            {{ selectedRenewal.renewal_date | date:'dd-MM-yyyy' }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Previous Expiry Date</strong>
+          <span>
+            {{
+              selectedRenewal.previous_expiry_date
+                ? (selectedRenewal.previous_expiry_date | date:'dd-MM-yyyy')
+                : '—'
+            }}
+          </span>
+        </div>
+
+        <div>
+          <strong>New Expiry Date</strong>
+          <span>
+            {{
+              selectedRenewal.new_expiry_date
+                ? (selectedRenewal.new_expiry_date | date:'dd-MM-yyyy')
+                : '—'
+            }}
+          </span>
+        </div>
+
+        <div>
+          <strong>Assigned To</strong>
+          <span>
+            {{
+              selectedRenewal.assigned_to
+                ? 'User #' + selectedRenewal.assigned_to
+                : 'Not assigned'
+            }}
+          </span>
+        </div>
+
+        <div class="full-width">
+          <strong>Notes</strong>
+          <span>
+            {{ selectedRenewal.notes || 'No notes provided.' }}
+          </span>
+        </div>
+
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="closeDetails()">
+
+        Close Details
+
+      </button>
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>

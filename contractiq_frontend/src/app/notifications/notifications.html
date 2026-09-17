@@ -1,0 +1,305 @@
+<div class="notifications-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Notifications</h1>
+      <p>View and manage your ContractIQ notifications.</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="markAllAsRead()"
+      [disabled]="getUnreadCount() === 0">
+      Mark All as Read
+    </button>
+  </div>
+
+  <div class="summary-grid">
+
+    <mat-card class="summary-card">
+      <div class="summary-label">Total Notifications</div>
+      <div class="summary-value">{{ notifications.length }}</div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="summary-label">Unread</div>
+      <div class="summary-value">{{ getUnreadCount() }}</div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="summary-label">Read</div>
+      <div class="summary-value">{{ getReadCount() }}</div>
+    </mat-card>
+
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="success-message">
+    {{ successMessage }}
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <mat-card class="filters-card">
+
+    <div class="filters">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Search notifications</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (ngModelChange)="applyFilters()"
+          placeholder="Search title, message or type">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select
+          [(ngModel)]="selectedStatus"
+          (selectionChange)="applyFilters()">
+
+          <mat-option value="">
+            All
+          </mat-option>
+
+          <mat-option
+            *ngFor="let status of statuses"
+            [value]="status">
+            {{ status }}
+          </mat-option>
+
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="clearFilters()">
+        Clear Filters
+      </button>
+
+    </div>
+
+  </mat-card>
+
+  <mat-card class="table-card">
+
+    <div
+      *ngIf="loading"
+      class="loading-state">
+      Loading notifications...
+    </div>
+
+    <div
+      *ngIf="!loading && filteredNotifications.length === 0"
+      class="empty-state">
+      <h3>No notifications found</h3>
+      <p>
+        There are no notifications matching the current filters.
+      </p>
+    </div>
+
+    <div
+      *ngIf="!loading && filteredNotifications.length > 0"
+      class="table-container">
+
+      <table
+        mat-table
+        [dataSource]="filteredNotifications">
+
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>
+            Title
+          </th>
+
+          <td mat-cell *matCellDef="let notification">
+            <strong>{{ notification.title }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="notification_type">
+          <th mat-header-cell *matHeaderCellDef>
+            Type
+          </th>
+
+          <td mat-cell *matCellDef="let notification">
+            {{ notification.notification_type }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="message">
+          <th mat-header-cell *matHeaderCellDef>
+            Message
+          </th>
+
+          <td mat-cell *matCellDef="let notification">
+            {{ notification.message }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>
+            Status
+          </th>
+
+          <td mat-cell *matCellDef="let notification">
+
+            <span
+              class="status-badge"
+              [ngClass]="getStatusClass(notification.status)">
+              {{ notification.status }}
+            </span>
+
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef>
+            Created
+          </th>
+
+          <td mat-cell *matCellDef="let notification">
+            {{ notification.created_at | date:'dd-MM-yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>
+            Actions
+          </th>
+
+          <td mat-cell *matCellDef="let notification">
+
+            <button
+              mat-button
+              color="primary"
+              (click)="viewNotification(notification)">
+              View
+            </button>
+
+            <button
+              mat-button
+              color="accent"
+              *ngIf="notification.status === 'Unread'"
+              (click)="markAsRead(notification)">
+              Mark Read
+            </button>
+
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns">
+        </tr>
+
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns;">
+        </tr>
+
+      </table>
+
+    </div>
+
+  </mat-card>
+
+  <mat-card
+    *ngIf="selectedNotification"
+    class="details-card">
+
+    <div class="details-header">
+      <div>
+        <h2>Notification Details</h2>
+        <p>{{ selectedNotification.title }}</p>
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="closeDetails()">
+        Close
+      </button>
+    </div>
+
+    <div class="details-grid">
+
+      <div>
+        <span class="detail-label">Notification ID</span>
+        <span>{{ selectedNotification.id }}</span>
+      </div>
+
+      <div>
+        <span class="detail-label">Type</span>
+        <span>{{ selectedNotification.notification_type }}</span>
+      </div>
+
+      <div>
+        <span class="detail-label">Status</span>
+        <span
+          class="status-badge"
+          [ngClass]="getStatusClass(selectedNotification.status)">
+          {{ selectedNotification.status }}
+        </span>
+      </div>
+
+      <div>
+        <span class="detail-label">Created</span>
+        <span>
+          {{ selectedNotification.created_at | date:'dd-MM-yyyy HH:mm' }}
+        </span>
+      </div>
+
+      <div>
+        <span class="detail-label">Contract ID</span>
+        <span>
+          {{ selectedNotification.contract_id || 'N/A' }}
+        </span>
+      </div>
+
+      <div>
+        <span class="detail-label">Obligation ID</span>
+        <span>
+          {{ selectedNotification.obligation_id || 'N/A' }}
+        </span>
+      </div>
+
+      <div>
+        <span class="detail-label">Read At</span>
+        <span>
+          {{
+            selectedNotification.read_at
+              ? (selectedNotification.read_at | date:'dd-MM-yyyy HH:mm')
+              : 'Not read'
+          }}
+        </span>
+      </div>
+
+      <div>
+        <span class="detail-label">Scheduled At</span>
+        <span>
+          {{
+            selectedNotification.scheduled_at
+              ? (selectedNotification.scheduled_at | date:'dd-MM-yyyy HH:mm')
+              : 'N/A'
+          }}
+        </span>
+      </div>
+
+    </div>
+
+    <div class="message-section">
+      <span class="detail-label">Message</span>
+      <p>{{ selectedNotification.message }}</p>
+    </div>
+
+  </mat-card>
+
+</div>

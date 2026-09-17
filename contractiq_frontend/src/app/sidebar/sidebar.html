@@ -1,0 +1,47 @@
+<nav class="sidebar">
+
+  <a routerLink="/dashboard" routerLinkActive="active">
+    Dashboard
+  </a>
+
+  @if (isAdmin() || isContractManager()) {
+    <a routerLink="/contracts" routerLinkActive="active">
+      Contracts
+    </a>
+  }
+
+  @if (isAdmin() || isContractManager()) {
+    <a routerLink="/obligations" routerLinkActive="active">
+      Obligations
+    </a>
+  }
+
+  @if (isAdmin() || isContractManager()) {
+    <a routerLink="/renewals" routerLinkActive="active">
+      Renewals
+    </a>
+  }
+
+  @if (isAdmin() || isComplianceOfficer()) {
+    <a routerLink="/compliance" routerLinkActive="active">
+      Compliance
+    </a>
+  }
+
+  <a routerLink="/notifications" routerLinkActive="active">
+    Notifications
+  </a>
+
+  @if (isAdmin() || isContractManager() || isComplianceOfficer()) {
+    <a routerLink="/reports" routerLinkActive="active">
+      Reports
+    </a>
+  }
+
+  @if (isAdmin()) {
+    <a routerLink="/audit-history" routerLinkActive="active">
+      Audit History
+    </a>
+  }
+
+</nav>
