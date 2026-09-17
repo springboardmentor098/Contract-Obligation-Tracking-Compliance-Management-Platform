@@ -1,0 +1,800 @@
+<div class="contracts-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Contracts</h1>
+
+      <p>
+        Manage contracts using the ContractIQ FastAPI backend.
+      </p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="openCreateForm()"
+    >
+      Add Contract
+    </button>
+
+  </div>
+
+
+  <!-- Messages -->
+
+  @if (successMessage) {
+    <div class="success-message">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+
+
+  <!-- Search and filters -->
+
+  <mat-card class="filter-card">
+
+    <mat-card-content>
+
+      <div class="filter-grid">
+
+        <mat-form-field
+          appearance="outline"
+          class="search-field"
+        >
+
+          <mat-label>Search contracts</mat-label>
+
+          <input
+            matInput
+            [value]="searchText"
+            (input)="onSearchChange($any($event.target).value)"
+            placeholder="Title, contract number or category"
+          />
+
+        </mat-form-field>
+
+
+        <mat-form-field
+          appearance="outline"
+          class="status-field"
+        >
+
+          <mat-label>Status</mat-label>
+
+          <mat-select
+            [value]="statusFilter"
+            (selectionChange)="onStatusFilterChange($event.value)"
+          >
+
+            <mat-option value="ALL">
+              All statuses
+            </mat-option>
+
+            @for (status of statuses; track status) {
+
+              <mat-option [value]="status">
+                {{ status }}
+              </mat-option>
+
+            }
+
+          </mat-select>
+
+        </mat-form-field>
+
+      </div>
+
+    </mat-card-content>
+
+  </mat-card>
+
+
+  <!-- Create / Edit Contract Form -->
+
+  @if (showForm) {
+
+    <mat-card class="form-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          {{ isEditMode ? 'Edit Contract' : 'Create Contract' }}
+        </mat-card-title>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <form
+          [formGroup]="contractForm"
+          (ngSubmit)="saveContract()"
+        >
+
+          <div class="form-grid">
+
+            <!-- Title -->
+
+            <mat-form-field appearance="outline">
+
+              <mat-label>Title</mat-label>
+
+              <input
+                matInput
+                formControlName="title"
+              />
+
+              @if (
+                contractForm.get('title')?.hasError('required')
+                && contractForm.get('title')?.touched
+              ) {
+
+                <mat-error>
+                  Title is required.
+                </mat-error>
+
+              }
+
+            </mat-form-field>
+
+
+            <!-- Contract Number -->
+
+            @if (!isEditMode) {
+
+              <mat-form-field appearance="outline">
+
+                <mat-label>Contract Number</mat-label>
+
+                <input
+                  matInput
+                  formControlName="contract_number"
+                  placeholder="e.g. CON-2026-010"
+                />
+
+                @if (
+                  contractForm.get('contract_number')?.hasError('required')
+                  && contractForm.get('contract_number')?.touched
+                ) {
+
+                  <mat-error>
+                    Contract number is required.
+                  </mat-error>
+
+                }
+
+              </mat-form-field>
+
+            }
+
+
+            <!-- Category -->
+
+            <mat-form-field appearance="outline">
+
+              <mat-label>Category</mat-label>
+
+              <input
+                matInput
+                formControlName="category"
+                placeholder="e.g. Service Agreement"
+              />
+
+              @if (
+                contractForm.get('category')?.hasError('required')
+                && contractForm.get('category')?.touched
+              ) {
+
+                <mat-error>
+                  Category is required.
+                </mat-error>
+
+              }
+
+            </mat-form-field>
+
+
+            <!-- Start Date -->
+
+            <mat-form-field appearance="outline">
+
+              <mat-label>Start Date</mat-label>
+
+              <input
+                matInput
+                type="date"
+                formControlName="start_date"
+              />
+
+              @if (
+                contractForm.get('start_date')?.hasError('required')
+                && contractForm.get('start_date')?.touched
+              ) {
+
+                <mat-error>
+                  Start date is required.
+                </mat-error>
+
+              }
+
+            </mat-form-field>
+
+
+            <!-- End Date -->
+
+            <mat-form-field appearance="outline">
+
+              <mat-label>End Date</mat-label>
+
+              <input
+                matInput
+                type="date"
+                formControlName="end_date"
+              />
+
+              @if (
+                contractForm.get('end_date')?.hasError('required')
+                && contractForm.get('end_date')?.touched
+              ) {
+
+                <mat-error>
+                  End date is required.
+                </mat-error>
+
+              }
+
+            </mat-form-field>
+
+
+            <!-- Description -->
+
+            <mat-form-field
+              appearance="outline"
+              class="full-width"
+            >
+
+              <mat-label>Description</mat-label>
+
+              <textarea
+                matInput
+                rows="4"
+                formControlName="description"
+                placeholder="Enter contract description"
+              ></textarea>
+
+            </mat-form-field>
+
+          </div>
+
+
+          <!-- Form actions -->
+
+          <div class="form-actions">
+
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="saving"
+            >
+
+              @if (saving) {
+
+                Saving...
+
+              } @else {
+
+                {{ isEditMode
+                  ? 'Update Contract'
+                  : 'Create Contract'
+                }}
+
+              }
+
+            </button>
+
+
+            <button
+              mat-button
+              type="button"
+              [disabled]="saving"
+              (click)="cancelForm()"
+            >
+              Cancel
+            </button>
+
+          </div>
+
+        </form>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Loading -->
+
+  @if (loading) {
+
+    <div class="loading-container">
+
+      <mat-spinner></mat-spinner>
+
+      <p>
+        Loading contracts...
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- Empty -->
+
+  @if (
+    !loading &&
+    filteredContracts.length === 0
+  ) {
+
+    <mat-card class="empty-card">
+
+      <mat-card-content>
+
+        @if (contracts.length === 0) {
+
+          <h2>
+            No contracts found.
+          </h2>
+
+          <p>
+            There are currently no contracts available from the backend.
+          </p>
+
+        } @else {
+
+          <h2>
+            No matching contracts found.
+          </h2>
+
+          <p>
+            Try changing your search text or status filter.
+          </p>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Contract Table -->
+
+  @if (
+    !loading &&
+    filteredContracts.length > 0
+  ) {
+
+    <mat-card class="table-card">
+
+      <mat-card-content>
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Contract Number
+                </th>
+
+                <th>
+                  Title
+                </th>
+
+                <th>
+                  Category
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Start Date
+                </th>
+
+                <th>
+                  End Date
+                </th>
+
+                <th>
+                  Actions
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                contract of filteredContracts;
+                track contract.id
+              ) {
+
+                <tr>
+
+                  <td>
+                    {{ contract.contract_number }}
+                  </td>
+
+                  <td>
+                    {{ contract.title }}
+                  </td>
+
+                  <td>
+                    {{ contract.category }}
+                  </td>
+
+                  <td>
+
+                    <span
+                      class="status-badge"
+                      [class.active]="contract.status === 'Active'"
+                      [class.draft]="contract.status === 'Draft'"
+                      [class.approved]="contract.status === 'Approved'"
+                      [class.expired]="contract.status === 'Expired'"
+                    >
+
+                      {{ contract.status }}
+
+                    </span>
+
+                  </td>
+
+                  <td>
+                    {{ contract.start_date }}
+                  </td>
+
+                  <td>
+                    {{ contract.end_date || '-' }}
+                  </td>
+
+                  <td>
+
+                    <div class="action-buttons">
+
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="viewContract(contract)"
+                      >
+                        View
+                      </button>
+
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="openEditForm(contract)"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="deleteContract(contract)"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Contract Details -->
+
+  @if (selectedContract) {
+
+    <mat-card class="details-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Contract Details
+        </mat-card-title>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="details-grid">
+
+          <div>
+
+            <strong>ID</strong>
+
+            <span>
+              {{ selectedContract.id }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Contract Number</strong>
+
+            <span>
+              {{ selectedContract.contract_number }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Title</strong>
+
+            <span>
+              {{ selectedContract.title }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Category</strong>
+
+            <span>
+              {{ selectedContract.category }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Status</strong>
+
+            <span>
+              {{ selectedContract.status }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Start Date</strong>
+
+            <span>
+              {{ selectedContract.start_date }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>End Date</strong>
+
+            <span>
+              {{ selectedContract.end_date || '-' }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Created By</strong>
+
+            <span>
+              {{ selectedContract.created_by }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Assigned To</strong>
+
+            <span>
+              {{
+                selectedContract.assigned_to ??
+                'Not assigned'
+              }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Reviewed At</strong>
+
+            <span>
+              {{ selectedContract.reviewed_at || '-' }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>Approved At</strong>
+
+            <span>
+              {{ selectedContract.approved_at || '-' }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="description-box">
+
+          <strong>
+            Description
+          </strong>
+
+          <p>
+            {{
+              selectedContract.description ||
+              'No description available.'
+            }}
+          </p>
+
+        </div>
+
+
+        <!-- Change Status -->
+
+        <div class="status-action">
+
+          <mat-form-field appearance="outline">
+
+            <mat-label>
+              Change Status
+            </mat-label>
+
+            <mat-select
+              [value]="selectedContract.status"
+              (selectionChange)="
+                changeStatus(
+                  selectedContract!,
+                  $event.value
+                )
+              "
+            >
+
+              @for (
+                status of statuses;
+                track status
+              ) {
+
+                <mat-option
+                  [value]="status"
+                >
+                  {{ status }}
+                </mat-option>
+
+              }
+
+            </mat-select>
+
+          </mat-form-field>
+
+        </div>
+
+
+        <!-- Workflow Actions -->
+
+        <div class="workflow-actions">
+
+          @if (
+            selectedContract.status === 'Draft'
+          ) {
+
+            <button
+              mat-raised-button
+              type="button"
+              (click)="
+                submitForReview(selectedContract)
+              "
+            >
+              Submit for Review
+            </button>
+
+          }
+
+
+          @if (
+            selectedContract.status === 'Under Review'
+          ) {
+
+            <button
+              mat-raised-button
+              type="button"
+              (click)="
+                approveContract(selectedContract)
+              "
+            >
+              Approve
+            </button>
+
+          }
+
+
+          @if (
+            selectedContract.status === 'Approved'
+          ) {
+
+            <button
+              mat-raised-button
+              type="button"
+              (click)="
+                activateContract(selectedContract)
+              "
+            >
+              Activate
+            </button>
+
+          }
+
+        </div>
+
+
+        <button
+          mat-button
+          type="button"
+          (click)="closeDetails()"
+        >
+          Close Details
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+</div>

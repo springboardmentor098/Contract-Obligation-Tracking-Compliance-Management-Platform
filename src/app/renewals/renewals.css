@@ -1,0 +1,29 @@
+.page-container {
+  padding: 30px;
+}
+
+.page-container h1 {
+  margin-bottom: 8px;
+}
+
+.page-description {
+  margin-bottom: 25px;
+}
+
+.placeholder-card {
+  max-width: 750px;
+  padding: 25px;
+  border-radius: 8px;
+  background: #f4f6f8;
+}
+
+.placeholder-card h2 {
+  margin-top: 0;
+}
+
+.placeholder-message {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 6px;
+  background: #ffffff;
+}

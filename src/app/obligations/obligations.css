@@ -1,0 +1,166 @@
+.page-container {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.page-header p {
+  margin: 0;
+  color: #666;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.success-message {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.form-card {
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.filter-card {
+  margin-bottom: 20px;
+  padding: 18px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.state-card {
+  margin-top: 20px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+
+th,
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  font-weight: 600;
+  background: #f7f7f7;
+}
+
+.title-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.overdue-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+}
+
+.status-badge.completed {
+  background: #d4edda;
+}
+
+.status-badge.overdue {
+  background: #f8d7da;
+}
+
+.status-badge.in-progress {
+  background: #dbeafe;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-select {
+  width: 140px;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-grid,
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-container {
+    padding: 16px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+}

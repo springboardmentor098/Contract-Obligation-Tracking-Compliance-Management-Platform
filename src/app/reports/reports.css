@@ -1,0 +1,239 @@
+.renewals-page {
+  padding: 30px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px 0;
+}
+
+.page-header p {
+  margin: 0;
+  color: #666;
+}
+
+.filter-card {
+  margin-bottom: 20px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+}
+
+.filter-grid mat-form-field {
+  width: 100%;
+}
+
+.form-card {
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.form-grid mat-form-field {
+  width: 100%;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.table-card {
+  margin-bottom: 20px;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1350px;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+th {
+  font-weight: 600;
+  background: #f7f7f7;
+}
+
+.notes-cell {
+  max-width: 280px;
+  white-space: normal;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.status-select {
+  width: 145px;
+  margin: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 14px;
+  background: #eeeeee;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: #fff8e1;
+}
+
+.status-badge.in-progress {
+  background: #e3f2fd;
+}
+
+.status-badge.renewed {
+  background: #e8f5e9;
+}
+
+.status-badge.expired {
+  background: #ffebee;
+}
+
+.details-card {
+  margin-top: 20px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.details-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.notes-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 6px;
+  background: #f4f6f8;
+}
+
+.notes-box p {
+  margin: 8px 0 0 0;
+  line-height: 1.5;
+}
+
+.workflow-actions {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+}
+
+.empty-card {
+  margin-top: 20px;
+}
+
+.success-message {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.error-message {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #ffebee;
+  color: #b00020;
+}
+
+@media (max-width: 1100px) {
+
+  .filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+
+  .renewals-page {
+    padding: 20px;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .renewals-page {
+    padding: 15px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

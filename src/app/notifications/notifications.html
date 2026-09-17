@@ -1,0 +1,494 @@
+<div class="notifications-page">
+
+  <!-- ===================================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div class="header-text">
+      <div class="page-title-row">
+        <div class="page-title-icon">
+          <mat-icon>notifications</mat-icon>
+        </div>
+
+        <div>
+          <h1>Notifications</h1>
+
+          <p>
+            Stay updated with contract, obligation, renewal and compliance alerts.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      [disabled]="actionLoading || getUnreadCount() === 0"
+      (click)="markAllAsRead()"
+    >
+      <mat-icon>done_all</mat-icon>
+      Mark All as Read
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SUMMARY -->
+  <!-- ===================================================== -->
+
+  <div class="summary-grid">
+
+    <!-- Total -->
+    <mat-card class="summary-card total-card">
+
+      <mat-card-content>
+
+        <div class="summary-icon">
+          <mat-icon>notifications</mat-icon>
+        </div>
+
+        <div class="summary-info">
+          <span class="summary-label">
+            Total Notifications
+          </span>
+
+          <strong class="summary-value">
+            {{ notifications.length }}
+          </strong>
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- Unread -->
+    <mat-card class="summary-card unread-summary-card">
+
+      <mat-card-content>
+
+        <div class="summary-icon">
+          <mat-icon>mark_email_unread</mat-icon>
+        </div>
+
+        <div class="summary-info">
+          <span class="summary-label">
+            Unread
+          </span>
+
+          <strong class="summary-value">
+            {{ getUnreadCount() }}
+          </strong>
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- Read -->
+    <mat-card class="summary-card read-summary-card">
+
+      <mat-card-content>
+
+        <div class="summary-icon">
+          <mat-icon>mark_email_read</mat-icon>
+        </div>
+
+        <div class="summary-info">
+          <span class="summary-label">
+            Read
+          </span>
+
+          <strong class="summary-value">
+            {{ getReadCount() }}
+          </strong>
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SUCCESS MESSAGE -->
+  <!-- ===================================================== -->
+
+  @if (successMessage) {
+
+    <div class="message success-message">
+
+      <mat-icon>
+        check_circle
+      </mat-icon>
+
+      <span>
+        {{ successMessage }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR MESSAGE -->
+  <!-- ===================================================== -->
+
+  @if (errorMessage) {
+
+    <div class="message error-message">
+
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- LOADING -->
+  <!-- ===================================================== -->
+
+  @if (loading) {
+
+    <div class="state-container">
+
+      <mat-spinner diameter="44"></mat-spinner>
+
+      <h3>
+        Loading notifications...
+      </h3>
+
+      <p>
+        Please wait while your notifications are loaded.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- EMPTY -->
+  <!-- ===================================================== -->
+
+  @if (!loading && notifications.length === 0) {
+
+    <mat-card class="empty-card">
+
+      <mat-card-content>
+
+        <div class="empty-icon">
+          <mat-icon>
+            notifications_none
+          </mat-icon>
+        </div>
+
+        <h2>
+          No Notifications
+        </h2>
+
+        <p>
+          There are currently no notifications to display.
+        </p>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- NOTIFICATION LIST -->
+  <!-- ===================================================== -->
+
+  @if (!loading && notifications.length > 0) {
+
+    <section class="notification-section">
+
+      <div class="section-header">
+
+        <div>
+          <h2>Recent Notifications</h2>
+
+          <p>
+            Select a notification to open the related record.
+          </p>
+        </div>
+
+        <span class="notification-count">
+          {{ notifications.length }}
+          notification{{ notifications.length === 1 ? '' : 's' }}
+        </span>
+
+      </div>
+
+
+      <div class="notifications-list">
+
+        @for (
+          notification of notifications;
+          track notification.id
+        ) {
+
+          <mat-card
+            class="notification-card"
+            [class.unread]="!isRead(notification)"
+            [class.read]="isRead(notification)"
+            role="button"
+            tabindex="0"
+            (click)="openNotification(notification)"
+            (keydown.enter)="openNotification(notification)"
+            (keydown.space)="$event.preventDefault(); openNotification(notification)"
+          >
+
+            <mat-card-content>
+
+              <!-- =========================================== -->
+              <!-- LEFT ICON -->
+              <!-- =========================================== -->
+
+              <div class="notification-icon-wrapper">
+
+                <div class="notification-icon">
+
+                  @if (
+                    notification.notification_type
+                      .toLowerCase()
+                      .includes('compliance')
+                  ) {
+
+                    <mat-icon>
+                      verified_user
+                    </mat-icon>
+
+                  } @else if (
+                    notification.notification_type
+                      .toLowerCase()
+                      .includes('renewal')
+                  ) {
+
+                    <mat-icon>
+                      event
+                    </mat-icon>
+
+                  } @else if (
+                    notification.notification_type
+                      .toLowerCase()
+                      .includes('obligation')
+                  ) {
+
+                    <mat-icon>
+                      task_alt
+                    </mat-icon>
+
+                  } @else if (
+                    notification.notification_type
+                      .toLowerCase()
+                      .includes('approval')
+                  ) {
+
+                    <mat-icon>
+                      approval
+                    </mat-icon>
+
+                  } @else {
+
+                    <mat-icon>
+                      notifications
+                    </mat-icon>
+
+                  }
+
+                </div>
+
+                @if (!isRead(notification)) {
+
+                  <span class="unread-dot"></span>
+
+                }
+
+              </div>
+
+
+              <!-- =========================================== -->
+              <!-- MAIN CONTENT -->
+              <!-- =========================================== -->
+
+              <div class="notification-main">
+
+                <!-- TOP ROW -->
+                <div class="notification-heading">
+
+                  <div class="title-area">
+
+                    <h3>
+                      {{ notification.title }}
+                    </h3>
+
+                    @if (!isRead(notification)) {
+
+                      <span class="status-badge unread-badge">
+                        <mat-icon>fiber_manual_record</mat-icon>
+                        Unread
+                      </span>
+
+                    } @else {
+
+                      <span class="status-badge read-badge">
+                        <mat-icon>check_circle</mat-icon>
+                        Read
+                      </span>
+
+                    }
+
+                  </div>
+
+                  <span class="notification-date">
+
+                    {{ notification.created_at | date:'MMM d, y, h:mm a' }}
+
+                  </span>
+
+                </div>
+
+
+                <!-- MESSAGE -->
+                <p class="notification-message">
+                  {{ notification.message }}
+                </p>
+
+
+                <!-- DETAILS -->
+                <div class="notification-details">
+
+                  @if (
+                    notification.contract_id !== null &&
+                    notification.contract_id !== undefined
+                  ) {
+
+                    <div class="detail-item contract-detail">
+
+                      <mat-icon>
+                        description
+                      </mat-icon>
+
+                      <div>
+                        <span class="detail-label">
+                          Contract
+                        </span>
+
+                        <strong>
+                          #{{ notification.contract_id }}
+                        </strong>
+                      </div>
+
+                    </div>
+
+                  }
+
+
+                  <div class="detail-item">
+
+                    <mat-icon>
+                      category
+                    </mat-icon>
+
+                    <div>
+
+                      <span class="detail-label">
+                        Notification Type
+                      </span>
+
+                      <strong>
+                        {{ notification.notification_type }}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <!-- FOOTER -->
+                <div class="notification-footer">
+
+                  <span class="open-hint">
+
+                    <mat-icon>
+                      touch_app
+                    </mat-icon>
+
+                    Click anywhere to view details
+
+                  </span>
+
+
+                  @if (
+                    notification.contract_id !== null &&
+                    notification.contract_id !== undefined
+                  ) {
+
+                    <button
+                      mat-stroked-button
+                      color="primary"
+                      type="button"
+                      [disabled]="actionLoading"
+                      (click)="$event.stopPropagation(); openNotification(notification)"
+                    >
+                      <mat-icon>
+                        open_in_new
+                      </mat-icon>
+
+                      View Details
+                    </button>
+
+                  } @else {
+
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      [disabled]="actionLoading"
+                      (click)="$event.stopPropagation(); openNotification(notification)"
+                    >
+                      <mat-icon>
+                        open_in_new
+                      </mat-icon>
+
+                      Open
+                    </button>
+
+                  }
+
+                </div>
+
+              </div>
+
+            </mat-card-content>
+
+          </mat-card>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+</div>

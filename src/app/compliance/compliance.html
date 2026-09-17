@@ -1,0 +1,1066 @@
+<div class="compliance-page">
+
+  <!-- Header -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Compliance</h1>
+
+      <p>
+        Monitor contract compliance, obligation performance and risk.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- Messages -->
+
+  @if (successMessage) {
+
+    <div class="success-message">
+      {{ successMessage }}
+    </div>
+
+  }
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <!-- Summary Cards -->
+
+  <div class="summary-grid">
+
+    <!-- Total Contracts -->
+
+    <mat-card>
+
+      <mat-card-content>
+
+        <span class="summary-label">
+          Total Contracts
+        </span>
+
+        <strong>
+          {{ evaluations.length }}
+        </strong>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- Compliant -->
+
+    <mat-card>
+
+      <mat-card-content>
+
+        <span class="summary-label">
+          Compliant
+        </span>
+
+        <strong>
+          {{ compliantCount }}
+        </strong>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- Non-Compliant -->
+
+    <mat-card>
+
+      <mat-card-content>
+
+        <span class="summary-label">
+          Non-Compliant
+        </span>
+
+        <strong>
+          {{ nonCompliantCount }}
+        </strong>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- High Risk -->
+
+    <mat-card>
+
+      <mat-card-content>
+
+        <span class="summary-label">
+          High Risk
+        </span>
+
+        <strong>
+          {{ highRiskCount }}
+        </strong>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+
+
+  <!-- Evaluate Contract -->
+
+  <mat-card class="evaluation-card">
+
+    <mat-card-header>
+
+      <mat-card-title>
+        Evaluate Contract
+      </mat-card-title>
+
+    </mat-card-header>
+
+
+    <mat-card-content>
+
+      <div class="evaluation-form">
+
+        <mat-form-field
+          appearance="outline"
+        >
+
+          <mat-label>
+            Contract ID
+          </mat-label>
+
+          <input
+            matInput
+            type="number"
+            min="1"
+            [(ngModel)]="contractIdInput"
+            placeholder="Enter contract ID"
+          />
+
+        </mat-form-field>
+
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="actionLoading"
+          (click)="evaluateContract()"
+        >
+
+          @if (actionLoading) {
+            Evaluating...
+          } @else {
+            Evaluate
+          }
+
+        </button>
+
+
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="actionLoading"
+          (click)="saveEvaluation()"
+        >
+
+          @if (actionLoading) {
+            Saving...
+          } @else {
+            Save Evaluation
+          }
+
+        </button>
+
+      </div>
+
+    </mat-card-content>
+
+  </mat-card>
+
+
+  <!-- Filters -->
+
+  <mat-card class="filter-card">
+
+    <mat-card-content>
+
+      <div class="filter-grid">
+
+
+        <!-- Search -->
+
+        <mat-form-field
+          appearance="outline"
+        >
+
+          <mat-label>
+            Search
+          </mat-label>
+
+          <input
+            matInput
+            [value]="searchText"
+            (input)="
+              onSearchChange(
+                $any($event.target).value
+              )
+            "
+            placeholder="Contract ID, status or risk"
+          />
+
+        </mat-form-field>
+
+
+        <!-- Compliance Status -->
+
+        <mat-form-field
+          appearance="outline"
+        >
+
+          <mat-label>
+            Compliance Status
+          </mat-label>
+
+          <mat-select
+            [value]="statusFilter"
+            (selectionChange)="
+              onStatusFilterChange(
+                $event.value
+              )
+            "
+          >
+
+            <mat-option value="ALL">
+              All statuses
+            </mat-option>
+
+            @for (
+              status of statusOptions;
+              track status
+            ) {
+
+              <mat-option [value]="status">
+                {{ status }}
+              </mat-option>
+
+            }
+
+          </mat-select>
+
+        </mat-form-field>
+
+
+        <!-- Risk -->
+
+        <mat-form-field
+          appearance="outline"
+        >
+
+          <mat-label>
+            Risk Level
+          </mat-label>
+
+          <mat-select
+            [value]="riskFilter"
+            (selectionChange)="
+              onRiskFilterChange(
+                $event.value
+              )
+            "
+          >
+
+            <mat-option value="ALL">
+              All risk levels
+            </mat-option>
+
+            @for (
+              risk of riskOptions;
+              track risk
+            ) {
+
+              <mat-option [value]="risk">
+                {{ risk }}
+              </mat-option>
+
+            }
+
+          </mat-select>
+
+        </mat-form-field>
+
+      </div>
+
+    </mat-card-content>
+
+  </mat-card>
+
+
+  <!-- Loading -->
+
+  @if (loading) {
+
+    <div class="loading-container">
+
+      <mat-spinner></mat-spinner>
+
+      <p>
+        Loading compliance data...
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- Empty -->
+
+  @if (
+    !loading &&
+    filteredEvaluations.length === 0
+  ) {
+
+    <mat-card class="empty-card">
+
+      <mat-card-content>
+
+        @if (evaluations.length === 0) {
+
+          <h2>
+            No compliance data found.
+          </h2>
+
+          <p>
+            The backend did not return any compliance evaluations.
+          </p>
+
+        } @else {
+
+          <h2>
+            No matching compliance records found.
+          </h2>
+
+          <p>
+            Try changing your search or filters.
+          </p>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Compliance Table -->
+
+  @if (
+    !loading &&
+    filteredEvaluations.length > 0
+  ) {
+
+    <mat-card class="table-card">
+
+      <mat-card-content>
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Contract ID
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Score
+                </th>
+
+                <th>
+                  Total Obligations
+                </th>
+
+                <th>
+                  Completed
+                </th>
+
+                <th>
+                  Pending
+                </th>
+
+                <th>
+                  Delayed
+                </th>
+
+                <th>
+                  Overdue
+                </th>
+
+                <th>
+                  Risk
+                </th>
+
+                <th>
+                  Evaluated At
+                </th>
+
+                <th>
+                  Actions
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                evaluation of filteredEvaluations;
+                track evaluation.contract_id
+              ) {
+
+                <tr>
+
+                  <!-- Contract -->
+
+                  <td>
+                    #{{ evaluation.contract_id }}
+                  </td>
+
+
+                  <!-- Status -->
+
+                  <td>
+
+                    <span
+                      class="status-badge"
+                      [ngClass]="
+                        getStatusClass(
+                          evaluation.compliance_status
+                        )
+                      "
+                    >
+
+                      {{ evaluation.compliance_status }}
+
+                    </span>
+
+                  </td>
+
+
+                  <!-- Score -->
+
+                  <td>
+
+                    <span
+                      class="score"
+                      [ngClass]="
+                        getScoreClass(
+                          evaluation.compliance_score
+                        )
+                      "
+                    >
+
+                      {{ evaluation.compliance_score }}%
+
+                    </span>
+
+                  </td>
+
+
+                  <!-- Total obligations -->
+
+                  <td>
+                    {{ evaluation.total_obligations }}
+                  </td>
+
+
+                  <!-- Completed -->
+
+                  <td>
+                    {{ evaluation.completed_obligations }}
+                  </td>
+
+
+                  <!-- Pending -->
+
+                  <td>
+                    {{ evaluation.pending_obligations }}
+                  </td>
+
+
+                  <!-- Delayed -->
+
+                  <td>
+                    {{ evaluation.delayed_obligations }}
+                  </td>
+
+
+                  <!-- Overdue -->
+
+                  <td>
+
+                    @if (
+                      evaluation.overdue_obligations > 0
+                    ) {
+
+                      <strong class="overdue">
+                        {{ evaluation.overdue_obligations }}
+                      </strong>
+
+                    } @else {
+
+                      0
+
+                    }
+
+                  </td>
+
+
+                  <!-- Risk -->
+
+                  <td>
+
+                    <span
+                      class="risk-badge"
+                      [ngClass]="
+                        getRiskClass(
+                          evaluation.risk_level
+                        )
+                      "
+                    >
+
+                      {{ evaluation.risk_level }}
+
+                    </span>
+
+                  </td>
+
+
+                  <!-- Evaluated -->
+
+                  <td>
+                    {{
+                      evaluation.evaluated_at
+                      | date:'medium'
+                    }}
+                  </td>
+
+
+                  <!-- Actions -->
+
+                  <td>
+
+                    <div class="action-buttons">
+
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="
+                          viewEvaluation(
+                            evaluation
+                          )
+                        "
+                      >
+                        View
+                      </button>
+
+
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="
+                          contractIdInput =
+                            evaluation.contract_id;
+                          loadContractHistory(
+                            evaluation.contract_id
+                          )
+                        "
+                      >
+                        History
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Selected Evaluation -->
+
+  @if (selectedEvaluation) {
+
+    <mat-card class="details-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Compliance Details
+        </mat-card-title>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="details-grid">
+
+          <div>
+
+            <strong>
+              Contract ID
+            </strong>
+
+            <span>
+              #{{ selectedEvaluation.contract_id }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Compliance Status
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.compliance_status }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Compliance Score
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.compliance_score }}%
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Risk Level
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.risk_level }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Total Obligations
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.total_obligations }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Completed Obligations
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.completed_obligations }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Pending Obligations
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.pending_obligations }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Delayed Obligations
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.delayed_obligations }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Overdue Obligations
+            </strong>
+
+            <span>
+              {{ selectedEvaluation.overdue_obligations }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Evaluated At
+            </strong>
+
+            <span>
+              {{
+                selectedEvaluation.evaluated_at
+                | date:'medium'
+              }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <button
+          mat-button
+          type="button"
+          (click)="clearSelection()"
+        >
+          Close
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Selected Saved Record -->
+
+  @if (selectedRecord) {
+
+    <mat-card class="details-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Saved Compliance Record
+        </mat-card-title>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="details-grid">
+
+          <div>
+
+            <strong>
+              Record ID
+            </strong>
+
+            <span>
+              {{ selectedRecord.id }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Contract ID
+            </strong>
+
+            <span>
+              #{{ selectedRecord.contract_id }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Status
+            </strong>
+
+            <span>
+              {{ selectedRecord.status }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Compliance Score
+            </strong>
+
+            <span>
+              {{ selectedRecord.compliance_score }}%
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Risk Level
+            </strong>
+
+            <span>
+              {{ selectedRecord.risk_level }}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Evaluated At
+            </strong>
+
+            <span>
+              {{
+                selectedRecord.evaluated_at
+                | date:'medium'
+              }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="notes-box">
+
+          <strong>
+            Notes
+          </strong>
+
+          <p>
+            {{
+              selectedRecord.notes ||
+              'No notes available.'
+            }}
+          </p>
+
+        </div>
+
+
+        <button
+          mat-button
+          type="button"
+          (click)="selectedRecord = null"
+        >
+          Close Record
+        </button>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Compliance History -->
+
+  @if (contractHistory.length > 0) {
+
+    <mat-card class="history-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+
+          Compliance History
+          — Contract #{{ contractIdInput }}
+
+        </mat-card-title>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="history-list">
+
+          @for (
+            record of contractHistory;
+            track record.id
+          ) {
+
+            <div class="history-item">
+
+              <div>
+
+                <strong>
+                  {{ record.status }}
+                </strong>
+
+                <span>
+                  Score:
+                  {{ record.compliance_score }}%
+                </span>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Risk:
+                  {{ record.risk_level }}
+                </span>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  {{
+                    record.evaluated_at
+                    | date:'medium'
+                  }}
+                </span>
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- Saved Compliance Records -->
+
+  @if (savedRecords.length > 0) {
+
+    <mat-card class="records-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Saved Compliance Records
+        </mat-card-title>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        <div class="records-list">
+
+          @for (
+            record of savedRecords;
+            track record.id
+          ) {
+
+            <div class="record-row">
+
+              <span>
+                Contract #{{ record.contract_id }}
+              </span>
+
+              <span>
+                {{ record.status }}
+              </span>
+
+              <span>
+                {{ record.compliance_score }}%
+              </span>
+
+              <span>
+                {{ record.risk_level }}
+              </span>
+
+              <button
+                mat-button
+                type="button"
+                (click)="viewRecord(record)"
+              >
+                View
+              </button>
+
+            </div>
+
+          }
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+</div>

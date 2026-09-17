@@ -1,0 +1,188 @@
+<div class="page-container">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Audit History</h1>
+
+      <p class="page-description">
+        Review user activity, contract history and system changes.
+      </p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="refresh()"
+      [disabled]="loading">
+
+      <mat-icon>refresh</mat-icon>
+
+      Refresh
+
+    </button>
+
+  </div>
+
+  <!-- Error -->
+  <div
+    *ngIf="errorMessage"
+    class="error-message">
+
+    <mat-icon>error</mat-icon>
+
+    <span>{{ errorMessage }}</span>
+
+  </div>
+
+  <!-- Loading -->
+  <div
+    *ngIf="loading"
+    class="loading-container">
+
+    <mat-spinner></mat-spinner>
+
+    <p>Loading audit history...</p>
+
+  </div>
+
+  <!-- Empty -->
+  <div
+    *ngIf="!loading && !errorMessage && auditLogs.length === 0"
+    class="empty-state">
+
+    <mat-icon>history</mat-icon>
+
+    <h2>No Audit History</h2>
+
+    <p>
+      No audit records are currently available.
+    </p>
+
+  </div>
+
+  <!-- Audit Records -->
+  <div
+    *ngIf="!loading && auditLogs.length > 0"
+    class="audit-card">
+
+    <div class="card-header">
+
+      <div>
+        <h2>System Activity</h2>
+
+        <p>
+          {{ auditLogs.length }} audit
+          {{ auditLogs.length === 1 ? 'record' : 'records' }}
+        </p>
+      </div>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>ID</th>
+            <th>Date & Time</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>Entity ID</th>
+            <th>IP Address</th>
+            <th>Changes</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let log of auditLogs">
+
+            <td class="id-cell">
+              #{{ log.id }}
+            </td>
+
+            <td class="date-cell">
+              {{ log.created_at | date:'medium' }}
+            </td>
+
+            <td>
+              <span class="user-badge">
+                {{ log.user_id ?? 'System' }}
+              </span>
+            </td>
+
+            <td>
+
+              <div class="action-cell">
+
+                <mat-icon>
+                  {{ getActionIcon(log.action) }}
+                </mat-icon>
+
+                <span>
+                  {{ log.action }}
+                </span>
+
+              </div>
+
+            </td>
+
+            <td>
+              <span class="entity-badge">
+                {{ log.entity_type }}
+              </span>
+            </td>
+
+            <td>
+              {{ log.entity_id ?? '—' }}
+            </td>
+
+            <td>
+              {{ log.ip_address ?? '—' }}
+            </td>
+
+            <td>
+
+              <div class="changes">
+
+                <div *ngIf="log.old_value !== null">
+                  <strong>Old:</strong>
+
+                  <pre>{{ formatJson(log.old_value) }}</pre>
+                </div>
+
+                <div *ngIf="log.new_value !== null">
+                  <strong>New:</strong>
+
+                  <pre>{{ formatJson(log.new_value) }}</pre>
+                </div>
+
+                <span
+                  *ngIf="
+                    log.old_value === null &&
+                    log.new_value === null
+                  ">
+                  —
+                </span>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

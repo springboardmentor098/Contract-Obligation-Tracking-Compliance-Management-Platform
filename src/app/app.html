@@ -1,0 +1,66 @@
+@if (isLoggedIn) {
+
+  <div class="layout">
+
+    <aside class="sidebar">
+
+      <h2>ContractIQ</h2>
+
+      <nav>
+
+        <a routerLink="/dashboard">
+          Dashboard
+        </a>
+
+        <a routerLink="/contracts">
+          Contracts
+        </a>
+
+        <a routerLink="/obligations">
+          Obligations
+        </a>
+
+        <a routerLink="/renewals">
+          Renewals
+        </a>
+
+        <a routerLink="/compliance">
+          Compliance
+        </a>
+
+        <a routerLink="/notifications">
+          Notifications
+        </a>
+
+        <a routerLink="/reports">
+          Reports
+        </a>
+
+        <a routerLink="/audit-history">
+          Audit History
+        </a>
+
+      </nav>
+
+      <button
+        class="logout-button"
+        (click)="logout()"
+      >
+        Logout
+      </button>
+
+    </aside>
+
+    <main class="main-content">
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </div>
+
+} @else {
+
+  <router-outlet></router-outlet>
+
+}

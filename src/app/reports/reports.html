@@ -1,0 +1,776 @@
+<div class="reports-page">
+
+  <!-- ===================================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Reports Dashboard</h1>
+
+      <p>
+        Generate and view ContractIQ reports
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- REPORT CARDS -->
+  <!-- ===================================================== -->
+
+  <div class="reports-grid">
+
+    <!-- CONTRACT REPORT -->
+
+    <mat-card class="report-card">
+
+      <mat-card-content>
+
+        <h2>
+          Contract Reports
+        </h2>
+
+        <p>
+          View contract details and statistics.
+        </p>
+
+        <div class="report-actions">
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            [disabled]="loadingContracts"
+            (click)="viewContractReport()"
+          >
+            @if (loadingContracts) {
+              Loading...
+            } @else {
+              View Report
+            }
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadContractExcel()"
+          >
+            Download Excel
+          </button>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- OBLIGATION REPORT -->
+
+    <mat-card class="report-card">
+
+      <mat-card-content>
+
+        <h2>
+          Obligation Reports
+        </h2>
+
+        <p>
+          View obligation status and deadlines.
+        </p>
+
+        <div class="report-actions">
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            [disabled]="loadingObligations"
+            (click)="viewObligationReport()"
+          >
+            @if (loadingObligations) {
+              Loading...
+            } @else {
+              View Report
+            }
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadObligationExcel()"
+          >
+            Download Excel
+          </button>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- RENEWAL REPORT -->
+
+    <mat-card class="report-card">
+
+      <mat-card-content>
+
+        <h2>
+          Renewal Reports
+        </h2>
+
+        <p>
+          View upcoming and expired renewals.
+        </p>
+
+        <div class="report-actions">
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            [disabled]="loadingRenewals"
+            (click)="viewRenewalReport()"
+          >
+            @if (loadingRenewals) {
+              Loading...
+            } @else {
+              View Report
+            }
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadRenewalExcel()"
+          >
+            Download Excel
+          </button>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- COMPLIANCE REPORT -->
+
+    <mat-card class="report-card">
+
+      <mat-card-content>
+
+        <h2>
+          Compliance Reports
+        </h2>
+
+        <p>
+          View compliance status and risks.
+        </p>
+
+        <div class="report-actions">
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            [disabled]="loadingCompliance"
+            (click)="viewComplianceReport()"
+          >
+            @if (loadingCompliance) {
+              Loading...
+            } @else {
+              View Report
+            }
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadComplianceExcel()"
+          >
+            Download Excel
+          </button>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTRACT REPORT RESULT -->
+  <!-- ===================================================== -->
+
+  @if (loadingContracts) {
+
+    <div class="loading-container">
+
+      <mat-spinner></mat-spinner>
+
+      <p>
+        Loading Contract Report...
+      </p>
+
+    </div>
+
+  }
+
+
+  @if (showContracts) {
+
+    <mat-card class="result-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Contract Report
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <div class="report-summary">
+
+          Total Contracts:
+          <strong>
+            {{ contracts.length }}
+          </strong>
+
+        </div>
+
+        @if (contracts.length === 0) {
+
+          <div class="empty-message">
+            No contract records found.
+          </div>
+
+        } @else {
+
+          <div class="table-wrapper">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Contract Number
+                  </th>
+
+                  <th>
+                    Contract Title
+                  </th>
+
+                  <th>
+                    Category
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Start Date
+                  </th>
+
+                  <th>
+                    End Date
+                  </th>
+
+                  <th>
+                    Assigned User
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                @for (
+                  contract of contracts;
+                  track $index
+                ) {
+
+                  <tr>
+
+                    <td>
+                      {{ contract.contract_number }}
+                    </td>
+
+                    <td>
+                      {{ contract.contract_title ?? contract.title }}
+                    </td>
+
+                    <td>
+                      {{ contract.category }}
+                    </td>
+
+                    <td>
+                      {{ contract.status }}
+                    </td>
+
+                    <td>
+                      {{ contract.start_date }}
+                    </td>
+
+                    <td>
+                      {{ contract.end_date }}
+                    </td>
+
+                    <td>
+                      {{
+                        contract.assigned_user ??
+                        'Not Assigned'
+                      }}
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- OBLIGATION REPORT RESULT -->
+  <!-- ===================================================== -->
+
+  @if (loadingObligations) {
+
+    <div class="loading-container">
+
+      <mat-spinner></mat-spinner>
+
+      <p>
+        Loading Obligation Report...
+      </p>
+
+    </div>
+
+  }
+
+
+  @if (showObligations) {
+
+    <mat-card class="result-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Obligation Report
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <div class="report-summary">
+
+          Total Obligations:
+          <strong>
+            {{ obligations.length }}
+          </strong>
+
+        </div>
+
+        @if (obligations.length === 0) {
+
+          <div class="empty-message">
+            No obligation records found.
+          </div>
+
+        } @else {
+
+          <div class="table-wrapper">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Title
+                  </th>
+
+                  <th>
+                    Contract
+                  </th>
+
+                  <th>
+                    Obligation Type
+                  </th>
+
+                  <th>
+                    Due Date
+                  </th>
+
+                  <th>
+                    Assigned To
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                @for (
+                  obligation of obligations;
+                  track $index
+                ) {
+
+                  <tr>
+
+                    <td>
+                      {{ obligation.obligation_title }}
+                    </td>
+
+                    <td>
+                      {{ obligation.contract }}
+                    </td>
+
+                    <td>
+                      {{ obligation.obligation_type }}
+                    </td>
+
+                    <td>
+                      {{ obligation.due_date }}
+                    </td>
+
+                    <td>
+                      {{
+                        obligation.assigned_user ??
+                        'Not Assigned'
+                      }}
+                    </td>
+
+                    <td>
+                      {{ obligation.status }}
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- RENEWAL REPORT RESULT -->
+  <!-- ===================================================== -->
+
+  @if (loadingRenewals) {
+
+    <div class="loading-container">
+
+      <mat-spinner></mat-spinner>
+
+      <p>
+        Loading Renewal Report...
+      </p>
+
+    </div>
+
+  }
+
+
+  @if (showRenewals) {
+
+    <mat-card class="result-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Renewal Report
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <div class="report-summary">
+
+          Total Renewals:
+          <strong>
+            {{ renewals.length }}
+          </strong>
+
+        </div>
+
+        @if (renewals.length === 0) {
+
+          <div class="empty-message">
+            No renewal records found.
+          </div>
+
+        } @else {
+
+          <div class="table-wrapper">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Contract
+                  </th>
+
+                  <th>
+                    Previous Expiry
+                  </th>
+
+                  <th>
+                    Renewal Date
+                  </th>
+
+                  <th>
+                    New Expiry
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Assigned User
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                @for (
+                  renewal of renewals;
+                  track $index
+                ) {
+
+                  <tr>
+
+                    <td>
+                      {{ renewal.contract }}
+                    </td>
+
+                    <td>
+                      {{ renewal.previous_expiry_date }}
+                    </td>
+
+                    <td>
+                      {{ renewal.renewal_date }}
+                    </td>
+
+                    <td>
+                      {{ renewal.new_expiry_date }}
+                    </td>
+
+                    <td>
+                      {{ renewal.renewal_status }}
+                    </td>
+
+                    <td>
+                      {{
+                        renewal.assigned_user ??
+                        'Not Assigned'
+                      }}
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- COMPLIANCE REPORT RESULT -->
+  <!-- ===================================================== -->
+
+  @if (loadingCompliance) {
+
+    <div class="loading-container">
+
+      <mat-spinner></mat-spinner>
+
+      <p>
+        Loading Compliance Report...
+      </p>
+
+    </div>
+
+  }
+
+
+  @if (showCompliance) {
+
+    <mat-card class="result-card">
+
+      <mat-card-header>
+
+        <mat-card-title>
+          Compliance Report
+        </mat-card-title>
+
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <div class="report-summary">
+
+          Total Records:
+          <strong>
+            {{ compliance.length }}
+          </strong>
+
+        </div>
+
+        @if (compliance.length === 0) {
+
+          <div class="empty-message">
+            No compliance records found.
+          </div>
+
+        } @else {
+
+          <div class="table-wrapper">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Contract
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Compliance Score
+                  </th>
+
+                  <th>
+                    Overdue Obligations
+                  </th>
+
+                  <th>
+                    Risk Level
+                  </th>
+
+                  <th>
+                    Evaluation Date
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                @for (
+                  record of compliance;
+                  track $index
+                ) {
+
+                  <tr>
+
+                    <td>
+                      {{ record.contract }}
+                    </td>
+
+                    <td>
+                      {{ record.compliance_status }}
+                    </td>
+
+                    <td>
+                      {{ record.compliance_score }}%
+                    </td>
+
+                    <td>
+                      {{ record.overdue_obligations }}
+                    </td>
+
+                    <td>
+                      {{ record.risk_level }}
+                    </td>
+
+                    <td>
+                      {{ record.evaluation_date | date:'medium' }}
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
+
+      </mat-card-content>
+
+    </mat-card>
+
+  }
+
+</div>
