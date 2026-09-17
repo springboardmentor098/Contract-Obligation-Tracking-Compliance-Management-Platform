@@ -1,0 +1,21 @@
+.app-shell {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.body-container {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 16px;
+  }
+}

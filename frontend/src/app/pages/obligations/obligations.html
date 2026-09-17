@@ -1,0 +1,118 @@
+<div class="obligations-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Obligations</h1>
+      <p>Track and manage contractual obligations.</p>
+    </div>
+
+    <button
+      class="refresh-button"
+      type="button"
+      (click)="loadObligations()"
+    >
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div class="obligations-card">
+
+    <div class="card-header">
+      <div>
+        <h2>Obligation Portfolio</h2>
+        <p>{{ obligations().length }} obligation(s) found</p>
+      </div>
+    </div>
+
+    <div *ngIf="loading()" class="loading">
+      Loading obligations...
+    </div>
+
+    <div
+      *ngIf="!loading() && obligations().length === 0"
+      class="empty-state"
+    >
+      <div class="empty-icon">📋</div>
+
+      <h3>No obligations found</h3>
+
+      <p>
+        There are currently no obligations in the system.
+      </p>
+    </div>
+
+    <div
+      class="table-wrapper"
+      *ngIf="!loading() && obligations().length > 0"
+    >
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Obligation</th>
+            <th>Contract ID</th>
+            <th>Type</th>
+            <th>Due Date</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let obligation of obligations()">
+
+            <td>
+              <div class="obligation-title">
+                {{ obligation.title }}
+              </div>
+
+              <div
+                class="obligation-description"
+                *ngIf="obligation.description"
+              >
+                {{ obligation.description }}
+              </div>
+            </td>
+
+            <td>
+              {{ obligation.contract_id }}
+            </td>
+
+            <td>
+              {{ obligation.obligation_type }}
+            </td>
+
+            <td>
+              {{ obligation.due_date | date:'mediumDate' }}
+            </td>
+
+            <td>
+              {{ obligation.assigned_to }}
+            </td>
+
+            <td>
+              <span
+                class="status"
+                [ngClass]="getStatusClass(obligation.status)"
+              >
+                {{ obligation.status }}
+              </span>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

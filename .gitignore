@@ -1,0 +1,11 @@
+.DS_Store
+.venv/
+.env
+__pycache__/
+*.pyc
+.git_backup/
+
+# Angular generated files
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/

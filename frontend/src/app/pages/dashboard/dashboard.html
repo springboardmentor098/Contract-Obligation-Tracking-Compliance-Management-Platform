@@ -1,0 +1,253 @@
+<div class="dashboard-page">
+
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">CONTRACTIQ OVERVIEW</span>
+      <h1>Dashboard</h1>
+      <p>Monitor your contract portfolio, obligations, renewals, and compliance health.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="loadDashboard()"
+      [disabled]="loading"
+    >
+      {{ loading ? 'Refreshing...': 'Refresh Data' }}
+    </button>
+  </header>
+
+  <div *ngIf="loading" class="state-card">
+    <div class="spinner"></div>
+    <h2>Loading dashboard</h2>
+    <p>Fetching the latest ContractIQ data...</p>
+  </div>
+
+  <div *ngIf="!loading && error" class="error-card">
+    <h2>Unable to load dashboard</h2>
+    <p>{{ error }}</p>
+    <button type="button" (click)="loadDashboard()">Try Again</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <section class="metrics-grid">
+
+      <article class="metric-card blue">
+        <div class="metric-icon">C</div>
+        <div>
+          <span class="metric-label">Total Contracts</span>
+          <strong>{{ data?.contracts?.total ?? 0 }}</strong>
+        </div>
+      </article>
+
+      <article class="metric-card green">
+        <div class="metric-icon">✓</div>
+        <div>
+          <span class="metric-label">Active Contracts</span>
+          <strong>{{ data?.contracts?.active ?? 0 }}</strong>
+        </div>
+      </article>
+
+      <article class="metric-card amber">
+        <div class="metric-icon">!</div>
+        <div>
+          <span class="metric-label">Pending Obligations</span>
+          <strong>{{ data?.obligations?.pending ?? 0 }}</strong>
+        </div>
+      </article>
+
+      <article class="metric-card red">
+        <div class="metric-icon">!</div>
+        <div>
+          <span class="metric-label">Overdue Obligations</span>
+          <strong>{{ data?.obligations?.overdue ?? 0 }}</strong>
+        </div>
+      </article>
+
+      <article class="metric-card purple">
+        <div class="metric-icon">R</div>
+        <div>
+          <span class="metric-label">Upcoming Renewals</span>
+          <strong>{{ data?.renewals?.upcoming ?? 0 }}</strong>
+        </div>
+      </article>
+
+      <article class="metric-card teal">
+        <div class="metric-icon">%</div>
+        <div>
+          <span class="metric-label">Compliance Score</span>
+          <strong>{{ data?.compliance?.average_score ?? 0 }}%</strong>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="dashboard-grid">
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-label">CONTRACT PORTFOLIO</span>
+            <h2>Contract Status</h2>
+          </div>
+        </div>
+
+        <div class="status-list">
+          <div class="status-row">
+            <span>Active</span>
+            <strong class="green">{{ data?.contracts?.active ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Draft</span>
+            <strong>{{ data?.contracts?.draft ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Under Review</span>
+            <strong class="amber">{{ data?.contracts?.under_review ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Approved</span>
+            <strong>{{ data?.contracts?.approved ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Expired</span>
+            <strong class="red">{{ data?.contracts?.expired ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Terminated</span>
+            <strong>{{ data?.contracts?.terminated ?? 0 }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-label">OBLIGATION HEALTH</span>
+            <h2>Obligation Status</h2>
+          </div>
+        </div>
+
+        <div class="status-list">
+          <div class="status-row">
+            <span>Total</span>
+            <strong>{{ data?.obligations?.total ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Pending</span>
+            <strong class="amber">{{ data?.obligations?.pending ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>In Progress</span>
+            <strong>{{ data?.obligations?.in_progress ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Completed</span>
+            <strong class="green">{{ data?.obligations?.completed ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Delayed</span>
+            <strong class="amber">{{ data?.obligations?.delayed ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Overdue</span>
+            <strong class="red">{{ data?.obligations?.overdue ?? 0 }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-label">RENEWAL PIPELINE</span>
+            <h2>Renewal Status</h2>
+          </div>
+        </div>
+
+        <div class="status-list">
+          <div class="status-row">
+            <span>Upcoming</span>
+            <strong class="purple">{{ data?.renewals?.upcoming ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>In Progress</span>
+            <strong class="amber">{{ data?.renewals?.in_progress ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Renewed</span>
+            <strong class="green">{{ data?.renewals?.renewed ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Expired</span>
+            <strong class="red">{{ data?.renewals?.expired ?? 0 }}</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Cancelled</span>
+            <strong>{{ data?.renewals?.cancelled ?? 0 }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel compliance-panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-label">COMPLIANCE HEALTH</span>
+            <h2>Compliance Summary</h2>
+          </div>
+        </div>
+
+        <div class="score">
+          <strong>{{ data?.compliance?.average_score ?? 0 }}%</strong>
+          <span>Average compliance score</span>
+        </div>
+
+        <div class="progress">
+          <div
+            class="progress-fill"
+            [style.width.%]="data?.compliance?.average_score ?? 0"
+          ></div>
+        </div>
+
+        <div class="compliance-grid">
+          <div>
+            <strong class="green">{{ data?.compliance?.compliant ?? 0 }}</strong>
+            <span>Compliant</span>
+          </div>
+
+          <div>
+            <strong class="amber">{{ data?.compliance?.pending ?? 0 }}</strong>
+            <span>Pending</span>
+          </div>
+
+          <div>
+            <strong class="red">{{ data?.compliance?.non_compliant ?? 0 }}</strong>
+            <span>Non-compliant</span>
+          </div>
+
+          <div>
+            <strong>{{ data?.compliance?.high_risk ?? 0 }}</strong>
+            <span>High Risk</span>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+  </ng-container>
+
+</div>

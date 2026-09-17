@@ -1,0 +1,266 @@
+<div class="contracts-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Contracts</h1>
+      <p>Manage your contract portfolio and approval workflow.</p>
+    </div>
+
+    <button class="primary-button" type="button" (click)="openCreateForm()">
+      + New Contract
+    </button>
+  </div>
+
+  @if (error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+  }
+
+  @if (showCreateForm) {
+    <div class="create-card">
+
+      <div class="card-header">
+        <div>
+          <h2>Create Contract</h2>
+          <p>Enter the basic contract information.</p>
+        </div>
+
+        <button class="close-button" type="button" (click)="closeCreateForm()">
+          ×
+        </button>
+      </div>
+
+      <form (ngSubmit)="createContract()">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label>Contract Title *</label>
+            <input
+              type="text"
+              name="title"
+              [(ngModel)]="newContract.title"
+              placeholder="e.g. Software Services Agreement"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Contract Number *</label>
+            <input
+              type="text"
+              name="contract_number"
+              [(ngModel)]="newContract.contract_number"
+              placeholder="e.g. CNT-2026-001"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Category *</label>
+            <input
+              type="text"
+              name="category"
+              [(ngModel)]="newContract.category"
+              placeholder="e.g. Vendor"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Start Date *</label>
+            <input
+              type="date"
+              name="start_date"
+              [(ngModel)]="newContract.start_date"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>End Date *</label>
+            <input
+              type="date"
+              name="end_date"
+              [(ngModel)]="newContract.end_date"
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label>Description</label>
+            <textarea
+              name="description"
+              [(ngModel)]="newContract.description"
+              rows="3"
+              placeholder="Enter contract description..."
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeCreateForm()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving"
+          >
+            {{ saving ? 'Creating...' : 'Create Contract' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  }
+
+  <div class="contracts-card">
+
+    <div class="card-header">
+      <div>
+        <h2>Contract Portfolio</h2>
+        <p>{{ contracts().length }} contract(s) found</p>
+      </div>
+
+      <button
+        class="refresh-button"
+        type="button"
+        (click)="loadContracts()"
+      >
+        ↻ Refresh
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">
+        Loading contracts...
+      </div>
+    }
+
+    @if (!loading() && contracts().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h3>No contracts found</h3>
+        <p>Create your first contract to get started.</p>
+
+        <button
+          class="primary-button"
+          type="button"
+          (click)="openCreateForm()"
+        >
+          Create Contract
+        </button>
+      </div>
+    }
+
+    @if (!loading() && contracts().length > 0) {
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Number</th>
+              <th>Category</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (contract of contracts(); track contract.id) {
+              <tr>
+
+                <td>
+                  <div class="contract-title">
+                    {{ contract.title }}
+                  </div>
+
+                  @if (contract.description) {
+                    <div class="contract-description">
+                      {{ contract.description }}
+                    </div>
+                  }
+                </td>
+
+                <td>{{ contract.contract_number }}</td>
+
+                <td>{{ contract.category }}</td>
+
+                <td>{{ contract.start_date | date:'mediumDate' }}</td>
+
+                <td>{{ contract.end_date | date:'mediumDate' }}</td>
+
+                <td>
+                  <span
+                    class="status"
+                    [ngClass]="getStatusClass(contract.status)"
+                  >
+                    {{ contract.status }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="actions">
+
+                    @if (contract.status === 'Draft') {
+                      <button
+                        class="action-button review"
+                        type="button"
+                        (click)="submitForReview(contract)"
+                      >
+                        Submit Review
+                      </button>
+                    }
+
+                    @if (contract.status === 'Under Review') {
+                      <button
+                        class="action-button approve"
+                        type="button"
+                        (click)="approveContract(contract)"
+                      >
+                        Approve
+                      </button>
+                    }
+
+                    @if (contract.status === 'Approved') {
+                      <button
+                        class="action-button activate"
+                        type="button"
+                        (click)="activateContract(contract)"
+                      >
+                        Activate
+                      </button>
+                    }
+
+                    @if (
+                      contract.status !== 'Draft' &&
+                      contract.status !== 'Under Review' &&
+                      contract.status !== 'Approved'
+                    ) {
+                      <span class="no-action">—</span>
+                    }
+
+                  </div>
+                </td>
+
+              </tr>
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+    }
+
+  </div>
+
+</div>

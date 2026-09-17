@@ -1,0 +1,23 @@
+.sidebar {
+  width: 240px;
+  min-height: calc(100vh - 64px);
+  background: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  padding-top: 12px;
+}
+
+a {
+  margin: 4px 8px;
+  border-radius: 8px;
+}
+
+a.active {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+}

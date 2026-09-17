@@ -1,0 +1,86 @@
+<div class="audit-page">
+  <div class="page-header">
+    <div>
+      <h1>Audit History</h1>
+      <p>Track changes and activities across the ContractIQ platform.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="loadAuditHistory()"
+      [disabled]="loading()"
+    >
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div class="summary-card">
+    <span>Total Audit Events</span>
+    <strong>{{ auditLogs().length }}</strong>
+  </div>
+
+  @if (error) {
+    <div class="error-message">
+      {{ error }}
+      <button type="button" (click)="loadAuditHistory()">Try Again</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="empty-state">
+      Loading audit history...
+    </div>
+  }
+
+  @if (!loading() && !error && auditLogs().length === 0) {
+    <div class="empty-state">
+      <h3>No audit events</h3>
+      <p>There are currently no audit events recorded.</p>
+    </div>
+  }
+
+  @if (!loading() && auditLogs().length > 0) {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Entity</th>
+            <th>Entity ID</th>
+            <th>Action</th>
+            <th>Old Values</th>
+            <th>New Values</th>
+            <th>IP Address</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (audit of auditLogs(); track audit.id) {
+            <tr>
+              <td>#{{ audit.id }}</td>
+              <td>{{ audit.user_id }}</td>
+              <td>{{ audit.entity_type || '—' }}</td>
+              <td>{{ audit.entity_id ?? '—' }}</td>
+              <td>
+                <span class="action-badge">
+                  {{ audit.action }}
+                </span>
+              </td>
+              <td class="values">
+                {{ formatValues(audit.old_values) }}
+              </td>
+              <td class="values">
+                {{ formatValues(audit.new_values) }}
+              </td>
+              <td>{{ audit.ip_address || '—' }}</td>
+              <td>{{ formatDate(audit.created_at) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
