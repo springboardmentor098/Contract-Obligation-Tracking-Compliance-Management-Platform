@@ -1,27 +1,11 @@
 from datetime import date
-from io import BytesIO
-from typing import Any
-
-from openpyxl import Workbook
-from openpyxl.utils import get_column_letter
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer,
-    Table,
-    TableStyle,
-)
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
 from app.models.contract import Contract
 from app.models.obligation import Obligation
 from app.models.renewal import Renewal
-from app.models.audit_log import AuditLog
-from app.models.user import User
 
 from app.services.compliance_service import (
     calculate_contract_compliance,
@@ -29,860 +13,522 @@ from app.services.compliance_service import (
 
 
 # ============================================================
-# Helper
+# CONTRACT REPORT
 # ============================================================
 
-def _status_count(items, attribute: str, status: str) -> int:
-    return sum(
-        1
-        for item in items
-        if getattr(item, attribute, None) == status
-    )
+def get_contract_summary(
+    db: Session,
+    status: Optional[str] = None,
+):
+    query = db.query(Contract)
 
-
-# ============================================================
-# Contract Report
-# ============================================================
-
-def generate_contract_report(db: Session) -> dict[str, Any]:
+    if status:
+        query = query.filter(
+            Contract.status == status
+        )
 
     contracts = (
-        db.query(Contract)
-        .order_by(Contract.id.asc())
+        query
+        .order_by(Contract.id)
         .all()
     )
 
-    result = {
-        "total_contracts": len(contracts),
-        "active_contracts": 0,
-        "draft_contracts": 0,
-        "under_review_contracts": 0,
-        "approved_contracts": 0,
-        "expired_contracts": 0,
-        "terminated_contracts": 0,
-        "contracts": [],
-    }
+    total = len(contracts)
+
+    active = sum(
+        1
+        for contract in contracts
+        if contract.status == "Active"
+    )
+
+    expired = sum(
+        1
+        for contract in contracts
+        if contract.status == "Expired"
+    )
+
+    pending_approval = sum(
+        1
+        for contract in contracts
+        if contract.status in {
+            "Under Review",
+            "Pending Approval",
+        }
+    )
+
+    grouped = {}
 
     for contract in contracts:
+        contract_status = (
+            contract.status or "Unknown"
+        )
 
-        status = contract.status or "Draft"
+        grouped[contract_status] = (
+            grouped.get(contract_status, 0) + 1
+        )
 
-        if status == "Active":
-            result["active_contracts"] += 1
-        elif status == "Draft":
-            result["draft_contracts"] += 1
-        elif status == "Under Review":
-            result["under_review_contracts"] += 1
-        elif status == "Approved":
-            result["approved_contracts"] += 1
-        elif status == "Expired":
-            result["expired_contracts"] += 1
-        elif status == "Terminated":
-            result["terminated_contracts"] += 1
+    contract_records = []
 
-        result["contracts"].append({
-            "contract_id": contract.id,
-            "contract_number": contract.contract_number,
-            "title": contract.title,
-            "category": contract.category,
-            "start_date": contract.start_date,
-            "end_date": contract.end_date,
-            "status": status,
-        })
+    for contract in contracts:
+        contract_records.append(
+            {
+                "id": contract.id,
+                "contract_number": contract.contract_number,
+                "title": contract.title,
+                "category": contract.category,
+                "start_date": (
+                    contract.start_date.isoformat()
+                    if contract.start_date
+                    else ""
+                ),
+                "end_date": (
+                    contract.end_date.isoformat()
+                    if contract.end_date
+                    else ""
+                ),
+                "status": contract.status,
+                "created_by": contract.created_by,
+                "assigned_to": contract.assigned_to,
+            }
+        )
 
-    return result
+    return {
+        "total_contracts": total,
+        "active_contracts": active,
+        "expired_contracts": expired,
+        "pending_approval_contracts": pending_approval,
+        "contracts_by_status": grouped,
+        "contract_records": contract_records,
+    }
 
 
 # ============================================================
-# Obligation Report
+# OBLIGATION REPORT
 # ============================================================
 
-def generate_obligation_report(db: Session) -> dict[str, Any]:
+def get_obligation_summary(
+    db: Session,
+    status: Optional[str] = None,
+):
+    query = db.query(Obligation)
+
+    if status:
+        query = query.filter(
+            Obligation.status == status
+        )
 
     obligations = (
-        db.query(Obligation)
-        .order_by(Obligation.due_date.asc())
+        query
+        .order_by(Obligation.id)
         .all()
     )
-
-    result = {
-        "total_obligations": len(obligations),
-        "pending_obligations": 0,
-        "in_progress_obligations": 0,
-        "delayed_obligations": 0,
-        "overdue_obligations": 0,
-        "completed_obligations": 0,
-        "obligations": [],
-    }
 
     today = date.today()
 
+    total = len(obligations)
+
+    pending = 0
+    completed = 0
+    overdue = 0
+
+    grouped = {}
+
+    obligation_records = []
+
     for obligation in obligations:
 
-        status = obligation.status or "Pending"
+        obligation_status = (
+            obligation.status or "Unknown"
+        )
 
-        # Detect overdue obligations using due date.
-        if (
-            status not in {"Completed", "Delayed"}
+        grouped[obligation_status] = (
+            grouped.get(obligation_status, 0) + 1
+        )
+
+        if obligation_status == "Completed":
+
+            completed += 1
+
+        elif obligation_status == "Overdue":
+
+            overdue += 1
+
+        elif (
+            obligation_status == "Pending"
             and obligation.due_date
             and obligation.due_date < today
         ):
-            status = "Overdue"
 
-        if status == "Pending":
-            result["pending_obligations"] += 1
+            overdue += 1
 
-        elif status == "In Progress":
-            result["in_progress_obligations"] += 1
+        elif obligation_status == "Pending":
 
-        elif status == "Delayed":
-            result["delayed_obligations"] += 1
+            pending += 1
 
-        elif status == "Overdue":
-            result["overdue_obligations"] += 1
+        contract = (
+            db.query(Contract)
+            .filter(
+                Contract.id
+                == obligation.contract_id
+            )
+            .first()
+        )
 
-        elif status == "Completed":
-            result["completed_obligations"] += 1
+        obligation_records.append(
+            {
+                "id": obligation.id,
+                "contract_id": obligation.contract_id,
+                "contract_number": (
+                    contract.contract_number
+                    if contract
+                    else None
+                ),
+                "contract_title": (
+                    contract.title
+                    if contract
+                    else None
+                ),
+                "title": obligation.title,
+                "description": obligation.description,
+                "obligation_type": (
+                    obligation.obligation_type
+                ),
+                "due_date": (
+                    obligation.due_date.isoformat()
+                    if obligation.due_date
+                    else ""
+                ),
+                "assigned_to": obligation.assigned_to,
+                "status": obligation_status,
+                "completion_date": (
+                    obligation.completion_date.isoformat()
+                    if obligation.completion_date
+                    else None
+                ),
+            }
+        )
 
-        contract_number = None
-        if obligation.contract:
-            contract_number = obligation.contract.contract_number
-
-        assigned_user = None
-        if obligation.assignee:
-            assigned_user = obligation.assignee.full_name
-
-        result["obligations"].append({
-            "obligation_id": obligation.id,
-            "title": obligation.title,
-            "obligation_type": obligation.obligation_type,
-            "contract_id": obligation.contract_id,
-            "contract_number": contract_number,
-            "due_date": obligation.due_date,
-            "assigned_to": obligation.assigned_to,
-            "assigned_user": assigned_user,
-            "status": status,
-            "completion_date": obligation.completion_date,
-        })
-
-    return result
+    return {
+        "total_obligations": total,
+        "pending_obligations": pending,
+        "completed_obligations": completed,
+        "overdue_obligations": overdue,
+        "obligations_by_status": grouped,
+        "obligation_records": obligation_records,
+    }
 
 
 # ============================================================
-# Renewal Report
+# RENEWAL REPORT
 # ============================================================
 
-def generate_renewal_report(db: Session) -> dict[str, Any]:
+def get_renewal_summary(
+    db: Session,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+):
+    today = date.today()
+
+    query = db.query(Renewal)
+
+    if start_date:
+        query = query.filter(
+            Renewal.previous_expiry_date
+            >= start_date
+        )
+
+    if end_date:
+        query = query.filter(
+            Renewal.previous_expiry_date
+            <= end_date
+        )
 
     renewals = (
-        db.query(Renewal)
-        .order_by(Renewal.previous_expiry_date.asc())
+        query
+        .order_by(Renewal.previous_expiry_date)
         .all()
     )
 
-    result = {
-        "total_renewals": len(renewals),
-        "upcoming_renewals": 0,
-        "in_progress_renewals": 0,
-        "renewed_renewals": 0,
-        "expired_renewals": 0,
-        "cancelled_renewals": 0,
-        "renewals": [],
-    }
+    upcoming = 0
+    expired = 0
+    immediate_attention = 0
+
+    renewal_records = []
 
     for renewal in renewals:
 
-        status = renewal.status or "Upcoming"
+        if renewal.status in {
+            "Renewed",
+            "Cancelled",
+        }:
+            continue
 
-        if status == "Upcoming":
-            result["upcoming_renewals"] += 1
+        contract = (
+            db.query(Contract)
+            .filter(
+                Contract.id
+                == renewal.contract_id
+            )
+            .first()
+        )
 
-        elif status == "In Progress":
-            result["in_progress_renewals"] += 1
+        expiry_date = (
+            renewal.previous_expiry_date
+        )
 
-        elif status == "Renewed":
-            result["renewed_renewals"] += 1
+        days_remaining = None
 
-        elif status == "Expired":
-            result["expired_renewals"] += 1
+        if expiry_date:
+            days_remaining = (
+                expiry_date - today
+            ).days
 
-        elif status == "Cancelled":
-            result["cancelled_renewals"] += 1
+        if (
+            expiry_date
+            and expiry_date < today
+        ):
 
-        contract_number = None
-        contract_title = None
+            expired += 1
 
-        if renewal.contract:
-            contract_number = renewal.contract.contract_number
-            contract_title = renewal.contract.title
+        elif (
+            expiry_date
+            and 0 <= days_remaining <= 30
+        ):
 
-        assigned_user = None
+            upcoming += 1
 
-        if renewal.assigned_user:
-            assigned_user = renewal.assigned_user.full_name
+            if days_remaining <= 7:
+                immediate_attention += 1
 
-        result["renewals"].append({
-            "renewal_id": renewal.id,
-            "contract_id": renewal.contract_id,
-            "contract_number": contract_number,
-            "contract_title": contract_title,
-            "renewal_date": renewal.renewal_date,
-            "previous_expiry_date": renewal.previous_expiry_date,
-            "new_expiry_date": renewal.new_expiry_date,
-            "status": status,
-            "assigned_to": renewal.assigned_to,
-            "assigned_user": assigned_user,
-        })
+        elif expiry_date:
 
-    return result
+            upcoming += 1
 
+        renewal_records.append(
+            {
+                "contract_id": renewal.contract_id,
+                "contract_number": (
+                    contract.contract_number
+                    if contract
+                    else None
+                ),
+                "contract_title": (
+                    contract.title
+                    if contract
+                    else None
+                ),
+                "expiry_date": (
+                    expiry_date.isoformat()
+                    if expiry_date
+                    else None
+                ),
+                "renewal_date": (
+                    renewal.renewal_date.isoformat()
+                    if renewal.renewal_date
+                    else None
+                ),
+                "days_remaining": days_remaining,
+                "status": renewal.status,
+            }
+        )
 
-# ============================================================
-# Compliance Report
-# ============================================================
-
-def generate_compliance_report(db: Session) -> dict[str, Any]:
-
-    contracts = db.query(Contract).all()
-
-    result = {
-        "total_contracts": len(contracts),
-        "compliant_contracts": 0,
-        "pending_contracts": 0,
-        "delayed_contracts": 0,
-        "non_compliant_contracts": 0,
-        "high_risk_contracts": 0,
-        "average_compliance_score": 0.0,
-        "compliance_reports": [],
+    return {
+        "upcoming_renewals": upcoming,
+        "expired_contracts": expired,
+        "immediate_attention": immediate_attention,
+        "renewal_records": renewal_records,
     }
 
-    total_score = 0.0
+
+# ============================================================
+# COMPLIANCE REPORT
+# ============================================================
+
+def get_compliance_summary(
+    db: Session,
+):
+    contracts = (
+        db.query(Contract)
+        .order_by(Contract.id)
+        .all()
+    )
+
+    total_contracts = len(contracts)
+
+    compliant = 0
+    pending = 0
+    delayed = 0
+    non_compliant = 0
+    high_risk = 0
+
+    compliance_records = []
 
     for contract in contracts:
 
         obligations = (
             db.query(Obligation)
             .filter(
-                Obligation.contract_id == contract.id
+                Obligation.contract_id
+                == contract.id
             )
             .all()
         )
 
-        compliance = calculate_contract_compliance(
+        result = calculate_contract_compliance(
             contract,
             obligations,
         )
 
-        status = compliance["compliance_status"]
-
-        if status == "Compliant":
-            result["compliant_contracts"] += 1
-
-        elif status == "Pending":
-            result["pending_contracts"] += 1
-
-        elif status == "Delayed":
-            result["delayed_contracts"] += 1
-
-        elif status == "Non-Compliant":
-            result["non_compliant_contracts"] += 1
-
-        elif status == "High Risk":
-            result["high_risk_contracts"] += 1
-
-        score = float(
-            compliance.get("compliance_score", 0)
+        compliance_status = (
+            result.get(
+                "compliance_status",
+                "Pending",
+            )
         )
 
-        total_score += score
+        risk_level = (
+            result.get(
+                "risk_level",
+                "Low",
+            )
+        )
 
-        result["compliance_reports"].append({
-            "contract_id": compliance["contract_id"],
-            "contract_number": compliance.get(
-                "contract_number"
-            ),
-            "compliance_status": status,
-            "compliance_score": score,
-            "total_obligations": compliance[
-                "total_obligations"
-            ],
-            "completed_obligations": compliance[
-                "completed_obligations"
-            ],
-            "pending_obligations": compliance[
-                "pending_obligations"
-            ],
-            "delayed_obligations": compliance[
-                "delayed_obligations"
-            ],
-            "overdue_obligations": compliance[
-                "overdue_obligations"
-            ],
-            "risk_level": compliance["risk_level"],
-            "evaluated_at": compliance.get(
-                "evaluated_at"
-            ),
-        })
+        total_obligations = len(
+            obligations
+        )
 
-    if contracts:
-        result["average_compliance_score"] = round(
-            total_score / len(contracts),
+        completed_obligations = sum(
+            1
+            for obligation in obligations
+            if obligation.status == "Completed"
+        )
+
+        pending_obligations = sum(
+            1
+            for obligation in obligations
+            if obligation.status == "Pending"
+            and (
+                not obligation.due_date
+                or obligation.due_date >= date.today()
+            )
+        )
+
+        delayed_obligations = sum(
+            1
+            for obligation in obligations
+            if obligation.status == "Delayed"
+        )
+
+        overdue_obligations = sum(
+            1
+            for obligation in obligations
+            if obligation.status == "Overdue"
+            or (
+                obligation.status == "Pending"
+                and obligation.due_date
+                and obligation.due_date < date.today()
+            )
+        )
+
+        if total_obligations > 0:
+            compliance_score = round(
+                (
+                    completed_obligations
+                    / total_obligations
+                ) * 100,
+                2,
+            )
+        else:
+            compliance_score = 0.0
+
+        if compliance_status == "Compliant":
+            compliant += 1
+
+        elif compliance_status == "Delayed":
+            delayed += 1
+
+        elif compliance_status == "Non-Compliant":
+            non_compliant += 1
+
+        else:
+            pending += 1
+
+        if risk_level == "High":
+            high_risk += 1
+
+        compliance_records.append(
+            {
+                "contract_id": contract.id,
+                "contract_number": (
+                    contract.contract_number
+                ),
+                "contract_title": contract.title,
+                "total_obligations": total_obligations,
+                "completed_obligations": (
+                    completed_obligations
+                ),
+                "pending_obligations": (
+                    pending_obligations
+                ),
+                "delayed_obligations": (
+                    delayed_obligations
+                ),
+                "overdue_obligations": (
+                    overdue_obligations
+                ),
+                "compliance_score": (
+                    compliance_score
+                ),
+                "compliance_status": (
+                    compliance_status
+                ),
+                "risk_level": risk_level,
+            }
+        )
+
+    if total_contracts:
+        compliance_percentage = round(
+            (
+                compliant
+                / total_contracts
+            ) * 100,
             2,
         )
+    else:
+        compliance_percentage = 0.0
 
-    return result
-
-
-# ============================================================
-# Audit Report
-# ============================================================
-
-def generate_audit_report(db: Session) -> dict[str, Any]:
-
-    logs = (
-        db.query(AuditLog)
-        .order_by(AuditLog.created_at.desc())
-        .all()
-    )
-
-    result = {
-        "total_audit_logs": len(logs),
-        "audit_logs": [],
+    return {
+        "total_contracts": total_contracts,
+        "compliant_contracts": compliant,
+        "pending_contracts": pending,
+        "delayed_contracts": delayed,
+        "non_compliant_contracts": non_compliant,
+        "high_risk_contracts": high_risk,
+        "compliance_percentage": (
+            compliance_percentage
+        ),
+        "compliance_records": compliance_records,
     }
 
-    for log in logs:
-
-        user_name = None
-
-        if log.user:
-            user_name = log.user.full_name
-
-        result["audit_logs"].append({
-            "audit_id": log.id,
-            "user_id": log.user_id,
-            "user_name": user_name,
-            "action": log.action,
-            "table_name": log.table_name,
-            "record_id": log.record_id,
-            "created_at": log.created_at,
-        })
-
-    return result
-
 
 # ============================================================
-# Excel Helper
+# COMPLETE DASHBOARD
 # ============================================================
 
-def create_excel_file(
-    title: str,
-    headers: list[str],
-    rows: list[list[Any]],
-) -> BytesIO:
-
-    workbook = Workbook()
-    worksheet = workbook.active
-    worksheet.title = title[:31]
-
-    # Header
-    worksheet.append(headers)
-
-    # Data
-    for row in rows:
-        worksheet.append([
-            "" if value is None else str(value)
-            for value in row
-        ])
-
-    # Formatting
-    for cell in worksheet[1]:
-        cell.font = cell.font.copy(bold=True)
-
-    for column_cells in worksheet.columns:
-
-        max_length = 0
-        column_index = column_cells[0].column
-
-        for cell in column_cells:
-            value = "" if cell.value is None else str(cell.value)
-            max_length = max(
-                max_length,
-                len(value),
-            )
-
-        worksheet.column_dimensions[
-            get_column_letter(column_index)
-        ].width = min(max_length + 2, 50)
-
-    output = BytesIO()
-
-    workbook.save(output)
-    output.seek(0)
-
-    return output
-
-
-# ============================================================
-# Contract Excel
-# ============================================================
-
-def contract_excel(db: Session) -> BytesIO:
-
-    report = generate_contract_report(db)
-
-    rows = [
-        [
-            item["contract_id"],
-            item["contract_number"],
-            item["title"],
-            item["category"],
-            item["start_date"],
-            item["end_date"],
-            item["status"],
-        ]
-        for item in report["contracts"]
-    ]
-
-    return create_excel_file(
-        "Contracts",
-        [
-            "Contract ID",
-            "Contract Number",
-            "Title",
-            "Category",
-            "Start Date",
-            "End Date",
-            "Status",
-        ],
-        rows,
-    )
-
-
-# ============================================================
-# Obligation Excel
-# ============================================================
-
-def obligation_excel(db: Session) -> BytesIO:
-
-    report = generate_obligation_report(db)
-
-    rows = [
-        [
-            item["obligation_id"],
-            item["title"],
-            item["obligation_type"],
-            item["contract_id"],
-            item["contract_number"],
-            item["due_date"],
-            item["assigned_user"],
-            item["status"],
-            item["completion_date"],
-        ]
-        for item in report["obligations"]
-    ]
-
-    return create_excel_file(
-        "Obligations",
-        [
-            "Obligation ID",
-            "Title",
-            "Type",
-            "Contract ID",
-            "Contract Number",
-            "Due Date",
-            "Assigned User",
-            "Status",
-            "Completion Date",
-        ],
-        rows,
-    )
-
-
-# ============================================================
-# Renewal Excel
-# ============================================================
-
-def renewal_excel(db: Session) -> BytesIO:
-
-    report = generate_renewal_report(db)
-
-    rows = [
-        [
-            item["renewal_id"],
-            item["contract_id"],
-            item["contract_number"],
-            item["contract_title"],
-            item["renewal_date"],
-            item["previous_expiry_date"],
-            item["new_expiry_date"],
-            item["status"],
-            item["assigned_user"],
-        ]
-        for item in report["renewals"]
-    ]
-
-    return create_excel_file(
-        "Renewals",
-        [
-            "Renewal ID",
-            "Contract ID",
-            "Contract Number",
-            "Contract Title",
-            "Renewal Date",
-            "Previous Expiry",
-            "New Expiry",
-            "Status",
-            "Assigned User",
-        ],
-        rows,
-    )
-
-
-# ============================================================
-# Compliance Excel
-# ============================================================
-
-def compliance_excel(db: Session) -> BytesIO:
-
-    report = generate_compliance_report(db)
-
-    rows = [
-        [
-            item["contract_id"],
-            item["contract_number"],
-            item["compliance_status"],
-            item["compliance_score"],
-            item["total_obligations"],
-            item["completed_obligations"],
-            item["pending_obligations"],
-            item["delayed_obligations"],
-            item["overdue_obligations"],
-            item["risk_level"],
-        ]
-        for item in report["compliance_reports"]
-    ]
-
-    return create_excel_file(
-        "Compliance",
-        [
-            "Contract ID",
-            "Contract Number",
-            "Compliance Status",
-            "Compliance Score",
-            "Total Obligations",
-            "Completed",
-            "Pending",
-            "Delayed",
-            "Overdue",
-            "Risk Level",
-        ],
-        rows,
-    )
-
-
-# ============================================================
-# Audit Excel
-# ============================================================
-
-def audit_excel(db: Session) -> BytesIO:
-
-    report = generate_audit_report(db)
-
-    rows = [
-        [
-            item["audit_id"],
-            item["user_id"],
-            item["user_name"],
-            item["action"],
-            item["table_name"],
-            item["record_id"],
-            item["created_at"],
-        ]
-        for item in report["audit_logs"]
-    ]
-
-    return create_excel_file(
-        "Audit Logs",
-        [
-            "Audit ID",
-            "User ID",
-            "User Name",
-            "Action",
-            "Table",
-            "Record ID",
-            "Created At",
-        ],
-        rows,
-    )
-
-
-# ============================================================
-# PDF Helper
-# ============================================================
-
-def create_pdf_file(
-    title: str,
-    headers: list[str],
-    rows: list[list[Any]],
-) -> BytesIO:
-
-    output = BytesIO()
-
-    document = SimpleDocTemplate(
-        output,
-        pagesize=landscape(A4),
-        rightMargin=25,
-        leftMargin=25,
-        topMargin=25,
-        bottomMargin=25,
-    )
-
-    styles = getSampleStyleSheet()
-
-    story = []
-
-    story.append(
-        Paragraph(
-            "ContractIQ",
-            styles["Title"],
-        )
-    )
-
-    story.append(
-        Paragraph(
-            title,
-            styles["Heading2"],
-        )
-    )
-
-    story.append(Spacer(1, 12))
-
-    formatted_rows = [
-        headers
-    ]
-
-    for row in rows:
-
-        formatted_rows.append([
-            "" if value is None else str(value)
-            for value in row
-        ])
-
-    table = Table(
-        formatted_rows,
-        repeatRows=1,
-    )
-
-    table.setStyle(
-        TableStyle([
-            (
-                "BACKGROUND",
-                (0, 0),
-                (-1, 0),
-                colors.grey,
-            ),
-            (
-                "TEXTCOLOR",
-                (0, 0),
-                (-1, 0),
-                colors.white,
-            ),
-            (
-                "FONTNAME",
-                (0, 0),
-                (-1, 0),
-                "Helvetica-Bold",
-            ),
-            (
-                "GRID",
-                (0, 0),
-                (-1, -1),
-                0.5,
-                colors.black,
-            ),
-            (
-                "FONTSIZE",
-                (0, 0),
-                (-1, -1),
-                7,
-            ),
-            (
-                "VALIGN",
-                (0, 0),
-                (-1, -1),
-                "TOP",
-            ),
-        ])
-    )
-
-    story.append(table)
-
-    document.build(story)
-
-    output.seek(0)
-
-    return output
-
-
-# ============================================================
-# PDF Reports
-# ============================================================
-
-def contract_pdf(db: Session) -> BytesIO:
-
-    report = generate_contract_report(db)
-
-    rows = [
-        [
-            item["contract_id"],
-            item["contract_number"],
-            item["title"],
-            item["category"],
-            item["start_date"],
-            item["end_date"],
-            item["status"],
-        ]
-        for item in report["contracts"]
-    ]
-
-    return create_pdf_file(
-        "Contract Report",
-        [
-            "ID",
-            "Contract No.",
-            "Title",
-            "Category",
-            "Start",
-            "End",
-            "Status",
-        ],
-        rows,
-    )
-
-
-def obligation_pdf(db: Session) -> BytesIO:
-
-    report = generate_obligation_report(db)
-
-    rows = [
-        [
-            item["obligation_id"],
-            item["title"],
-            item["obligation_type"],
-            item["contract_number"],
-            item["due_date"],
-            item["assigned_user"],
-            item["status"],
-        ]
-        for item in report["obligations"]
-    ]
-
-    return create_pdf_file(
-        "Obligation Report",
-        [
-            "ID",
-            "Title",
-            "Type",
-            "Contract",
-            "Due Date",
-            "Assigned User",
-            "Status",
-        ],
-        rows,
-    )
-
-
-def renewal_pdf(db: Session) -> BytesIO:
-
-    report = generate_renewal_report(db)
-
-    rows = [
-        [
-            item["renewal_id"],
-            item["contract_number"],
-            item["contract_title"],
-            item["previous_expiry_date"],
-            item["renewal_date"],
-            item["new_expiry_date"],
-            item["status"],
-        ]
-        for item in report["renewals"]
-    ]
-
-    return create_pdf_file(
-        "Renewal Report",
-        [
-            "ID",
-            "Contract",
-            "Title",
-            "Previous Expiry",
-            "Renewal Date",
-            "New Expiry",
-            "Status",
-        ],
-        rows,
-    )
-
-
-def compliance_pdf(db: Session) -> BytesIO:
-
-    report = generate_compliance_report(db)
-
-    rows = [
-        [
-            item["contract_id"],
-            item["contract_number"],
-            item["compliance_status"],
-            item["compliance_score"],
-            item["total_obligations"],
-            item["completed_obligations"],
-            item["overdue_obligations"],
-            item["risk_level"],
-        ]
-        for item in report["compliance_reports"]
-    ]
-
-    return create_pdf_file(
-        "Compliance Report",
-        [
-            "Contract ID",
-            "Contract",
-            "Status",
-            "Score",
-            "Total",
-            "Completed",
-            "Overdue",
-            "Risk",
-        ],
-        rows,
-    )
-
-
-def audit_pdf(db: Session) -> BytesIO:
-
-    report = generate_audit_report(db)
-
-    rows = [
-        [
-            item["audit_id"],
-            item["user_name"],
-            item["action"],
-            item["table_name"],
-            item["record_id"],
-            item["created_at"],
-        ]
-        for item in report["audit_logs"]
-    ]
-
-    return create_pdf_file(
-        "Audit Report",
-        [
-            "ID",
-            "User",
-            "Action",
-            "Table",
-            "Record ID",
-            "Created At",
-        ],
-        rows,
-    )
+def get_dashboard_summary(
+    db: Session,
+):
+    contracts = get_contract_summary(db)
+
+    obligations = get_obligation_summary(db)
+
+    renewals = get_renewal_summary(db)
+
+    compliance = get_compliance_summary(db)
+
+    return {
+        "contracts": contracts,
+        "obligations": obligations,
+        "renewals": renewals,
+        "compliance": compliance,
+    }
