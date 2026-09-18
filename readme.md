@@ -1,112 +1,132 @@
-# ContractIQ – Contract Obligation Tracking & Compliance Management Platform
+# 📄 ContractIQ – Contract Obligation Tracking & Compliance Management Platform
 
-A full-stack Contract Lifecycle Management (CLM) platform developed to streamline contract administration, obligation tracking, renewals, compliance monitoring, reporting, and user management.
-
-## 🌐 Live Demo
-
-**Deployed Application**
-
-👉 https://contractiq-beryl.vercel.app/
+A full-stack **Contract Lifecycle Management (CLM)** platform developed using **FastAPI, React (TanStack Start), PostgreSQL, and Tailwind CSS**. ContractIQ helps organizations efficiently manage contracts, track obligations, monitor renewals, ensure compliance, generate business insights, and maintain audit trails through a secure and user-friendly interface.
 
 ---
 
-# Project Overview
+# 🌐 Live Demo
 
-ContractIQ is an enterprise Contract Lifecycle Management (CLM) system that enables organizations to efficiently manage contracts from creation to expiration.
+**Application URL**
 
-The platform provides modules for:
-
-- Dashboard & Analytics
-- Contract Management
-- Obligation Tracking
-- Renewal Management
-- Compliance Monitoring
-- Notifications
-- Reports
-- Activity Logs
-- User Management
-- Authentication & Authorization
+👉 **https://contractiq-beryl.vercel.app/**
 
 ---
 
-# Features
+# 👤 Demo Login Credentials
 
-## Dashboard
+Use the following accounts to explore the application.
 
-- Contract summary cards
-- Active / Expired contracts
-- Pending obligations
-- Upcoming renewals
-- Compliance overview
-- Interactive charts
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@contractiq.com | Admin@123 |
+| **Legal Manager** | legal@contractiq.com | Legal@123 |
+| **Contract Manager** | contract@contractiq.com | Contract@123 |
+| **Compliance Officer** | compliance@contractiq.com | Compliance@123 |
+| **Viewer** | viewer@contractiq.com | Viewer@123 |
 
----
-
-## Contract Management
-
-- Create contracts
-- Edit contracts
-- Upload contracts
-- Search & filter
-- Department categorization
-- Contract lifecycle tracking
+> **Note:** Passwords are securely stored in PostgreSQL using **bcrypt hashing**. These credentials are intended for demonstration and testing purposes.
 
 ---
 
-## Obligation Management
+# 📌 Project Overview
 
-- Create obligations
-- Assign owners
-- Track completion
-- Due dates
-- Priority management
-- Status tracking
+ContractIQ is an enterprise Contract Lifecycle Management (CLM) platform that centralizes the management of contracts throughout their lifecycle—from creation to expiration.
 
----
+The system enables organizations to:
 
-## Renewal Management
-
-- Upcoming renewals
-- Renewal reminders
-- Expired contracts
-- Renewal status tracking
+- Manage contracts
+- Track contractual obligations
+- Monitor renewal dates
+- Analyze compliance status
+- Generate reports
+- Maintain audit logs
+- Receive important notifications
+- Manage users securely
 
 ---
 
-## Compliance Management
+# ✨ Features
 
-- Compliance dashboard
-- Compliance score
-- Risk level monitoring
-- Contract compliance tracking
-- Compliance history
+## 📊 Dashboard
+
+- Total Contracts
+- Active Contracts
+- Expired Contracts
+- Pending Obligations
+- Overdue Obligations
+- Upcoming Renewals
+- Compliance Summary
+- Interactive Charts
 
 ---
 
-## Reports
+## 📁 Contract Management
+
+- Create Contracts
+- Edit Contracts
+- Upload Contracts
+- Search Contracts
+- Department-wise Classification
+- Contract Status Tracking
+- Contract Lifecycle Management
+
+---
+
+## ✅ Obligation Management
+
+- Create Obligations
+- Assign Responsibilities
+- Due Date Tracking
+- Priority Management
+- Pending & Completed Status
+- Overdue Monitoring
+
+---
+
+## 🔄 Renewal Management
+
+- Upcoming Renewals
+- Expired Contracts
+- Renewal Status
+- Renewal Alerts
+- Date-based Filtering
+
+---
+
+## 🛡 Compliance Management
+
+- Compliance Dashboard
+- Compliance Statistics
+- Risk Level Monitoring
+- Compliance Score
+- Contract Compliance History
+
+---
+
+## 📑 Reports
 
 Generate reports for:
 
-- Compliance
-- Contracts
+- Contract Summary
 - Obligations
 - Renewals
-- Audit Logs
+- Compliance
+- Audit History
 
 ---
 
-## Notifications
+## 🔔 Notifications
 
-- Upcoming deadlines
-- Contract reminders
-- Renewal alerts
-- Compliance alerts
+- Upcoming Deadlines
+- Contract Alerts
+- Renewal Notifications
+- Compliance Alerts
 
 ---
 
-## Activity Logs
+## 📜 Activity Logs
 
-Tracks major system events including:
+Automatically records:
 
 - User Login
 - User Logout
@@ -114,62 +134,69 @@ Tracks major system events including:
 - Contract Updates
 - Contract Deletion
 - Report Generation
-- User Management Actions
+- User Activities
 
 ---
 
-## Authentication
+## 🔐 Authentication
 
 - JWT Authentication
 - Secure Login
+- Password Hashing using bcrypt
 - Protected Routes
 - Session Management
-- Password Hashing (bcrypt)
 
 ---
 
-## Tech Stack
+# 🛠 Tech Stack
 
-### Frontend
+## Frontend
 
 - React
+- TanStack Start
 - TanStack Router
 - React Query
 - TypeScript
 - Tailwind CSS
 - Chart.js
 - React ChartJS 2
-- Lucide Icons
+- Lucide React Icons
 
-### Backend
+---
+
+## Backend
 
 - FastAPI
 - SQLAlchemy
-- PostgreSQL
 - Alembic
+- PostgreSQL
 - Pydantic
 - JWT Authentication
 - bcrypt Password Hashing
 
-### Database
+---
+
+## Database
 
 - PostgreSQL
 
-### Deployment
+---
 
-Frontend:
-- Vercel
+## Deployment
 
-Backend:
-- FastAPI
+Frontend is deployed on **Vercel**.
+
+Live Application:
+
+👉 **https://contractiq-beryl.vercel.app/**
 
 ---
 
-# Project Structure
+# 📂 Project Structure
 
 ```
 Contract-Obligation-Tracking-Compliance-Management-Platform
-
+│
 ├── backend/
 │   ├── app/
 │   ├── alembic/
@@ -185,17 +212,17 @@ Contract-Obligation-Tracking-Compliance-Management-Platform
 
 ---
 
-# Local Installation
+# 🚀 Local Setup
 
-## Clone Repository
+## 1. Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/<your-github-username>/Contract-Obligation-Tracking-Compliance-Management-Platform.git
 ```
 
 ---
 
-## Backend Setup
+## 2. Backend Setup
 
 ```bash
 cd backend
@@ -211,7 +238,7 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-Backend runs on
+Backend runs at:
 
 ```
 http://localhost:8000
@@ -219,7 +246,7 @@ http://localhost:8000
 
 ---
 
-## Frontend Setup
+## 3. Frontend Setup
 
 ```bash
 cd frontend
@@ -229,45 +256,83 @@ npm install
 npm run dev
 ```
 
-Frontend runs on
+Frontend runs at:
 
 ```
-http://localhost:3000
+http://localhost:8080
 ```
-
-(or the configured Vite port)
 
 ---
 
-# Deployment
-
-Frontend is deployed on **Vercel**.
-
-Live URL:
-
-https://contractiq-beryl.vercel.app/
-
----
-
-# Deployment Notes
+# 📦 Deployment Process
 
 The original project repository belonged to the project owner.
 
-Since Vercel only allows deployment from repositories accessible under the connected GitHub account, the deployment process was:
+Since deployment permissions were unavailable from the original repository, the following workflow was used:
 
-1. Fork the original repository into my GitHub account.
-2. Clone the fork locally.
-3. Switch to my development branch (`saivarun`).
-4. Push the latest changes to my fork.
-5. Import the forked repository into Vercel.
-6. Configure the project settings.
-7. Deploy the frontend.
+1. Forked the original repository into my GitHub account.
+2. Cloned the fork locally.
+3. Worked on my development branch (`saivarun`).
+4. Pushed the latest commits to the fork.
+5. Connected the forked repository to **Vercel**.
+6. Configured the build settings.
+7. Successfully deployed the frontend.
 
-This preserves the original repository while allowing independent deployment and testing.
+This workflow preserved the original repository while enabling independent deployment and testing.
 
 ---
 
-# Git Workflow
+# 📈 Sprint Coverage
+
+## ✅ Sprint 13 – Reports, Analytics & Dashboard APIs
+
+Implemented:
+
+- Contract Summary APIs
+- Obligation Summary APIs
+- Renewal Summary APIs
+- Compliance Summary APIs
+- Dashboard Statistics
+- Chart-ready API Responses
+- SQLAlchemy Aggregation Queries
+- Swagger Tested APIs
+
+---
+
+## ✅ Sprint 14 – Frontend Foundation & Dashboard Integration
+
+Implemented using **React (TanStack Start)** instead of Angular.
+
+Completed:
+
+- Responsive Application Layout
+- Sidebar Navigation
+- Header
+- Dashboard UI
+- Dashboard API Integration
+- Authentication
+- Login
+- Logout
+- Protected Routes
+- API Services
+- Loading States
+- Error Handling
+- Responsive Design
+
+---
+
+# 🔒 Security Features
+
+- JWT Authentication
+- bcrypt Password Hashing
+- Protected API Routes
+- Input Validation using Pydantic
+- SQLAlchemy ORM
+- PostgreSQL Data Storage
+
+---
+
+# 📋 Git Workflow
 
 ```bash
 git checkout saivarun
@@ -281,57 +346,40 @@ git push origin saivarun
 
 ---
 
-# Sprint Coverage
+# 🚀 Future Enhancements
 
-### Sprint 13
-
-- Reports & Analytics APIs
-- Dashboard data aggregation
-- Compliance summary
-- Contract statistics
-- Renewal summary
-- Obligation summary
-- Chart-ready backend data
-
-### Sprint 14
-
-- Frontend foundation
-- Dashboard implementation
-- API integration
-- Authentication
-- Protected routes
-- Responsive layout
-- Navigation
-- Dashboard visualization
+- Role-Based Access Control (RBAC)
+- PDF Report Generation
+- Report Downloads
+- Email Notifications
+- Digital Signature Support
+- Contract Version History
+- Document Preview
+- Advanced Analytics
+- Export to Excel
+- Audit Report Downloads
 
 ---
 
-# Future Improvements
-
-- PDF report generation
-- Report downloads
-- Email notifications
-- RBAC (Role-Based Access Control)
-- Contract document preview
-- Digital signatures
-- Advanced analytics
-- Audit exports
-
----
-
-# Author
+# 👨‍💻 Author
 
 **Sai Varun**
 
-B.Tech – Big Data Analytics
+**B.Tech – Big Data Analytics**
 
-SRM Institute of Science and Technology, Ramapuram
+**SRM Institute of Science and Technology, Ramapuram**
 
 GitHub:
 https://github.com/SaiVarun-26
 
 ---
 
-# License
+# 📄 License
 
-This project was developed for educational and academic purposes as part of the ContractIQ Contract Lifecycle Management project.
+This project was developed for academic and educational purposes as part of the **ContractIQ – Contract Obligation Tracking & Compliance Management Platform** project.
+
+---
+
+# 🙏 Acknowledgements
+
+Special thanks to the project mentors and team members for their guidance throughout the development of the ContractIQ platform.
