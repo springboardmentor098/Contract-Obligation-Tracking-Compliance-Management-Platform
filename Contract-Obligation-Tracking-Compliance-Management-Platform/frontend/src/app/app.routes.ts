@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
+
 import { authGuard } from './core/guards/auth.guard';
+
 import { LayoutComponent } from './layout/layout.component';
 import { LoginComponent } from './features/auth/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
@@ -10,24 +12,75 @@ import { ComplianceComponent } from './features/compliance/compliance.component'
 import { NotificationsComponent } from './features/notifications/notifications.component';
 import { ReportsComponent } from './features/reports/reports.component';
 import { AuditComponent } from './features/audit/audit.component';
+import { UserComponent } from './features/user/user.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  {
+    path: 'login',
+    component: LoginComponent
+  },
+
   {
     path: '',
     component: LayoutComponent,
     canActivate: [authGuard],
+
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'contracts', component: ContractsComponent },
-      { path: 'obligations', component: ObligationsComponent },
-      { path: 'renewals', component: RenewalsComponent },
-      { path: 'compliance', component: ComplianceComponent },
-      { path: 'notifications', component: NotificationsComponent },
-      { path: 'reports', component: ReportsComponent },
-      { path: 'audit', component: AuditComponent }
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard'
+      },
+
+      {
+        path: 'dashboard',
+        component: DashboardComponent
+      },
+
+      {
+        path: 'contracts',
+        component: ContractsComponent
+      },
+
+      {
+        path: 'obligations',
+        component: ObligationsComponent
+      },
+
+      {
+        path: 'renewals',
+        component: RenewalsComponent
+      },
+
+      {
+        path: 'compliance',
+        component: ComplianceComponent
+      },
+
+      {
+        path: 'notifications',
+        component: NotificationsComponent
+      },
+
+      {
+        path: 'reports',
+        component: ReportsComponent
+      },
+
+      {
+        path: 'audit',
+        component: AuditComponent
+      },
+
+      {
+        path: 'users',
+        component: UserComponent
+      }
     ]
   },
-  { path: '**', redirectTo: 'dashboard' }
+
+  {
+    path: '**',
+    redirectTo: 'dashboard'
+  }
 ];
