@@ -50,12 +50,18 @@ ALLOWED_STATUS_TRANSITIONS = {
 # ---------------------------------------------------------
 
 MANAGER_ROLES = {
+    "Administrator",
+    "Legal Manager",
+    "Compliance Officer",
+    "Contract Manager",
+    "Department Head",
+
+    # Backward-compatible values
     "admin",
     "manager",
     "contract_manager",
     "Admin",
     "Manager",
-    "Contract Manager",
 }
 
 
@@ -677,11 +683,7 @@ def complete_renewal(
     if hasattr(contract, "end_date"):
         contract.end_date = renewal.new_expiry_date
 
-    # If your Contract model uses expiry_date instead,
-    # replace the above with:
-    #
-    # contract.expiry_date = renewal.new_expiry_date
-
+  
     if renewal.renewal_date is None:
         renewal.renewal_date = date.today()
 
