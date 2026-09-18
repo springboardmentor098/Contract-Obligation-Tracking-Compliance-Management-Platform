@@ -1,1 +1,187 @@
 .alert{background:#fff1f1;border:1px solid #f1d0d0;color:#b64242;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px}.toolbar{display:flex;gap:9px;margin-bottom:14px}.search{height:37px;background:white;border:1px solid #e0e6ed;border-radius:7px;display:flex;align-items:center;gap:7px;padding:0 10px;flex:1;max-width:500px}.search span{font-size:18px;color:#8995a6}.search input,.toolbar select{border:0;outline:0;font-size:11px;background:transparent}.search input{width:100%}.toolbar select{height:37px;background:white;border:1px solid #e0e6ed;border-radius:7px;width:160px;padding:0 9px}.secondary{height:34px;border:1px solid #dbe2eb;background:white;border-radius:7px;padding:0 10px;color:#607087;cursor:pointer}.table-card{background:white;border:1px solid #e5eaf0;border-radius:11px;overflow:auto}.loading{padding:30px;color:#7d8999;font-size:12px}table{width:100%;border-collapse:collapse;font-size:11px;min-width:850px}th{background:#f9fafc;text-align:left;color:#8b96a6;font-size:9px;text-transform:uppercase;padding:11px 14px;border-bottom:1px solid #e8ecf1}td{padding:13px 14px;border-bottom:1px solid #eef1f4;color:#657286}td b{display:block;color:#253349}td small{display:block;color:#9aa4b2;font-size:9px;margin-top:3px}td select{height:30px;border:1px solid #dfe5ec;border-radius:6px;font-size:10px;color:#516076;padding:0 6px}
+/* ==========================================
+   CREATE RENEWAL FORM
+   ========================================== */
+
+.form-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.form-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.form-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.form-header h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.form-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.close-button {
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.field small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.primary {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 18px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:hover {
+  opacity: 0.92;
+}
+
+.primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.secondary {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 18px;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actions select {
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.renew-button {
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 12px;
+  background: #16a34a;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.renew-button:hover {
+  opacity: 0.9;
+}
+
+.alert {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
+@media (max-width: 768px) {
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+}
