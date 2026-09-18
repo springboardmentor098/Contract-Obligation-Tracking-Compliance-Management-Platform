@@ -1,8 +1,1124 @@
-<cq-page-header eyebrow="REPORTS & ANALYTICS" title="Analytics Workspace" subtitle="Turn live ContractIQ reporting data into operational insight.">
-  <button class="secondary" (click)="load()"><span class="material-icons-round">refresh</span> Refresh</button>
+
+<cq-page-header
+  eyebrow="REPORTS & ANALYTICS"
+  title="Analytics Workspace"
+  subtitle="Turn live ContractIQ reporting data into operational insight."
+>
+
+  <button
+    type="button"
+    class="secondary"
+    (click)="refresh()"
+  >
+
+    <span class="material-icons-round">
+      refresh
+    </span>
+
+    Refresh
+
+  </button>
+
 </cq-page-header>
-@if(error){<div class="alert">{{error}}</div>} @if(loading){<div class="loading">Loading analytics…</div>} @else if(data){
-<div class="report-grid"><div class="report-card"><span>Total contracts</span><b>{{data.total_contracts}}</b><small>Repository volume</small></div><div class="report-card"><span>Active rate</span><b>{{data.total_contracts ? (data.active_contracts/data.total_contracts*100 | number:'1.0-0') : 0}}%</b><small>Active vs total</small></div><div class="report-card"><span>Obligations</span><b>{{total(data.obligation_status_distribution)}}</b><small>Tracked records</small></div><div class="report-card"><span>Renewals due</span><b>{{data.upcoming_renewals}}</b><small>Upcoming pipeline</small></div></div>
-<div class="chart-grid"><div class="panel"><h3>Contract status</h3>@for(x of entries(data.contract_status_distribution);track x[0]){<div class="line"><span>{{x[0]}}</span><div><i [style.width.%]="data.total_contracts ? x[1]/data.total_contracts*100 : 0"></i></div><b>{{x[1]}}</b></div>}</div><div class="panel"><h3>Obligation status</h3>@for(x of entries(data.obligation_status_distribution);track x[0]){<div class="line"><span>{{x[0]}}</span><div><i [style.width.%]="total(data.obligation_status_distribution) ? x[1]/total(data.obligation_status_distribution)*100 : 0"></i></div><b>{{x[1]}}</b></div>}</div></div>
-<div class="panel compliance"><h3>Compliance summary</h3><div class="compliance-row">@for(x of entries(data.compliance_summary);track x[0]){<div><b>{{x[1]}}</b><span>{{x[0]}}</span></div>}</div></div>
+
+
+<!-- ========================================= -->
+<!-- ERROR -->
+<!-- ========================================= -->
+
+@if (error) {
+
+  <div class="alert">
+    {{ error }}
+  </div>
+
 }
+
+
+<!-- ========================================= -->
+<!-- ANALYTICS -->
+<!-- ========================================= -->
+
+@if (loading) {
+
+  <div class="loading">
+    Loading analytics…
+  </div>
+
+} @else if (data) {
+
+  <!-- ======================================= -->
+  <!-- SUMMARY CARDS -->
+  <!-- ======================================= -->
+
+  <div class="report-grid">
+
+    <div class="report-card">
+
+      <span>
+        Total contracts
+      </span>
+
+      <b>
+        {{ data.total_contracts }}
+      </b>
+
+      <small>
+        Repository volume
+      </small>
+
+    </div>
+
+
+    <div class="report-card">
+
+      <span>
+        Active rate
+      </span>
+
+      <b>
+        {{
+          data.total_contracts
+            ? (
+                data.active_contracts /
+                data.total_contracts *
+                100
+              | number:'1.0-0'
+              )
+            : 0
+        }}%
+      </b>
+
+      <small>
+        Active vs total
+      </small>
+
+    </div>
+
+
+    <div class="report-card">
+
+      <span>
+        Obligations
+      </span>
+
+      <b>
+        {{
+          total(
+            data.obligation_status_distribution
+          )
+        }}
+      </b>
+
+      <small>
+        Tracked records
+      </small>
+
+    </div>
+
+
+    <div class="report-card">
+
+      <span>
+        Renewals due
+      </span>
+
+      <b>
+        {{ data.upcoming_renewals }}
+      </b>
+
+      <small>
+        Upcoming pipeline
+      </small>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================= -->
+  <!-- CHARTS -->
+  <!-- ======================================= -->
+
+  <div class="chart-grid">
+
+    <!-- CONTRACT STATUS -->
+
+    <div class="panel">
+
+      <h3>
+        Contract status
+      </h3>
+
+      @for (
+        x of entries(
+          data.contract_status_distribution
+        );
+        track x[0]
+      ) {
+
+        <div class="line">
+
+          <span>
+            {{ x[0] }}
+          </span>
+
+          <div>
+
+            <i
+              [style.width.%]="
+                data.total_contracts
+                  ? x[1] /
+                    data.total_contracts *
+                    100
+                  : 0
+              "
+            ></i>
+
+          </div>
+
+          <b>
+            {{ x[1] }}
+          </b>
+
+        </div>
+
+      }
+
+    </div>
+
+
+    <!-- OBLIGATION STATUS -->
+
+    <div class="panel">
+
+      <h3>
+        Obligation status
+      </h3>
+
+      @for (
+        x of entries(
+          data.obligation_status_distribution
+        );
+        track x[0]
+      ) {
+
+        <div class="line">
+
+          <span>
+            {{ x[0] }}
+          </span>
+
+          <div>
+
+            <i
+              [style.width.%]="
+                total(
+                  data.obligation_status_distribution
+                )
+                  ? x[1] /
+                    total(
+                      data.obligation_status_distribution
+                    ) *
+                    100
+                  : 0
+              "
+            ></i>
+
+          </div>
+
+          <b>
+            {{ x[1] }}
+          </b>
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================= -->
+  <!-- COMPLIANCE ANALYTICS -->
+  <!-- ======================================= -->
+
+  <div class="panel compliance">
+
+    <h3>
+      Compliance summary
+    </h3>
+
+    <div class="compliance-row">
+
+      @for (
+        x of entries(
+          data.compliance_summary
+        );
+        track x[0]
+      ) {
+
+        <div>
+
+          <b>
+            {{ x[1] }}
+          </b>
+
+          <span>
+            {{ x[0] }}
+          </span>
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+}
+
+
+<!-- ========================================= -->
+<!-- REPORTS -->
+<!-- ========================================= -->
+
+<div class="reports-section">
+
+  <div class="section-header">
+
+    <div>
+
+      <div class="section-eyebrow">
+        REPORT CENTER
+      </div>
+
+      <h2>
+        Reports
+      </h2>
+
+      <p>
+        View and print live reports generated from ContractIQ data.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  @if (reportError) {
+
+    <div class="alert">
+      {{ reportError }}
+    </div>
+
+  }
+
+
+  @if (reportsLoading) {
+
+    <div class="loading">
+      Loading reports…
+    </div>
+
+  } @else {
+
+    <div class="reports-grid">
+
+      <!-- =================================== -->
+      <!-- CONTRACT REPORT -->
+      <!-- =================================== -->
+
+      <div class="report-option">
+
+        <div class="report-icon">
+          <span class="material-icons-round">
+            description
+          </span>
+        </div>
+
+        <div class="report-option-content">
+
+          <h3>
+            Contract Report
+          </h3>
+
+          <p>
+            Contract status and repository summary.
+          </p>
+
+        </div>
+
+        <div class="report-actions">
+
+          <button
+            type="button"
+            class="secondary"
+            (click)="viewReport('contracts')"
+          >
+            View Report
+          </button>
+
+          <button
+            type="button"
+            class="primary"
+            (click)="printReport('contracts')"
+          >
+            Print
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================== -->
+      <!-- OBLIGATION REPORT -->
+      <!-- =================================== -->
+
+      <div class="report-option">
+
+        <div class="report-icon">
+          <span class="material-icons-round">
+            task_alt
+          </span>
+        </div>
+
+        <div class="report-option-content">
+
+          <h3>
+            Obligation Report
+          </h3>
+
+          <p>
+            Obligation tracking and status summary.
+          </p>
+
+        </div>
+
+        <div class="report-actions">
+
+          <button
+            type="button"
+            class="secondary"
+            (click)="viewReport('obligations')"
+          >
+            View Report
+          </button>
+
+          <button
+            type="button"
+            class="primary"
+            (click)="printReport('obligations')"
+          >
+            Print
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================== -->
+      <!-- RENEWAL REPORT -->
+      <!-- =================================== -->
+
+      <div class="report-option">
+
+        <div class="report-icon">
+          <span class="material-icons-round">
+            event_repeat
+          </span>
+        </div>
+
+        <div class="report-option-content">
+
+          <h3>
+            Renewal Report
+          </h3>
+
+          <p>
+            Renewal pipeline and upcoming renewals.
+          </p>
+
+        </div>
+
+        <div class="report-actions">
+
+          <button
+            type="button"
+            class="secondary"
+            (click)="viewReport('renewals')"
+          >
+            View Report
+          </button>
+
+          <button
+            type="button"
+            class="primary"
+            (click)="printReport('renewals')"
+          >
+            Print
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================== -->
+      <!-- COMPLIANCE REPORT -->
+      <!-- =================================== -->
+
+      <div class="report-option">
+
+        <div class="report-icon">
+          <span class="material-icons-round">
+            verified_user
+          </span>
+        </div>
+
+        <div class="report-option-content">
+
+          <h3>
+            Compliance Report
+          </h3>
+
+          <p>
+            Compliance status and risk summary.
+          </p>
+
+        </div>
+
+        <div class="report-actions">
+
+          <button
+            type="button"
+            class="secondary"
+            (click)="viewReport('compliance')"
+          >
+            View Report
+          </button>
+
+          <button
+            type="button"
+            class="primary"
+            (click)="printReport('compliance')"
+          >
+            Print
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- REPORT VIEWER -->
+<!-- ========================================= -->
+
+@if (selectedReport) {
+
+  <div
+    id="report-viewer"
+    class="report-viewer"
+  >
+
+    <div class="report-viewer-header">
+
+      <div>
+
+        <div class="section-eyebrow">
+          CONTRACTIQ REPORT
+        </div>
+
+        <h2>
+          {{ getReportTitle() }}
+        </h2>
+
+        <p>
+          Generated from live ContractIQ reporting data.
+        </p>
+
+      </div>
+
+
+      <div class="viewer-actions">
+
+        <button
+          type="button"
+          class="secondary"
+          (click)="closeReport()"
+        >
+          Close
+        </button>
+
+
+        <button
+          type="button"
+          class="primary"
+          (click)="printReport(selectedReport)"
+        >
+
+          <span class="material-icons-round">
+            print
+          </span>
+
+          Print Report
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ======================================= -->
+    <!-- CONTRACT REPORT VIEW -->
+    <!-- ======================================= -->
+
+    @if (selectedReport === 'contracts' && contractReport) {
+
+      <div class="report-summary-grid">
+
+        <div>
+          <span>Total Contracts</span>
+
+          <strong>
+            {{ contractReport.total_contracts }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Active</span>
+
+          <strong>
+            {{ contractReport.active_contracts }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Under Review</span>
+
+          <strong>
+            {{ contractReport.pending_approval_contracts }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Expired</span>
+
+          <strong>
+            {{ contractReport.expired_contracts }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <h3>
+        Contract Details
+      </h3>
+
+
+      <div class="report-table">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Contract No.</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Start Date</th>
+              <th>Expiry Date</th>
+              <th>Status</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              contract of contractReport.contract_records;
+              track contract.id
+            ) {
+
+              <tr>
+
+                <td>
+                  <strong>
+                    {{ contract.contract_number }}
+                  </strong>
+                </td>
+
+
+                <td>
+                  {{ contract.title }}
+                </td>
+
+
+                <td>
+                  {{ contract.category }}
+                </td>
+
+
+                <td>
+                  {{ contract.start_date | date:'dd MMM yyyy' }}
+                </td>
+
+
+                <td>
+                  {{ contract.end_date | date:'dd MMM yyyy' }}
+                </td>
+
+
+                <td>
+                  <span class="report-status">
+                    {{ contract.status }}
+                  </span>
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+
+    <!-- ======================================= -->
+    <!-- OBLIGATION REPORT VIEW -->
+    <!-- ======================================= -->
+
+    @if (selectedReport === 'obligations' && obligationReport) {
+
+      <div class="report-summary-grid">
+
+        <div>
+          <span>Total Obligations</span>
+
+          <strong>
+            {{ obligationReport.total_obligations }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Completed</span>
+
+          <strong>
+            {{ obligationReport.completed_obligations }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Pending</span>
+
+          <strong>
+            {{ obligationReport.pending_obligations }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Overdue</span>
+
+          <strong>
+            {{ obligationReport.overdue_obligations }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <h3>
+        Obligation Details
+      </h3>
+
+
+      <div class="report-table">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Contract</th>
+              <th>Obligation</th>
+              <th>Type</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Assigned To</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              item of obligationReport.obligation_records;
+              track item.id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <strong>
+                    {{ item.contract_number }}
+                  </strong>
+
+                  <small>
+                    {{ item.contract_title }}
+                  </small>
+
+                </td>
+
+
+                <td>
+                  {{ item.title }}
+                </td>
+
+
+                <td>
+                  {{ item.obligation_type }}
+                </td>
+
+
+                <td>
+                  {{ item.due_date | date:'dd MMM yyyy' }}
+                </td>
+
+
+                <td>
+
+                  <span class="report-status">
+                    {{ item.status }}
+                  </span>
+
+                </td>
+
+
+                <td>
+                  {{ item.assigned_to || 'Unassigned' }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+
+    <!-- ======================================= -->
+    <!-- RENEWAL REPORT VIEW -->
+    <!-- ======================================= -->
+
+    @if (selectedReport === 'renewals' && renewalReport) {
+
+      <div class="report-summary-grid">
+
+        <div>
+          <span>Upcoming Renewals</span>
+
+          <strong>
+            {{ renewalReport.upcoming_renewals }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Expired</span>
+
+          <strong>
+            {{ renewalReport.expired_contracts }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Immediate Attention</span>
+
+          <strong>
+            {{ renewalReport.immediate_attention }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <h3>
+        Renewal Details
+      </h3>
+
+
+      <div class="report-table">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Contract</th>
+              <th>Previous Expiry</th>
+              <th>Renewal Date</th>
+              <th>Days Remaining</th>
+              <th>Status</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              item of renewalReport.renewal_records;
+              track item.contract_id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <strong>
+                    {{ item.contract_number }}
+                  </strong>
+
+                  <small>
+                    {{ item.contract_title }}
+                  </small>
+
+                </td>
+
+
+                <td>
+                  {{ item.expiry_date | date:'dd MMM yyyy' }}
+                </td>
+
+
+                <td>
+                  {{
+                    item.renewal_date
+                      ? (item.renewal_date | date:'dd MMM yyyy')
+                      : 'Not processed'
+                  }}
+                </td>
+
+
+                <td>
+                  {{
+                    item.days_remaining !== null &&
+                    item.days_remaining !== undefined
+                      ? item.days_remaining
+                      : '—'
+                  }}
+                </td>
+
+
+                <td>
+
+                  <span class="report-status">
+                    {{ item.status }}
+                  </span>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+
+    <!-- ======================================= -->
+    <!-- COMPLIANCE REPORT VIEW -->
+    <!-- ======================================= -->
+
+    @if (selectedReport === 'compliance' && complianceReport) {
+
+      <div class="report-summary-grid">
+
+        <div>
+          <span>Total Contracts</span>
+
+          <strong>
+            {{ complianceReport.total_contracts }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Compliant</span>
+
+          <strong>
+            {{ complianceReport.compliant_contracts }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Non-Compliant</span>
+
+          <strong>
+            {{ complianceReport.non_compliant_contracts }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>High Risk</span>
+
+          <strong>
+            {{ complianceReport.high_risk_contracts }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="overall-compliance">
+
+        <span>
+          Overall Compliance
+        </span>
+
+        <strong>
+          {{ complianceReport.compliance_percentage | number:'1.2-2' }}%
+        </strong>
+
+      </div>
+
+
+      <h3>
+        Contract Compliance Details
+      </h3>
+
+
+      <div class="report-table">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Contract</th>
+              <th>Total</th>
+              <th>Completed</th>
+              <th>Pending</th>
+              <th>Overdue</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Risk</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              item of complianceReport.compliance_records;
+              track item.contract_id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <strong>
+                    {{ item.contract_number }}
+                  </strong>
+
+                  <small>
+                    {{ item.contract_title }}
+                  </small>
+
+                </td>
+
+
+                <td>
+                  {{ item.total_obligations }}
+                </td>
+
+
+                <td>
+                  {{ item.completed_obligations }}
+                </td>
+
+
+                <td>
+                  {{ item.pending_obligations }}
+                </td>
+
+
+                <td>
+                  {{ item.overdue_obligations }}
+                </td>
+
+
+                <td>
+
+                  <strong>
+                    {{ item.compliance_score }}%
+                  </strong>
+
+                </td>
+
+
+                <td>
+                  {{ item.compliance_status }}
+                </td>
+
+
+                <td>
+                  {{ item.risk_level }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </div>
+
+}
+
