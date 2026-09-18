@@ -1,0 +1,645 @@
+<div class="page">
+
+  <!-- ========================================================
+       HEADER
+  ========================================================= -->
+
+  <div class="page-header">
+
+    <div>
+
+      <div class="eyebrow">
+        ADMINISTRATION
+      </div>
+
+      <h1>
+        User Management
+      </h1>
+
+      <p>
+        Manage ContractIQ users, roles and account access.
+      </p>
+
+    </div>
+
+
+    @if (canManageUsers) {
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreate()"
+      >
+
+        <span class="material-icons-round">
+          person_add
+        </span>
+
+        New User
+
+      </button>
+
+    }
+
+  </div>
+
+
+  <!-- ========================================================
+       PERMISSION ERROR
+  ========================================================= -->
+
+  @if (!canManageUsers) {
+
+    <div class="permission-card">
+
+      <span class="material-icons-round">
+        lock
+      </span>
+
+      <div>
+
+        <strong>
+          Access Restricted
+        </strong>
+
+        <p>
+          You do not have the
+          <strong>Manage Users</strong>
+          permission.
+        </p>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!-- ========================================================
+       MESSAGES
+  ========================================================= -->
+
+  @if (error) {
+
+    <div class="alert error">
+
+      <span class="material-icons-round">
+        error
+      </span>
+
+      {{ error }}
+
+    </div>
+
+  }
+
+
+  @if (success) {
+
+    <div class="alert success">
+
+      <span class="material-icons-round">
+        check_circle
+      </span>
+
+      {{ success }}
+
+    </div>
+
+  }
+
+
+  @if (canManageUsers) {
+
+    <!-- ======================================================
+         TOOLBAR
+    ====================================================== -->
+
+    <div class="toolbar">
+
+      <div class="search-box">
+
+        <span class="material-icons-round">
+          search
+        </span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilters()"
+          placeholder="Search by name, email or ID"
+        />
+
+      </div>
+
+
+      <select
+        [(ngModel)]="selectedRole"
+        (change)="applyFilters()"
+      >
+
+        <option value="">
+          All Roles
+        </option>
+
+        @for (role of roles; track role) {
+
+          <option [value]="role">
+            {{ role }}
+          </option>
+
+        }
+
+      </select>
+
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="loadUsers()"
+      >
+
+        <span class="material-icons-round">
+          refresh
+        </span>
+
+        Refresh
+
+      </button>
+
+    </div>
+
+
+    <!-- ======================================================
+         TABLE
+    ====================================================== -->
+
+    <div class="table-card">
+
+      @if (loading) {
+
+        <div class="loading">
+
+          <span class="material-icons-round spin">
+            sync
+          </span>
+
+          Loading users...
+
+        </div>
+
+      } @else {
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                User
+              </th>
+
+              <th>
+                Role
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Created
+              </th>
+
+              <th>
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              user of filteredUsers;
+              track user.id
+            ) {
+
+              <tr>
+
+                <!-- USER -->
+
+                <td>
+
+                  <div class="user-info">
+
+                    <div class="avatar">
+
+                      {{
+                        (
+                          user.full_name ||
+                          user.email ||
+                          'U'
+                        ).charAt(0).toUpperCase()
+                      }}
+
+                    </div>
+
+
+                    <div>
+
+                      <strong>
+                        {{
+                          user.full_name ||
+                          'Unnamed User'
+                        }}
+                      </strong>
+
+                      <small>
+                        {{ user.email }}
+                      </small>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ROLE -->
+
+                <td>
+
+                  <span class="role-badge">
+
+                    {{ user.role }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  @if (user.is_active) {
+
+                    <span class="status active">
+                      Active
+                    </span>
+
+                  } @else {
+
+                    <span class="status inactive">
+                      Inactive
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <!-- CREATED -->
+
+                <td>
+
+                  {{
+                    user.created_at
+                      ? (user.created_at | date:'dd MMM yyyy')
+                      : '—'
+                  }}
+
+                </td>
+
+
+                <!-- ACTIONS -->
+
+                <td>
+
+                  <div class="actions">
+
+                    <button
+                      type="button"
+                      class="icon-button"
+                      title="Edit user"
+                      (click)="openEdit(user)"
+                    >
+
+                      <span class="material-icons-round">
+                        edit
+                      </span>
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="icon-button"
+                      [title]="
+                        user.is_active
+                          ? 'Deactivate user'
+                          : 'Activate user'
+                      "
+                      (click)="toggleStatus(user)"
+                    >
+
+                      <span class="material-icons-round">
+
+                        {{
+                          user.is_active
+                            ? 'person_off'
+                            : 'person'
+                        }}
+
+                      </span>
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="icon-button danger"
+                      title="Delete user"
+                      (click)="deleteUser(user)"
+                    >
+
+                      <span class="material-icons-round">
+                        delete
+                      </span>
+
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+
+            @empty {
+
+              <tr>
+
+                <td
+                  colspan="5"
+                  class="empty"
+                >
+
+                  <span class="material-icons-round">
+                    group_off
+                  </span>
+
+                  <strong>
+                    No users found
+                  </strong>
+
+                  <small>
+                    Try changing your search or role filter.
+                  </small>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      }
+
+    </div>
+
+  }
+
+
+  <!-- ========================================================
+       CREATE / EDIT MODAL
+  ========================================================= -->
+
+  @if (showForm) {
+
+    <div
+      class="modal-backdrop"
+      (click)="closeForm()"
+    >
+
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
+      >
+
+        <div class="modal-header">
+
+          <div>
+
+            <div class="eyebrow">
+
+              {{
+                editingUser
+                  ? 'EDIT USER'
+                  : 'NEW USER'
+              }}
+
+            </div>
+
+            <h2>
+
+              {{
+                editingUser
+                  ? 'Edit User'
+                  : 'Create User'
+              }}
+
+            </h2>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeForm()"
+          >
+
+            <span class="material-icons-round">
+              close
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <div class="form-grid">
+
+
+          <!-- FULL NAME -->
+
+          <div class="field">
+
+            <label for="full_name">
+              Full Name
+            </label>
+
+            <input
+              id="full_name"
+              type="text"
+              [(ngModel)]="form.full_name"
+              placeholder="Enter full name"
+            />
+
+          </div>
+
+
+          <!-- EMAIL -->
+
+          <div class="field">
+
+            <label for="email">
+              Email *
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              [(ngModel)]="form.email"
+              placeholder="user@example.com"
+            />
+
+          </div>
+
+
+          <!-- ROLE -->
+
+          <div class="field">
+
+            <label for="role">
+              Role *
+            </label>
+
+            <select
+              id="role"
+              [(ngModel)]="form.role"
+            >
+
+              @for (role of roles; track role) {
+
+                <option [value]="role">
+                  {{ role }}
+                </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <!-- PASSWORD -->
+
+          <div class="field">
+
+            <label for="password">
+
+              {{
+                editingUser
+                  ? 'New Password'
+                  : 'Password *'
+              }}
+
+            </label>
+
+            <input
+              id="password"
+              type="password"
+              [(ngModel)]="form.password"
+              [placeholder]="
+                editingUser
+                  ? 'Leave blank to keep current password'
+                  : 'Enter password'
+              "
+            />
+
+          </div>
+
+
+          <!-- STATUS -->
+
+          @if (editingUser) {
+
+            <div class="field checkbox-field">
+
+              <label>
+
+                <input
+                  type="checkbox"
+                  [(ngModel)]="form.is_active"
+                />
+
+                Account is active
+
+              </label>
+
+            </div>
+
+          }
+
+        </div>
+
+
+        <!-- MODAL ACTIONS -->
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+            [disabled]="saving"
+          >
+            Cancel
+          </button>
+
+
+          <button
+            type="button"
+            class="primary-button"
+            (click)="saveUser()"
+            [disabled]="saving"
+          >
+
+            @if (saving) {
+
+              Saving...
+
+            } @else {
+
+              {{
+                editingUser
+                  ? 'Update User'
+                  : 'Create User'
+              }}
+
+            }
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

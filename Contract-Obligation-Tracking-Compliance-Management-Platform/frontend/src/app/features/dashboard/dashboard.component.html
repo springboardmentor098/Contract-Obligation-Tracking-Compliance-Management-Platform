@@ -1,0 +1,46 @@
+<cq-page-header eyebrow="EXECUTIVE WORKSPACE" title="Good morning, {{ data ? 'Workspace' : 'there' }}" subtitle="A live view of contracts, obligations, renewals and compliance health.">
+  <button class="secondary" (click)="load()"><span class="material-icons-round">refresh</span> Refresh data</button>
+</cq-page-header>
+
+@if (loading) {
+  <div class="loading-grid">@for (x of [1,2,3,4,5,6]; track x) { <div class="skeleton"></div> }</div>
+} @else if (error) {
+  <div class="error-panel"><span class="material-icons-round">cloud_off</span><div><b>Backend data unavailable</b><p>{{ error }}</p><button class="secondary" (click)="load()">Retry</button></div></div>
+} @else if (data) {
+  <section class="cards">
+    <div class="metric-card"><div class="metric-icon blue"><span class="material-icons-round">description</span></div><span>Total contracts</span><strong>{{data.total_contracts}}</strong><small>Across repository</small></div>
+    <div class="metric-card"><div class="metric-icon green"><span class="material-icons-round">verified</span></div><span>Active contracts</span><strong>{{data.active_contracts}}</strong><small>Currently active</small></div>
+    <div class="metric-card"><div class="metric-icon red"><span class="material-icons-round">event_busy</span></div><span>Expired contracts</span><strong>{{data.expired_contracts}}</strong><small>Require attention</small></div>
+    <div class="metric-card"><div class="metric-icon amber"><span class="material-icons-round">pending_actions</span></div><span>Pending obligations</span><strong>{{data.pending_obligations}}</strong><small>Awaiting completion</small></div>
+    <div class="metric-card"><div class="metric-icon red"><span class="material-icons-round">warning</span></div><span>Overdue obligations</span><strong>{{data.overdue_obligations}}</strong><small>Past due date</small></div>
+    <div class="metric-card"><div class="metric-icon purple"><span class="material-icons-round">event_repeat</span></div><span>Upcoming renewals</span><strong>{{data.upcoming_renewals}}</strong><small>Scheduled renewals</small></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div><h3>Contract status distribution</h3><span>Live repository breakdown</span></div><span class="material-icons-round muted">more_horiz</span></div>
+      <div class="bars">
+        @for (item of entries(data.contract_status_distribution); track item[0]) {
+          <div class="bar-row"><div class="bar-label"><span>{{item[0]}}</span><b>{{item[1]}}</b></div><div class="track"><i [style.width.%]="item[1] / max(data.contract_status_distribution) * 100"></i></div></div>
+        } @empty { <p class="empty-inline">No contract data returned.</p> }
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Obligation status distribution</h3><span>Completion and risk pipeline</span></div><span class="material-icons-round muted">more_horiz</span></div>
+      <div class="bars">
+        @for (item of entries(data.obligation_status_distribution); track item[0]) {
+          <div class="bar-row"><div class="bar-label"><span>{{item[0]}}</span><b>{{item[1]}}</b></div><div class="track"><i [style.width.%]="item[1] / max(data.obligation_status_distribution) * 100"></i></div></div>
+        } @empty { <p class="empty-inline">No obligation data returned.</p> }
+      </div>
+    </div>
+  </section>
+
+  <section class="panel compliance-panel">
+    <div class="panel-head"><div><h3>Compliance health</h3><span>Backend-driven compliance distribution</span></div></div>
+    <div class="compliance-grid">
+      @for (item of entries(data.compliance_summary); track item[0]) {
+        <div class="compliance-item"><div class="dot"></div><div><b>{{item[1]}}</b><span>{{item[0]}}</span></div></div>
+      } @empty { <p class="empty-inline">No compliance records returned.</p> }
+    </div>
+  </section>
+}

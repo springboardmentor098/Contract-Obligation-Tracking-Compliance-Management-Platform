@@ -1,0 +1,238 @@
+<div class="shell" [class.collapsed]="!sidebarOpen">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+
+  <aside class="sidebar">
+
+    <!-- BRAND -->
+    <div class="brand">
+
+      <div class="brand-mark">
+        C
+      </div>
+
+      <div class="brand-copy">
+        <strong>ContractIQ</strong>
+        <span>Enterprise Control Center</span>
+      </div>
+
+    </div>
+
+
+    <!-- NAVIGATION LABEL -->
+    <div class="nav-label">
+      WORKSPACE
+    </div>
+
+
+    <!-- NAVIGATION -->
+    <nav>
+
+      @for (item of nav; track item.route) {
+
+        @if (item.label !== 'Notifications') {
+
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{
+              exact: item.route === '/dashboard'
+            }"
+          >
+
+            <span class="material-icons-round">
+              {{ item.icon }}
+            </span>
+
+            <span>
+              {{ item.label }}
+            </span>
+
+          </a>
+
+        }
+
+      }
+
+    </nav>
+
+
+    <!-- SIDEBAR BOTTOM -->
+    <div class="sidebar-bottom">
+
+      <!-- SECURITY -->
+      <div class="security">
+
+        <span class="material-icons-round">
+          shield
+        </span>
+
+        <div>
+          <b>Secure workspace</b>
+          <small>JWT protected</small>
+        </div>
+
+      </div>
+
+
+      <!-- SIGN OUT -->
+      <!-- <button
+        type="button"
+        class="logout-side"
+        (click)="auth.logout()"
+      >
+
+        <span class="material-icons-round">
+          logout
+        </span>
+
+        Sign out
+
+      </button> -->
+
+    </div>
+
+  </aside>
+
+
+  <!-- ============================================================
+       MAIN
+       ============================================================ -->
+
+  <section class="main">
+
+
+    <!-- ============================================================
+         TOPBAR
+         ============================================================ -->
+
+    <header class="topbar">
+
+
+      <!-- SIDEBAR TOGGLE -->
+      <button
+        type="button"
+        class="icon-btn menu"
+        (click)="toggleSidebar()"
+        title="Toggle sidebar"
+      >
+
+        <span class="material-icons-round">
+          menu
+        </span>
+
+      </button>
+
+
+      <!-- BREADCRUMB -->
+      <div class="breadcrumb">
+
+        ContractIQ
+
+        <span>/</span>
+
+        Workspace
+
+      </div>
+
+
+      <!-- ========================================================
+           TOP ACTIONS
+           ======================================================== -->
+
+      <div class="top-actions">
+
+
+        <!-- NOTIFICATIONS -->
+
+        <a
+          routerLink="/notifications"
+          class="icon-btn notification"
+          title="Notifications"
+        >
+
+          <span class="material-icons-round">
+            notifications_none
+          </span>
+
+        </a>
+
+
+        <!-- ======================================================
+             ACTUAL LOGGED-IN USER
+             ====================================================== -->
+
+        <div class="user-chip">
+
+
+          <!-- USER AVATAR -->
+
+          <div class="avatar">
+  {{ getUserInitial() }}
+</div>
+
+
+          <!-- USER INFORMATION -->
+
+          <div class="user-copy">
+
+            <b>
+
+              {{
+                currentUser?.full_name
+                  || 'Loading...'
+              }}
+
+            </b>
+
+            <span>
+
+              {{
+                currentUser?.role
+                  || 'Loading...'
+              }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- LOGOUT -->
+
+        <button
+          type="button"
+          class="icon-btn"
+          (click)="auth.logout()"
+          title="Logout"
+        >
+
+          <span class="material-icons-round">
+            logout
+          </span>
+
+        </button>
+
+
+      </div>
+
+    </header>
+
+
+    <!-- ============================================================
+         PAGE CONTENT
+         ============================================================ -->
+
+    <main class="content">
+
+      <router-outlet />
+
+    </main>
+
+
+  </section>
+
+</div>

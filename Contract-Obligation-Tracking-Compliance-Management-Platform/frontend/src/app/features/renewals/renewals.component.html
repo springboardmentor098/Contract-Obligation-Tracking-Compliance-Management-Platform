@@ -1,0 +1,595 @@
+<cq-page-header
+  eyebrow="RENEWAL MANAGEMENT"
+  title="Renewal Pipeline"
+  subtitle="Track upcoming expiries, renewal decisions and contracts requiring attention."
+/>
+
+
+<!-- ========================================================= -->
+<!-- ERROR -->
+<!-- ========================================================= -->
+
+@if (error) {
+
+  <div class="alert">
+    {{ error }}
+  </div>
+
+}
+
+
+<!-- ========================================================= -->
+<!-- TOOLBAR -->
+<!-- ========================================================= -->
+
+<div class="toolbar">
+
+  <div class="search">
+
+    <span class="material-icons-round">
+      search
+    </span>
+
+    <input
+      [(ngModel)]="query"
+      (input)="apply()"
+      placeholder="Search by contract ID"
+    />
+
+  </div>
+
+
+  <select
+    [(ngModel)]="status"
+    (change)="apply()"
+  >
+
+    <option value="">
+      All statuses
+    </option>
+
+    @for (s of statuses; track s) {
+
+      <option [value]="s">
+        {{ s }}
+      </option>
+
+    }
+
+  </select>
+
+
+  <button
+    type="button"
+    class="secondary"
+    (click)="load()"
+  >
+    Refresh
+  </button>
+
+
+  <button
+    type="button"
+    class="primary"
+    (click)="openForm()"
+  >
+    + New Renewal
+  </button>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- CREATE / EDIT FORM -->
+<!-- ========================================================= -->
+
+@if (showForm) {
+
+  <div class="form-card">
+
+    <div class="form-header">
+
+      <div>
+
+        <div class="form-eyebrow">
+          RENEWAL MANAGEMENT
+        </div>
+
+        <h2>
+          {{ editing ? 'Edit Renewal' : 'Create Renewal' }}
+        </h2>
+
+        <p>
+          {{
+            editing
+              ? 'Update the selected renewal record.'
+              : 'Create a renewal record for an existing contract.'
+          }}
+        </p>
+
+      </div>
+
+
+      <!-- X BUTTON -->
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeForm()"
+        [disabled]="saving"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- ======================================================= -->
+    <!-- FORM -->
+    <!-- ======================================================= -->
+
+    <form
+      (ngSubmit)="save()"
+      #renewalForm="ngForm"
+    >
+
+      <div class="form-grid">
+
+
+        <!-- CONTRACT -->
+
+        <div class="field">
+
+          <label for="contract_number">
+            Contract *
+          </label>
+
+          <select
+            id="contract_number"
+            name="contract_number"
+            [(ngModel)]="form.contract_number"
+            (change)="contractSelected()"
+            required
+            [disabled]="!!editing || contractsLoading"
+          >
+
+            <option
+              value=""
+              disabled
+            >
+              Select a contract
+            </option>
+
+
+            @for (
+              contract of contracts;
+              track contract.id
+            ) {
+
+              <option
+                [value]="contract.contract_number"
+              >
+
+                {{ contract.contract_number }}
+                — {{ contract.title }}
+
+              </option>
+
+            }
+
+          </select>
+
+
+          @if (contractsLoading) {
+
+            <small>
+              Loading contracts...
+            </small>
+
+          }
+
+          @else {
+
+            <small>
+              {{
+                editing
+                  ? 'Contract cannot be changed after renewal creation.'
+                  : 'Select the contract using its contract number.'
+              }}
+            </small>
+
+          }
+
+        </div>
+
+
+        <!-- RENEWAL DATE -->
+
+        <div class="field">
+
+          <label for="renewal_date">
+            Renewal Date *
+          </label>
+
+          <input
+            id="renewal_date"
+            type="date"
+            name="renewal_date"
+            [(ngModel)]="form.renewal_date"
+            required
+          />
+
+        </div>
+
+
+        <!-- PREVIOUS EXPIRY -->
+
+        <div class="field">
+
+          <label for="previous_expiry_date">
+            Previous Expiry Date *
+          </label>
+
+          <input
+            id="previous_expiry_date"
+            type="date"
+            name="previous_expiry_date"
+            [(ngModel)]="form.previous_expiry_date"
+            required
+          />
+
+          <small>
+            Must match the existing contract expiry date.
+          </small>
+
+        </div>
+
+
+        <!-- NEW EXPIRY -->
+
+        <div class="field">
+
+          <label for="new_expiry_date">
+            New Expiry Date *
+          </label>
+
+          <input
+            id="new_expiry_date"
+            type="date"
+            name="new_expiry_date"
+            [(ngModel)]="form.new_expiry_date"
+            required
+          />
+
+          <small>
+            Must be later than the previous expiry date.
+          </small>
+
+        </div>
+
+
+        <!-- ASSIGNED USER -->
+
+        <div class="field">
+
+          <label for="assigned_to">
+            Assigned User ID
+          </label>
+
+          <input
+            id="assigned_to"
+            type="number"
+            name="assigned_to"
+            [(ngModel)]="form.assigned_to"
+            min="1"
+            placeholder="Optional"
+          />
+
+          <small>
+            Optional.
+          </small>
+
+        </div>
+
+
+        <!-- NOTES -->
+
+        <div class="field full-width">
+
+          <label for="notes">
+            Notes
+          </label>
+
+          <textarea
+            id="notes"
+            name="notes"
+            [(ngModel)]="form.notes"
+            rows="4"
+            placeholder="Enter renewal notes..."
+          ></textarea>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- FORM ERROR -->
+      <!-- ===================================================== -->
+
+      @if (error) {
+
+        <div class="alert form-error">
+          {{ error }}
+        </div>
+
+      }
+
+
+      <!-- ===================================================== -->
+      <!-- BUTTONS -->
+      <!-- ===================================================== -->
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="secondary"
+          (click)="closeForm()"
+          [disabled]="saving"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          type="submit"
+          class="primary"
+          [disabled]="saving || renewalForm.invalid"
+        >
+
+          @if (saving) {
+
+            {{ editing ? 'Updating...' : 'Creating...' }}
+
+          }
+
+          @else {
+
+            {{ editing ? 'Update Renewal' : 'Create Renewal' }}
+
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+}
+
+
+<!-- ========================================================= -->
+<!-- RENEWAL TABLE -->
+<!-- ========================================================= -->
+
+<div class="table-card">
+
+  @if (loading) {
+
+    <div class="loading">
+      Loading renewal pipeline…
+    </div>
+
+  }
+
+  @else {
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Contract
+          </th>
+
+          <th>
+            Renewal Date
+          </th>
+
+          <th>
+            Previous Expiry
+          </th>
+
+          <th>
+            New Expiry
+          </th>
+
+          <th>
+            Status
+          </th>
+
+          <th>
+            Actions
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody>
+
+        @for (
+          x of filtered;
+          track x.id
+        ) {
+
+          <tr>
+
+
+            <!-- CONTRACT -->
+
+            <td>
+
+              <b>
+                {{ getContractNumber(x.contract_id) }}
+              </b>
+
+              <small>
+                Renewal ID {{ x.id }}
+              </small>
+
+            </td>
+
+
+            <!-- RENEWAL DATE -->
+
+            <td>
+
+              {{
+                x.renewal_date
+                | date:'dd MMM yyyy'
+              }}
+
+            </td>
+
+
+            <!-- PREVIOUS EXPIRY -->
+
+            <td>
+
+              {{
+                x.previous_expiry_date
+                | date:'dd MMM yyyy'
+              }}
+
+            </td>
+
+
+            <!-- NEW EXPIRY -->
+
+            <td>
+
+              {{
+                x.new_expiry_date
+                | date:'dd MMM yyyy'
+              }}
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+              <cq-status
+                [label]="x.status"
+              />
+
+            </td>
+
+
+            <!-- ACTIONS -->
+
+            <td>
+
+              <div class="actions">
+
+
+                <!-- EDIT -->
+
+                <button
+                  type="button"
+                  class="secondary"
+                  (click)="editRenewal(x)"
+                >
+                  Edit
+                </button>
+
+
+                <!-- STATUS -->
+
+                <select
+                  [value]="x.status"
+                  (change)="
+                    change(
+                      x,
+                      $any($event.target).value
+                    )
+                  "
+                >
+
+                  @for (
+                    s of statuses;
+                    track s
+                  ) {
+
+                    <option
+                      [value]="s"
+                    >
+                      {{ s }}
+                    </option>
+
+                  }
+
+                </select>
+
+
+                <!-- COMPLETE -->
+
+                @if (
+                  x.status === 'In Progress'
+                ) {
+
+                  <button
+                    type="button"
+                    class="renew-button"
+                    (click)="completeRenewal(x)"
+                  >
+                    Renew Contract
+                  </button>
+
+                }
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        }
+
+
+        <!-- EMPTY -->
+
+        @empty {
+
+          <tr>
+
+            <td colspan="6">
+
+              <cq-empty
+                title="No renewals found"
+                message="No renewal records matched the current filters."
+                icon="event_busy"
+              />
+
+            </td>
+
+          </tr>
+
+        }
+
+      </tbody>
+
+    </table>
+
+  }
+
+</div>
