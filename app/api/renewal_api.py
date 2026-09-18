@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
@@ -13,11 +13,14 @@ from app.schemas.renewal_schema import (
     RenewalResponse
 )
 from app.core.auth import get_current_user
+from app.core.role_checker import require_non_viewer
+from app.services.activity_service import log_activity
 
 
 router = APIRouter(
     prefix="/renewals",
-    tags=["Renewals"]
+    tags=["Renewals"],
+    dependencies=[Depends(require_non_viewer)],
 )
 
 
@@ -28,8 +31,15 @@ router = APIRouter(
     response_model=RenewalResponse,
     status_code=status.HTTP_201_CREATED
 )
+@router.post(
+    "/",
+    response_model=RenewalResponse,
+    status_code=status.HTTP_201_CREATED,
+    include_in_schema=False
+)
 def create_renewal(
     renewal_data: RenewalCreate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -73,12 +83,31 @@ def create_renewal(
     db.commit()
     db.refresh(renewal)
 
+    # Automatically record CREATE_RENEWAL activity log
+    log_activity(
+        db=db,
+        action="CREATE_RENEWAL",
+        entity_type="Renewal",
+        entity_id=renewal.id,
+        contract_id=renewal.contract_id,
+        description=f"Scheduled renewal for contract '{contract.title}' on {renewal.renewal_date}",
+        user=current_user,
+        request=request,
+    )
+
     return renewal
+
+
 # ---------------- GET ALL RENEWALS ----------------
 
 @router.get(
-    "/",
+    "",
     response_model=list[RenewalResponse]
+)
+@router.get(
+    "/",
+    response_model=list[RenewalResponse],
+    include_in_schema=False
 )
 def get_renewals(
     current_user=Depends(get_current_user),
@@ -110,6 +139,7 @@ def get_renewal(
 
     return renewal
 
+
 # ---------------- GET RENEWALS FOR A CONTRACT ----------------
 
 @router.get(
@@ -137,6 +167,7 @@ def get_contract_renewals(
 
     return renewals
 
+
 # ---------------- UPDATE RENEWAL ----------------
 
 @router.put(
@@ -146,6 +177,7 @@ def get_contract_renewals(
 def update_renewal(
     renewal_id: int,
     renewal_data: RenewalUpdate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -188,7 +220,19 @@ def update_renewal(
     db.commit()
     db.refresh(renewal)
 
+    log_activity(
+        db=db,
+        action="UPDATE_RENEWAL",
+        entity_type="Renewal",
+        entity_id=renewal.id,
+        contract_id=renewal.contract_id,
+        description=f"Updated renewal #{renewal.id}",
+        user=current_user,
+        request=request,
+    )
+
     return renewal
+
 
 # ---------------- UPDATE RENEWAL STATUS ----------------
 
@@ -199,6 +243,7 @@ def update_renewal(
 def update_renewal_status(
     renewal_id: int,
     status_data: RenewalStatusUpdate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -234,7 +279,19 @@ def update_renewal_status(
     db.commit()
     db.refresh(renewal)
 
+    log_activity(
+        db=db,
+        action="UPDATE_RENEWAL_STATUS",
+        entity_type="Renewal",
+        entity_id=renewal.id,
+        contract_id=renewal.contract_id,
+        description=f"Updated renewal #{renewal.id} status to {new}",
+        user=current_user,
+        request=request,
+    )
+
     return renewal
+
 
 # ---------------- COMPLETE RENEWAL ----------------
 
@@ -244,6 +301,7 @@ def update_renewal_status(
 )
 def complete_renewal(
     renewal_id: int,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -274,5 +332,16 @@ def complete_renewal(
 
     db.commit()
     db.refresh(renewal)
+
+    log_activity(
+        db=db,
+        action="COMPLETE_RENEWAL",
+        entity_type="Renewal",
+        entity_id=renewal.id,
+        contract_id=renewal.contract_id,
+        description=f"Executed renewal for contract '{contract.title if contract else ''}' to {renewal.new_expiry_date}",
+        user=current_user,
+        request=request,
+    )
 
     return renewal

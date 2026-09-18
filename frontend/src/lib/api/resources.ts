@@ -1,6 +1,8 @@
 import { apiClient } from "./client";
 import type {
   ActivityLog,
+  PaginatedActivities,
+  ActivityFilterOptions,
   AuditLog,
   Compliance,
   Contract,
@@ -58,7 +60,27 @@ export const notifications = {
   delete: (id: number) => apiClient.delete(`/notifications/${id}`),
 };
 export const reports = resource<Report>("/reports", "/reports/");
-export const activities = resource<ActivityLog>("/activities", "/activities/");
+export const activities = {
+  ...resource<ActivityLog>("/activities", "/activities/"),
+  list: async (params?: Record<string, unknown>) => {
+    const res = await apiClient.get<any>("/activities/", { params });
+    if (res.data && Array.isArray(res.data.items)) {
+      const items = res.data.items as ActivityLog[];
+      Object.assign(items, {
+        total: res.data.total,
+        page: res.data.page,
+        limit: res.data.limit,
+        total_pages: res.data.total_pages,
+      });
+      return items;
+    }
+    return (res.data ?? []) as ActivityLog[];
+  },
+  paginated: (params?: Record<string, unknown>) =>
+    apiClient.get<PaginatedActivities>("/activities/", { params }).then((r) => r.data),
+  filterOptions: () =>
+    apiClient.get<ActivityFilterOptions>("/activities/filter-options").then((r) => r.data),
+};
 export const auditLogs = resource<AuditLog>("/audit-logs", "/audit-logs/");
 export const users = {
   ...resource<User>("/users", "/users/"),
@@ -66,7 +88,6 @@ export const users = {
 };
 export const compliance = {
   list: () => apiClient.get<Compliance[]>("/compliance").then((r) => r.data),
-  summary: () => apiClient.get("/compliance/summary").then((r) => r.data),
   highRisk: () => apiClient.get<Compliance[]>("/compliance/high-risk").then((r) => r.data),
   nonCompliant: () => apiClient.get<Compliance[]>("/compliance/non-compliant").then((r) => r.data),
   byContract: (id: number) =>
@@ -75,8 +96,20 @@ export const compliance = {
   timeline: () => apiClient.get<ComplianceTimeline[]>("/compliance/timeline").then((r) => r.data),
 };
 export const reportFiles = {
-  download: async (id: number) => {
-    const response = await apiClient.get(`/reports/${id}/download`, { responseType: "blob" });
-    return URL.createObjectURL(response.data);
+  download: async (id: number, format: "pdf" | "csv" = "pdf") => {
+    const response = await apiClient.get<Blob>(`/reports/${id}/download`, {
+      params: { format },
+      responseType: "blob",
+    });
+    const disposition = response.headers["content-disposition"] as string | undefined;
+    let filename: string | undefined;
+    if (disposition) {
+      const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+      if (match && match[1]) {
+        filename = match[1].replace(/['"]/g, "").trim();
+      }
+    }
+    const blobUrl = URL.createObjectURL(response.data);
+    return { blobUrl, filename };
   },
 };

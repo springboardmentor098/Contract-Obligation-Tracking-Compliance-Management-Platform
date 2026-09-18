@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
@@ -13,10 +13,13 @@ from app.schemas.obligation_schema import (
     ObligationResponse
 )
 from app.core.auth import get_current_user
+from app.core.role_checker import require_non_viewer
+from app.services.activity_service import log_activity
 
 router = APIRouter(
     prefix="/obligations",
-    tags=["Obligations"]
+    tags=["Obligations"],
+    dependencies=[Depends(require_non_viewer)],
 )
 
 
@@ -29,6 +32,7 @@ router = APIRouter(
 )
 def create_obligation(
     obligation_data: ObligationCreate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -66,6 +70,18 @@ def create_obligation(
     db.add(obligation)
     db.commit()
     db.refresh(obligation)
+
+    # Automatically record CREATE_OBLIGATION activity log
+    log_activity(
+        db=db,
+        action="CREATE_OBLIGATION",
+        entity_type="Obligation",
+        entity_id=obligation.id,
+        contract_id=obligation.contract_id,
+        description=f"Created obligation '{obligation.title}' on contract '{contract.title}'",
+        user=current_user,
+        request=request,
+    )
 
     return obligation
 
@@ -142,6 +158,7 @@ def get_contract_obligations(
 def update_obligation(
     obligation_id: int,
     obligation_data: ObligationUpdate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -168,11 +185,36 @@ def update_obligation(
                 detail="Assigned user not found"
             )
 
+    old_status = obligation.status
+
     for key, value in update_data.items():
         setattr(obligation, key, value)
 
     db.commit()
     db.refresh(obligation)
+
+    if update_data.get("status") == "Completed" and old_status != "Completed":
+        log_activity(
+            db=db,
+            action="COMPLETE_OBLIGATION",
+            entity_type="Obligation",
+            entity_id=obligation.id,
+            contract_id=obligation.contract_id,
+            description=f"Completed obligation '{obligation.title}'",
+            user=current_user,
+            request=request,
+        )
+    else:
+        log_activity(
+            db=db,
+            action="UPDATE_OBLIGATION",
+            entity_type="Obligation",
+            entity_id=obligation.id,
+            contract_id=obligation.contract_id,
+            description=f"Updated obligation '{obligation.title}'",
+            user=current_user,
+            request=request,
+        )
 
     return obligation
 
@@ -186,6 +228,7 @@ def update_obligation(
 def update_status(
     obligation_id: int,
     status_data: ObligationStatusUpdate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -224,17 +267,57 @@ def update_status(
     db.commit()
     db.refresh(obligation)
 
+    # Automatically record COMPLETE_OBLIGATION activity log if completed
+    if new == "Completed":
+        log_activity(
+            db=db,
+            action="COMPLETE_OBLIGATION",
+            entity_type="Obligation",
+            entity_id=obligation.id,
+            contract_id=obligation.contract_id,
+            description=f"Completed obligation '{obligation.title}'",
+            user=current_user,
+            request=request,
+        )
+    else:
+        log_activity(
+            db=db,
+            action="UPDATE_OBLIGATION_STATUS",
+            entity_type="Obligation",
+            entity_id=obligation.id,
+            contract_id=obligation.contract_id,
+            description=f"Updated obligation '{obligation.title}' status to {new}",
+            user=current_user,
+            request=request,
+        )
+
     return obligation
 
 
 @router.delete("/{obligation_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_obligation(
     obligation_id: int,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     obligation = db.query(Obligation).filter(Obligation.id == obligation_id).first()
     if not obligation:
         raise HTTPException(status_code=404, detail="Obligation not found")
+    
+    title = obligation.title
+    contract_id = obligation.contract_id
+
     db.delete(obligation)
     db.commit()
+
+    log_activity(
+        db=db,
+        action="DELETE_OBLIGATION",
+        entity_type="Obligation",
+        entity_id=obligation_id,
+        contract_id=contract_id,
+        description=f"Deleted obligation '{title}'",
+        user=current_user,
+        request=request,
+    )

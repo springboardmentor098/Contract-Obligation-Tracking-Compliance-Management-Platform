@@ -26,6 +26,7 @@ export function FormMessage({ tone, children }: { tone: "error" | "success"; chi
   return (
     <p
       role={tone === "error" ? "alert" : "status"}
+      aria-live="polite"
       className={cn(
         "rise rounded-md px-3 py-2.5 text-xs",
         tone === "error" ? "bg-destructive/10 text-destructive" : "bg-jade/10 text-jade",

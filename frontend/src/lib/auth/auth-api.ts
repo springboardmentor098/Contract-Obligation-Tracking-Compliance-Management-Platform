@@ -8,6 +8,13 @@ export type LoginPayload = {
 export type LoginResponse = {
   access_token: string;
   token_type: string;
+  user?: {
+    id: number;
+    email: string;
+    name: string;
+    role: string;
+    avatar_url?: string | null;
+  };
 };
 
 export async function loginRequest(payload: LoginPayload): Promise<LoginResponse> {

@@ -11,10 +11,12 @@ from app.schemas.compliance_schema import (
 )
 from app.services.compliance_service import calculate_compliance
 from app.core.auth import get_current_user
+from app.core.role_checker import RoleChecker
 
 router = APIRouter(
     prefix="/compliance",
-    tags=["Compliance"]
+    tags=["Compliance"],
+    dependencies=[Depends(RoleChecker(["Admin", "Legal Manager", "Compliance Officer"]))],
 )
 
 

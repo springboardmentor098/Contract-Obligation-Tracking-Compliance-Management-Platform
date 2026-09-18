@@ -35,9 +35,13 @@ function ForgotPasswordPage() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    if (!email.trim()) {
+      setError("Please enter your work email address.");
+      return;
+    }
     setStatus("loading");
     try {
-      await requestPasswordResetLink(email);
+      await requestPasswordResetLink(email.trim());
       setStatus("sent");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Something went wrong. Try again.");
@@ -50,8 +54,12 @@ function ForgotPasswordPage() {
       title="Forgot password"
       subtitle="We'll email you a secure link to set a new password."
       footer={
-        <Link to="/login" className="inline-flex items-center gap-1.5 hover:text-foreground">
-          <ArrowLeft className="size-3.5" /> Back to sign in
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-1.5 hover:text-foreground"
+          aria-label="Back to sign in page"
+        >
+          <ArrowLeft className="size-3.5" aria-hidden="true" /> Back to sign in
         </Link>
       }
     >
@@ -69,13 +77,20 @@ function ForgotPasswordPage() {
           type="email"
           autoComplete="email"
           required
+          aria-required="true"
+          aria-invalid={Boolean(error)}
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="name@organisation.gov"
         />
 
-        <Button type="submit" className="w-full" disabled={status === "loading"}>
-          {status === "loading" ? <Loader2 className="animate-spin" /> : null}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={status === "loading" || !email.trim()}
+          aria-busy={status === "loading"}
+        >
+          {status === "loading" ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
           {status === "loading" ? "Sending…" : "Send reset link"}
         </Button>
       </form>

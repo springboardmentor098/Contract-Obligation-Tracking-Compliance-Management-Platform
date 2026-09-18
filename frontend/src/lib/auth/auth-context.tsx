@@ -7,15 +7,25 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import {
+  apiClient,
   clearAccessToken,
+  clearAuthStorage,
   readAccessToken,
   setUnauthorizedHandler,
   storeAccessToken,
 } from "@/lib/api/client";
 import { loginRequest } from "./auth-api";
 
-type AuthUser = { email: string; id?: number; role?: string };
+export type AuthUser = {
+  email: string;
+  id?: number;
+  role?: string;
+  name?: string;
+  avatar_url?: string | null;
+};
 
 type AuthContextValue = {
   token: string | null;
@@ -23,7 +33,7 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isHydrated: boolean;
   signIn: (input: { email: string; password: string; rememberMe: boolean }) => Promise<void>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -37,6 +47,8 @@ function userFromToken(token: string): AuthUser | null {
       sub?: string;
       user_id?: number;
       role?: string;
+      name?: string;
+      avatar_url?: string;
       exp?: number;
     };
     if (!payload.sub || (payload.exp && payload.exp * 1000 <= Date.now())) return null;
@@ -44,6 +56,8 @@ function userFromToken(token: string): AuthUser | null {
       email: payload.sub,
       ...(payload.user_id !== undefined ? { id: payload.user_id } : {}),
       ...(payload.role !== undefined ? { role: payload.role } : {}),
+      ...(payload.name !== undefined ? { name: payload.name } : {}),
+      avatar_url: payload.avatar_url ?? null,
     };
   } catch {
     return null;
@@ -54,13 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const existing = readAccessToken();
     if (existing) {
       const restoredUser = userFromToken(existing);
       if (!restoredUser) {
-        clearAccessToken();
+        clearAuthStorage();
       } else {
         setToken(existing);
         setUser(restoredUser);
@@ -71,23 +87,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
-      clearAccessToken();
-      sessionStorage.removeItem(USER_KEY);
-      localStorage.removeItem(USER_KEY);
+      clearAuthStorage();
+      queryClient.clear();
       setToken(null);
       setUser(null);
       window.location.assign("/login?expired=1");
     });
     return () => setUnauthorizedHandler(() => undefined);
-  }, []);
+  }, [queryClient]);
 
-  const signOut = useCallback(() => {
-    clearAccessToken();
-    sessionStorage.removeItem(USER_KEY);
-    localStorage.removeItem(USER_KEY);
-    setToken(null);
-    setUser(null);
-  }, []);
+  const signOut = useCallback(async () => {
+    try {
+      // 1. Notify backend to log "User Logged Out" activity in PostgreSQL
+      await apiClient.post("/auth/logout").catch(() => {});
+    } catch {
+      // Handle network errors gracefully — never trap user in session
+    } finally {
+      // 2. Clear JWT access token & refresh tokens from localStorage and sessionStorage
+      clearAuthStorage();
+
+      // 3. Clear cached React Query data so sensitive info doesn't persist in memory
+      queryClient.clear();
+
+      // 4. Clear React Context state
+      setToken(null);
+      setUser(null);
+
+      // 5. Redirect user to /login
+      navigate({ to: "/login", replace: true });
+    }
+  }, [navigate, queryClient]);
 
   const signIn = useCallback(
     async ({
@@ -103,7 +132,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       storeAccessToken(result.access_token, rememberMe);
       (rememberMe ? localStorage : sessionStorage).setItem(USER_KEY, email);
       setToken(result.access_token);
-      setUser(userFromToken(result.access_token) ?? { email });
+      const decoded = userFromToken(result.access_token);
+      setUser(
+        decoded ?? {
+          email,
+          name: result.user?.name,
+          role: result.user?.role,
+          id: result.user?.id,
+          avatar_url: result.user?.avatar_url,
+        },
+      );
     },
     [],
   );

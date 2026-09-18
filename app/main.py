@@ -39,12 +39,20 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
+
+
+from app.core.rbac_seed import ensure_default_rbac_users
 
 
 @app.on_event("startup")
 def startup_event():
     test_database_connection()
+    try:
+        ensure_default_rbac_users()
+    except Exception as e:
+        print(f"Warning: RBAC initialization check encountered an error: {e}")
 
 
 # -----------------------------

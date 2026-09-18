@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
@@ -15,11 +15,14 @@ from app.schemas.notification_schema import (
     NotificationResponse,
 )
 from app.core.auth import get_current_user
+from app.core.role_checker import require_non_viewer
+from app.services.activity_service import log_activity
 
 
 router = APIRouter(
     prefix="/notifications",
     tags=["Notifications"],
+    dependencies=[Depends(require_non_viewer)],
 )
 
 
@@ -30,8 +33,15 @@ router = APIRouter(
     response_model=NotificationResponse,
     status_code=status.HTTP_201_CREATED,
 )
+@router.post(
+    "/",
+    response_model=NotificationResponse,
+    status_code=status.HTTP_201_CREATED,
+    include_in_schema=False,
+)
 def create_notification(
     notification_data: NotificationCreate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -72,6 +82,18 @@ def create_notification(
     db.add(notification)
     db.commit()
     db.refresh(notification)
+
+    # Automatically record SEND_NOTIFICATION activity log
+    log_activity(
+        db=db,
+        action="SEND_NOTIFICATION",
+        entity_type="Notification",
+        entity_id=notification.id,
+        contract_id=notification.contract_id,
+        description=f"Sent {notification.notification_type or 'Notification'} notification '{notification.title}' to {user.full_name}",
+        user=current_user,
+        request=request,
+    )
 
     return notification
 
@@ -122,6 +144,7 @@ def get_notification(
 def update_notification(
     notification_id: int,
     notification_data: NotificationUpdate,
+    request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

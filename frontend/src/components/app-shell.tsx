@@ -12,8 +12,10 @@ import {
   ShieldCheck,
   SlidersHorizontal,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { useAuth } from "@/lib/auth/auth-context";
+import { canAccessRoute } from "@/lib/auth/rbac-permissions";
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +32,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { ProfileMenu } from "@/components/profile-menu";
 
 type NavItem = {
   title: string;
@@ -67,9 +70,20 @@ const systemItems: NavItem[] = [
 ];
 
 function LedgerSidebar() {
+  const { user } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+
+  const visibleWorkspaceItems = useMemo(
+    () => workspaceItems.filter((item) => canAccessRoute(item.to, user?.role)),
+    [user?.role],
+  );
+
+  const visibleSystemItems = useMemo(
+    () => systemItems.filter((item) => canAccessRoute(item.to, user?.role)),
+    [user?.role],
+  );
 
   const renderItems = (items: NavItem[]) =>
     items.map((item) => (
@@ -105,13 +119,13 @@ function LedgerSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItems(workspaceItems)}</SidebarMenu>
+            <SidebarMenu>{renderItems(visibleWorkspaceItems)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>System</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItems(systemItems)}</SidebarMenu>
+            <SidebarMenu>{renderItems(visibleSystemItems)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -134,12 +148,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="min-w-0 flex-1 bg-background">
         <header className="sticky top-0 z-20 flex h-14 items-center border-b border-border/70 bg-background/90 px-4 backdrop-blur-md">
           <SidebarTrigger aria-label="Collapse navigation" />
-          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-            <SlidersHorizontal className="size-4" />
-            <span className="hidden sm:inline">Legal Operations</span>
-            <span className="ml-2 grid size-8 place-items-center rounded-full bg-jade/10 font-display font-semibold text-jade">
-              AR
-            </span>
+          <div className="ml-auto flex items-center gap-3">
+            <ProfileMenu />
           </div>
         </header>
         {children}

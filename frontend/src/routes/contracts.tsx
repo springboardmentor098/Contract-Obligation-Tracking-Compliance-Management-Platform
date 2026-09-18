@@ -24,11 +24,26 @@ import {
 } from "@/lib/api/resources";
 import { apiErrorMessage } from "@/lib/api/errors";
 import type { Contract, User } from "@/lib/api/types";
+import { useAuth } from "@/lib/auth/auth-context";
+import {
+  canAccessRoute,
+  canCreateContract,
+  canEditContract,
+  canDeleteContract,
+  canManageUsers,
+} from "@/lib/auth/rbac-permissions";
 
 export const Route = createFileRoute("/contracts")({ component: ContractsPage });
 
 function ContractsPage() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+  const allowCreate = canCreateContract(user?.role);
+  const allowEdit = canEditContract(user?.role);
+  const allowDelete = canDeleteContract(user?.role);
+  const allowUsers = canManageUsers(user?.role);
+  const allowCompliance = canAccessRoute("/compliance", user?.role);
+
   const [form, setForm] = useState({
     title: "",
     contract_number: "",
@@ -52,8 +67,16 @@ function ContractsPage() {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [openInEditMode, setOpenInEditMode] = useState(false);
   const contractQuery = useQuery({ queryKey: ["contracts"], queryFn: contracts.list });
-  const usersQuery = useQuery({ queryKey: ["users"], queryFn: users.list });
-  const complianceQuery = useQuery({ queryKey: ["compliance"], queryFn: compliance.list });
+  const usersQuery = useQuery({
+    queryKey: ["users"],
+    queryFn: users.list,
+    enabled: allowUsers,
+  });
+  const complianceQuery = useQuery({
+    queryKey: ["compliance"],
+    queryFn: compliance.list,
+    enabled: allowCompliance,
+  });
   const categories = [...new Set((contractQuery.data ?? []).map((item) => item.category))];
   const departments = [
     ...new Set((contractQuery.data ?? []).map((item) => item.department).filter(Boolean)),
@@ -179,68 +202,70 @@ function ContractsPage() {
           />
         </label>
       </header>
-      <section className="rounded-lg bg-card p-5 shadow-hairline">
-        <h2 className="mb-4 font-display text-sm font-semibold">Create Contract</h2>
-        <form className="grid gap-4 md:grid-cols-4" onSubmit={submit}>
-          <CreateField
-            label="Title"
-            value={form.title}
-            onChange={(value) => setForm({ ...form, title: value })}
-          />
-          <CreateField
-            label="Contract Number"
-            value={form.contract_number}
-            onChange={(value) => setForm({ ...form, contract_number: value })}
-          />
-          <CreateSelect
-            label="Category"
-            value={form.category}
-            options={categoryOptions}
-            onChange={(value) => setForm({ ...form, category: value })}
-          />
-          <CreateField
-            label="Department"
-            required={false}
-            value={form.department}
-            onChange={(value) => setForm({ ...form, department: value })}
-          />
-          <CreateSelect
-            label="Manager"
-            required={false}
-            value={form.assigned_to}
-            options={(usersQuery.data ?? []).map((user) => ({
-              value: String(user.id),
-              label: user.full_name,
-            }))}
-            onChange={(value) => setForm({ ...form, assigned_to: value })}
-          />
-          <CreateField
-            label="Start Date"
-            type="date"
-            value={form.start_date}
-            onChange={(value) => setForm({ ...form, start_date: value })}
-          />
-          <CreateField
-            label="End Date"
-            type="date"
-            value={form.end_date}
-            onChange={(value) => setForm({ ...form, end_date: value })}
-          />
-          <label className="space-y-2 text-sm md:col-span-4">
-            <Label>Description</Label>
-            <Textarea
-              required
-              value={form.description}
-              onChange={(event) => setForm({ ...form, description: event.target.value })}
+      {allowCreate && (
+        <section className="rounded-lg bg-card p-5 shadow-hairline">
+          <h2 className="mb-4 font-display text-sm font-semibold">Create Contract</h2>
+          <form className="grid gap-4 md:grid-cols-4" onSubmit={submit}>
+            <CreateField
+              label="Title"
+              value={form.title}
+              onChange={(value) => setForm({ ...form, title: value })}
             />
-          </label>
-          <div className="md:col-span-4">
-            <Button type="submit" disabled={busy}>
-              {busy ? "Creating…" : "Create Contract"}
-            </Button>
-          </div>
-        </form>
-      </section>
+            <CreateField
+              label="Contract Number"
+              value={form.contract_number}
+              onChange={(value) => setForm({ ...form, contract_number: value })}
+            />
+            <CreateSelect
+              label="Category"
+              value={form.category}
+              options={categoryOptions}
+              onChange={(value) => setForm({ ...form, category: value })}
+            />
+            <CreateField
+              label="Department"
+              required={false}
+              value={form.department}
+              onChange={(value) => setForm({ ...form, department: value })}
+            />
+            <CreateSelect
+              label="Manager"
+              required={false}
+              value={form.assigned_to}
+              options={(usersQuery.data ?? []).map((user) => ({
+                value: String(user.id),
+                label: user.full_name,
+              }))}
+              onChange={(value) => setForm({ ...form, assigned_to: value })}
+            />
+            <CreateField
+              label="Start Date"
+              type="date"
+              value={form.start_date}
+              onChange={(value) => setForm({ ...form, start_date: value })}
+            />
+            <CreateField
+              label="End Date"
+              type="date"
+              value={form.end_date}
+              onChange={(value) => setForm({ ...form, end_date: value })}
+            />
+            <label className="space-y-2 text-sm md:col-span-4">
+              <Label>Description</Label>
+              <Textarea
+                required
+                value={form.description}
+                onChange={(event) => setForm({ ...form, description: event.target.value })}
+              />
+            </label>
+            <div className="md:col-span-4">
+              <Button type="submit" disabled={busy}>
+                {busy ? "Creating…" : "Create Contract"}
+              </Button>
+            </div>
+          </form>
+        </section>
+      )}
       <section className="grid gap-6 lg:grid-cols-[220px_1fr]">
         <aside className="rounded-lg border border-border bg-card p-4 shadow-hairline">
           <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
@@ -356,24 +381,28 @@ function ContractsPage() {
                         >
                           <Eye className="size-4" />
                         </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          title="Edit"
-                          aria-label="Edit contract"
-                          onClick={() => openDetails(item.id, true)}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          title="Delete"
-                          aria-label="Delete contract"
-                          onClick={() => removeContract(item)}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {allowEdit && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Edit"
+                            aria-label="Edit contract"
+                            onClick={() => openDetails(item.id, true)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                        )}
+                        {allowDelete && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Delete"
+                            aria-label="Delete contract"
+                            onClick={() => removeContract(item)}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -388,6 +417,7 @@ function ContractsPage() {
         open={detailId !== null}
         initialEdit={openInEditMode}
         users={usersQuery.data ?? []}
+        userRole={user?.role}
         onClose={() => setDetailId(null)}
         onUpdated={async () => {
           setOpenInEditMode(false);
@@ -407,6 +437,7 @@ function ContractDetailsDialog({
   open,
   initialEdit,
   users: userList,
+  userRole,
   onClose,
   onUpdated,
   onDeleted,
@@ -415,11 +446,19 @@ function ContractDetailsDialog({
   open: boolean;
   initialEdit: boolean;
   users: User[];
+  userRole?: string | null;
   onClose: () => void;
   onUpdated: () => Promise<void>;
   onDeleted: () => Promise<void>;
 }) {
   const queryClient = useQueryClient();
+  const allowObligations = canAccessRoute("/obligations", userRole);
+  const allowRenewals = canAccessRoute("/renewals", userRole);
+  const allowCompliance = canAccessRoute("/compliance", userRole);
+  const allowActivities = canAccessRoute("/activities", userRole);
+  const allowEdit = canEditContract(userRole);
+  const allowDelete = canDeleteContract(userRole);
+
   const contract = useQuery({
     queryKey: ["contract", contractId],
     queryFn: () => contracts.get(contractId as number),
@@ -428,23 +467,23 @@ function ContractDetailsDialog({
   const obligationList = useQuery({
     queryKey: ["obligations", "contract", contractId],
     queryFn: () => obligations.forContract(contractId as number),
-    enabled: open && contractId !== null,
+    enabled: open && contractId !== null && allowObligations,
   });
   const renewalList = useQuery({
     queryKey: ["renewals", "contract", contractId],
     queryFn: () => renewals.forContract(contractId as number),
-    enabled: open && contractId !== null,
+    enabled: open && contractId !== null && allowRenewals,
   });
   const complianceResult = useQuery({
     queryKey: ["compliance", "contract", contractId],
     queryFn: () => compliance.byContract(contractId as number),
-    enabled: open && contractId !== null,
+    enabled: open && contractId !== null && allowCompliance,
   });
   const activityList = useQuery({
     queryKey: ["activities", "contract", contractId],
     queryFn: async () =>
       (await activities.list()).filter((entry) => entry.contract_id === contractId),
-    enabled: open && contractId !== null,
+    enabled: open && contractId !== null && allowActivities,
   });
   const [editMode, setEditMode] = useState(initialEdit);
   const [saving, setSaving] = useState(false);
@@ -623,14 +662,18 @@ function ContractDetailsDialog({
               <Button variant="ghost" onClick={onClose}>
                 Close
               </Button>
-              <Button variant="outline" onClick={remove}>
-                <Trash2 className="mr-2 size-4 text-destructive" />
-                Delete Contract
-              </Button>
-              <Button onClick={() => setEditMode(true)}>
-                <Pencil className="mr-2 size-4" />
-                Edit Contract
-              </Button>
+              {allowDelete && (
+                <Button variant="outline" onClick={remove}>
+                  <Trash2 className="mr-2 size-4 text-destructive" />
+                  Delete Contract
+                </Button>
+              )}
+              {allowEdit && (
+                <Button onClick={() => setEditMode(true)}>
+                  <Pencil className="mr-2 size-4" />
+                  Edit Contract
+                </Button>
+              )}
             </DialogFooter>
           </div>
         )}

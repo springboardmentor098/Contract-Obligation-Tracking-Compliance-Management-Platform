@@ -15,6 +15,7 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
     role: Optional[str] = None
+    is_active: Optional[bool] = None
     avatar_url: Optional[str] = None
     preferences: Optional[dict] = None
 

@@ -58,6 +58,18 @@ function ResetPasswordPage() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    if (!password) {
+      setError("Please enter a new password.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (!confirmPassword) {
+      setError("Please confirm your new password.");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Both passwords must match.");
       return;
@@ -76,7 +88,7 @@ function ResetPasswordPage() {
     return (
       <AuthLayout title="Password updated" subtitle="You can now sign in with your new password.">
         <div className="rise space-y-6">
-          <CheckCircle2 className="size-8 text-jade" />
+          <CheckCircle2 className="size-8 text-jade" aria-hidden="true" />
           <p className="text-sm text-muted-foreground">
             Redirecting you to the sign-in page in a moment.
           </p>
@@ -108,6 +120,8 @@ function ResetPasswordPage() {
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             required
+            aria-required="true"
+            aria-invalid={Boolean(error)}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="pr-10"
@@ -118,7 +132,7 @@ function ResetPasswordPage() {
             aria-label={showPassword ? "Hide password" : "Show password"}
             className="absolute bottom-2.5 right-3 text-muted-foreground transition-colors hover:text-foreground"
           >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
           </button>
         </div>
 
@@ -144,12 +158,19 @@ function ResetPasswordPage() {
           type={showPassword ? "text" : "password"}
           autoComplete="new-password"
           required
+          aria-required="true"
+          aria-invalid={Boolean(error)}
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
         />
 
-        <Button type="submit" className="w-full" disabled={status === "loading"}>
-          {status === "loading" ? <Loader2 className="animate-spin" /> : null}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={status === "loading" || !password || !confirmPassword}
+          aria-busy={status === "loading"}
+        >
+          {status === "loading" ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
           {status === "loading" ? "Updating…" : "Reset password"}
         </Button>
       </form>

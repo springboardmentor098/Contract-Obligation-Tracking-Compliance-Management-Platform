@@ -52,15 +52,23 @@ function LoginPage() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    if (!email.trim()) {
+      setError("Please enter your work email.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
     setStatus("loading");
     try {
-      await signIn({ email, password, rememberMe });
+      await signIn({ email: email.trim(), password, rememberMe });
       setStatus("success");
       navigate({ to: "/", replace: true });
     } catch (caught: unknown) {
       const detail =
         (caught as { response?: { data?: { detail?: string } } })?.response?.data?.detail ??
-        "We couldn't sign you in. Check your credentials and try again.";
+        "We couldn't sign you in. Please check your credentials and try again.";
       setError(detail);
       setStatus("idle");
     }
@@ -92,6 +100,8 @@ function LoginPage() {
           type="email"
           autoComplete="email"
           required
+          aria-required="true"
+          aria-invalid={Boolean(error)}
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="name@organisation.gov"
@@ -104,6 +114,8 @@ function LoginPage() {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             required
+            aria-required="true"
+            aria-invalid={Boolean(error)}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="pr-10"
@@ -114,7 +126,7 @@ function LoginPage() {
             aria-label={showPassword ? "Hide password" : "Show password"}
             className="absolute bottom-2.5 right-3 text-muted-foreground transition-colors hover:text-foreground"
           >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
           </button>
         </div>
 
@@ -133,8 +145,13 @@ function LoginPage() {
           </Link>
         </div>
 
-        <Button type="submit" className="w-full" disabled={status === "loading"}>
-          {status === "loading" ? <Loader2 className="animate-spin" /> : null}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={status === "loading" || !email.trim() || !password}
+          aria-busy={status === "loading"}
+        >
+          {status === "loading" ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
           {status === "loading" ? "Signing in…" : "Sign in"}
         </Button>
       </form>

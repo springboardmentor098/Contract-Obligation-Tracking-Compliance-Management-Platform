@@ -1,7 +1,21 @@
 export type DashboardSummary = {
-  contracts: Record<string, number>;
-  obligations: Record<string, number>;
-  renewals: Record<string, number>;
+  contracts: {
+    total?: number;
+    active?: number;
+    expired?: number;
+    [key: string]: number | undefined;
+  };
+  obligations: {
+    total?: number;
+    pending?: number;
+    overdue?: number;
+    [key: string]: number | undefined;
+  };
+  renewals: {
+    total?: number;
+    upcoming?: number;
+    [key: string]: number | undefined;
+  };
 };
 export type StatusCount = { status: string; count: number };
 export type UpcomingRenewal = {
@@ -84,8 +98,35 @@ export type Report = {
   file_path: string;
   generated_by: number;
 };
-export type ActivityLog = { id: number; user_id: number; contract_id: number; activity: string };
-export type ActivityLog = { id: number; user_id: number; contract_id: number; activity: string; created_at?: string | null };
+export type ActivityLog = {
+  id: number;
+  user_id?: number | null;
+  contract_id?: number | null;
+  activity: string;
+  created_at?: string | null;
+  timestamp?: string | null;
+  user_name?: string | null;
+  user_role?: string | null;
+  action?: string | null;
+  entity_type?: string | null;
+  entity_id?: number | null;
+  description?: string | null;
+  ip_address?: string | null;
+  status?: string | null;
+  metadata?: Record<string, unknown> | null;
+};
+export type PaginatedActivities = {
+  items: ActivityLog[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+};
+export type ActivityFilterOptions = {
+  users: Array<{ id: number; name: string }>;
+  roles: string[];
+  actions: string[];
+};
 export type AuditLog = {
   id: number;
   user_id: number;

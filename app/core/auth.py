@@ -53,3 +53,30 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+
+def get_optional_current_user(
+    token: str | None = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Returns the authenticated User if token is valid, or None without raising an exception."""
+    if not token:
+        return None
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        user_id = payload.get("user_id")
+
+        user = None
+        if user_id is not None:
+            user = db.query(User).filter(User.id == user_id).first()
+        if user is None and email is not None:
+            user = db.query(User).filter(User.email == email).first()
+
+        if user and user.is_active:
+            return user
+    except Exception:
+        pass
+
+    return None
