@@ -1,19 +1,21 @@
 from typing import List
 from fastapi import HTTPException, Depends, status
 from app.core.roles import UserRole
+from app.core.security import get_current_user, normalize_role_name
 
-#  Fixed import: Pointing to the new security file we just updated
-from app.core.security import get_current_user 
 
 class RoleChecker:
     def __init__(self, allowed_roles: List[UserRole]):
-        self.allowed_roles = allowed_roles
+        self.allowed_roles = {
+            normalize_role_name(role.value if hasattr(role, "value") else str(role))
+            for role in allowed_roles
+            if normalize_role_name(role.value if hasattr(role, "value") else str(role))
+        }
 
-    #  Fixed type: JWTs return a dictionary, not a User model
     def __call__(self, current_user: dict = Depends(get_current_user)):
-        user_role = current_user.get("role")
-        
-        if user_role not in [role.value for role in self.allowed_roles]:
+        user_role = normalize_role_name(current_user.get("role"))
+
+        if not user_role or user_role not in self.allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have enough permissions to perform this action"

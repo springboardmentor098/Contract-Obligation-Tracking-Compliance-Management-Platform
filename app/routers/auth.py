@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.all_models import User
-from app.core.security import pwd_context, create_access_token
+from app.core.security import pwd_context, create_access_token, normalize_role_name
 
 router = APIRouter(tags=["Authentication"])
 
@@ -22,9 +22,16 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         )
         
     # 3. Create the JWT Token containing the user's role AND id
+    normalized_role = normalize_role_name(user.role)
     access_token = create_access_token(
-        data={"sub": user.email, "role": user.role, "id": user.id} # 👈 Added "id" here!
+        data={"sub": user.email, "role": normalized_role, "id": user.id}
     )
-    
+
     # 4. Return the token to Swagger UI
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": normalized_role,
+        "user_id": user.id,
+        "email": user.email,
+    }

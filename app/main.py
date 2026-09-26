@@ -1,25 +1,27 @@
+from pathlib import Path
 from fastapi import FastAPI
-from app.routers import users  
+from fastapi.staticfiles import StaticFiles
+from app.routers import users
 from app.routers import auth
 from app.database.database import test_database_connection
-from app.routers import contracts 
+from app.routers import contracts
 from app.routers import obligations
 from app.routers import renewals
 from app.routers import compliance
 from app.routers import notifications
 from app.routers import reports
 from app.routers import audit
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware  
+from fastapi.middleware.cors import CORSMiddleware
+
+UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(
     title="ContractIQ API",
     version="1.0.0",
 )
 
-
-
-app = FastAPI(title="ContractIQ API")
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 
 app.add_middleware(

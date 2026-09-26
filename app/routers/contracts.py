@@ -1,41 +1,96 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
+import os
+import uuid
+from pathlib import Path
 from typing import List
 from datetime import datetime
+
+import boto3
+from fastapi import APIRouter, Depends, status, HTTPException, File, UploadFile
+from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.contract import Contract, ContractStatus
 from app.schemas.contracts import (
-    ContractCreate, 
-    ContractResponse, 
-    ContractUpdate, 
-    ContractStatusUpdate, 
-    ContractAssign
+    ContractCreate,
+    ContractResponse,
+    ContractUpdate,
+    ContractStatusUpdate,
+    ContractAssign,
 )
 from app.core.roles import UserRole
-from app.core.security import get_current_user
+from app.core.security import get_current_user, normalize_role_name, verify_role
 from app.utils.audit import record_audit_log
+
+UPLOAD_DIR = Path(__file__).resolve().parent.parent.parent / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+
+def _allowed_document_type(file_name: str) -> bool:
+    allowed_extensions = {".pdf", ".doc", ".docx"}
+    return Path(file_name).suffix.lower() in allowed_extensions
+
+
+def _upload_to_s3(file_name: str, file_content: bytes, content_type: str) -> str:
+    bucket_name = os.getenv("AWS_S3_BUCKET")
+    region = os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION") or "us-east-1"
+    access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+    if not bucket_name or not access_key or not secret_key:
+        raise RuntimeError("AWS S3 configuration not found")
+
+    s3_client = boto3.client(
+        "s3",
+        region_name=region,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+    )
+    key = f"contracts/{uuid.uuid4()}-{file_name}"
+    s3_client.upload_fileobj(
+        __import__("io").BytesIO(file_content),
+        bucket_name,
+        key,
+        ExtraArgs={"ContentType": content_type or "application/octet-stream"},
+    )
+    return f"https://{bucket_name}.s3.{region}.amazonaws.com/{key}"
+
+
+def _save_local_fallback(file_name: str, file_content: bytes) -> str:
+    safe_name = f"{uuid.uuid4()}-{file_name}"
+    destination = UPLOAD_DIR / safe_name
+    destination.write_bytes(file_content)
+    return f"/uploads/{safe_name}"
 
 # 🛡️ RoleChecker class to enforce permissions
 class RoleChecker:
     def __init__(self, allowed_roles: list):
-        self.allowed_roles = allowed_roles
+        self.allowed_roles = {normalize_role_name(role) for role in allowed_roles if role is not None}
 
     def __call__(self, current_user: dict = Depends(get_current_user)):
-        if current_user.get("role") not in self.allowed_roles:
+        user_role = normalize_role_name(current_user.get("role"))
+        if not user_role:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, 
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to perform this action"
             )
+
+        if user_role not in self.allowed_roles:
+            normalized_allowed = {role.lower() for role in self.allowed_roles}
+            if user_role.lower() not in normalized_allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to perform this action"
+                )
+
         return current_user
 
 # Create the router
 router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
 # Roles setup
-require_employee = RoleChecker([UserRole.ADMINISTRATOR, UserRole.EMPLOYEE])
-require_admin = RoleChecker(["Administrator", "Manager"]) 
-require_standard_user = RoleChecker(["Administrator", "Manager", "User"])
+require_employee = RoleChecker([UserRole.ADMINISTRATOR, UserRole.EMPLOYEE, "Admin"])
+require_admin = RoleChecker(["Admin", "Administrator", "Manager", UserRole.ADMINISTRATOR])
+require_standard_user = RoleChecker(["Admin", "Administrator", "Manager", "User"])
 
 
 # ==========================================
@@ -87,13 +142,45 @@ def get_contract_by_id(contract_id: int, db: Session = Depends(get_db), current_
     return contract
 
 @router.delete("/{contract_id}", status_code=status.HTTP_200_OK)
-def delete_contract(contract_id: int, db: Session = Depends(get_db), current_user: dict = Depends(require_admin)):
+def delete_contract(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_role(["Admin", "Legal Manager"]))
+):
     contract = db.query(Contract).filter(Contract.id == contract_id).first()
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
     db.delete(contract)
     db.commit()
     return {"detail": f"Contract {contract_id} has been successfully deleted"}
+
+
+@router.post("/{contract_id}/upload", status_code=status.HTTP_200_OK)
+async def upload_contract_document(
+    contract_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+
+    if not _allowed_document_type(file.filename or ""):
+        raise HTTPException(status_code=400, detail="Only PDF, DOC, and DOCX files are allowed")
+
+    file_content = await file.read()
+
+    try:
+        document_url = _upload_to_s3(file.filename or "contract_document", file_content, file.content_type or "application/octet-stream")
+    except Exception:
+        document_url = _save_local_fallback(file.filename or "contract_document", file_content)
+
+    contract.document_url = document_url
+    db.commit()
+    db.refresh(contract)
+
+    return {"detail": "Document uploaded successfully", "document_url": document_url, "contract_id": contract.id}
 
 
 # ==========================================

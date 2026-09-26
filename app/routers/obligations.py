@@ -11,18 +11,24 @@ from app.schemas.obligation import (
     ObligationUpdate,
     ObligationStatusUpdate
 )
-from app.core.security import get_current_user
+from app.core.security import get_current_user, normalize_role_name
 
 # 🛡️ RoleChecker to enforce permissions
 class RoleChecker:
     def __init__(self, allowed_roles: list):
-        self.allowed_roles = allowed_roles
+        self.allowed_roles = {
+            normalize_role_name(role.value if hasattr(role, "value") else str(role))
+            for role in allowed_roles
+            if normalize_role_name(role.value if hasattr(role, "value") else str(role))
+        }
+
     def __call__(self, current_user: dict = Depends(get_current_user)):
-        if current_user.get("role") not in self.allowed_roles:
+        user_role = normalize_role_name(current_user.get("role"))
+        if not user_role or user_role not in self.allowed_roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient Permission")
         return current_user
 
-require_admin = RoleChecker(["Administrator", "Manager"]) 
+require_admin = RoleChecker(["Administrator", "Manager", "Admin"])
 
 # 🚀 Create the router (No prefix here so we can support both /obligations and /contracts/{id}/obligations)
 router = APIRouter(tags=["Obligations"])

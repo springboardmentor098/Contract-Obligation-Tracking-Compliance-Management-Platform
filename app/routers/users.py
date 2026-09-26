@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.all_models import User
 from app.schemas.user_schema import UserCreate, UserResponse
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, verify_role
 from app.core.permissions import RoleChecker
 from app.core.roles import UserRole
 
@@ -13,8 +13,8 @@ router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
-require_admin = RoleChecker([UserRole.ADMINISTRATOR])
-require_auth = RoleChecker([UserRole.ADMINISTRATOR, UserRole.EMPLOYEE])
+require_admin = RoleChecker([UserRole.ADMINISTRATOR, UserRole.ADMIN])
+require_auth = RoleChecker([UserRole.ADMINISTRATOR, UserRole.ADMIN, UserRole.EMPLOYEE])
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)): 
@@ -48,7 +48,7 @@ def get_users(db: Session = Depends(get_db), current_user: dict = Depends(requir
     "/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_user(user_id: int, db: Session = Depends(get_db), current_user: dict = Depends(require_admin)):
+def delete_user(user_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Legal Manager"]))):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:

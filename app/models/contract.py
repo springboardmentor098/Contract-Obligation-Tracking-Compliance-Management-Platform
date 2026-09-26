@@ -35,6 +35,7 @@ class Contract(Base):
     description = Column(String)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
+    document_url = Column(String, nullable=True)
     status = Column(Enum(ContractStatus), default=ContractStatus.DRAFT, nullable=False)
     
     # Link to the User who created it

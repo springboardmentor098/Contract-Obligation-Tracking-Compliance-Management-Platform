@@ -10,6 +10,7 @@ class ContractBase(BaseModel):
     description: Optional[str] = None
     start_date: date
     end_date: date
+    document_url: Optional[str] = None
 
 class ContractCreate(ContractBase):
     pass 
